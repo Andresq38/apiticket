@@ -10,7 +10,7 @@ import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 import startOfWeek from 'date-fns/startOfWeek';
 import getDay from 'date-fns/getDay';
-import enUS from 'date-fns/locale/en-US';
+import es from 'date-fns/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
 import { getApiOrigin } from '../../utils/apiBase';
@@ -24,7 +24,7 @@ const TicketsPorCliente = () => {
   const [error, setError] = useState(null);
   const theme = useTheme();
 
-  const locales = { 'en-US': enUS };
+  const locales = { 'es': es };
   const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
   const getStatusColor = (estado) => {
@@ -86,7 +86,7 @@ const TicketsPorCliente = () => {
         setTickets(mapped);
       } catch (err) {
         console.error(err);
-        setError('No se pudieron cargar los tickets del usuario seleccionado');
+        setError('No se pudieron cargar los tiquetes del usuario seleccionado');
       } finally {
         setLoading(false);
       }
@@ -210,9 +210,9 @@ const TicketsPorCliente = () => {
     return (
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ marginLeft: 16 }}>
-          <button onClick={() => toolbarProps.onNavigate('TODAY')}>Today</button>
-          <button onClick={() => toolbarProps.onNavigate('PREV')}>Back</button>
-          <button onClick={() => toolbarProps.onNavigate('NEXT')}>Next</button>
+          <button onClick={() => toolbarProps.onNavigate('TODAY')}>Hoy</button>
+          <button onClick={() => toolbarProps.onNavigate('PREV')}>Atrás</button>
+          <button onClick={() => toolbarProps.onNavigate('NEXT')}>Siguiente</button>
         </div>
         <div style={{ fontWeight: 600 }}>{toolbarProps.label}</div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -235,7 +235,7 @@ const TicketsPorCliente = () => {
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom sx={{ mb: 3, color: 'primary.main', fontWeight: 700 }}>
-        Tickets por Cliente
+        Tiquetes por Cliente
       </Typography>
 
       <FormControl fullWidth variant="outlined" sx={{ mb: 4 }}>
@@ -306,7 +306,7 @@ const TicketsPorCliente = () => {
 
       {/* Calendar view below the tickets list */}
       <Box sx={{ mt: 2 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>Calendario de tickets (por fecha de creación)</Typography>
+        <Typography variant="h5" sx={{ mb: 2 }}>Calendario de tiquetes (por fecha de creación)</Typography>
         <Card>
           <CardContent sx={{ p: 0 }}>
               <div style={{ height: 640, paddingTop: 8, paddingRight: 8, overflow: 'hidden' }}>

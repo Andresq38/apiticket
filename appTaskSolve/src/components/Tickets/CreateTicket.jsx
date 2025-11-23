@@ -198,7 +198,7 @@ export default function CreateTicket() {
       const created = res?.data;
       const idTicket = created?.id_ticket;
       if (!idTicket) {
-        throw new Error('No se recibió el ID del ticket creado');
+        throw new Error('No se recibió el ID del tiquete creado');
       }
 
       // Gestionar imagen si fue seleccionada
@@ -224,13 +224,13 @@ export default function CreateTicket() {
         }
       }
 
-      const successMessage = `✓ Ticket #${idTicket} creado exitosamente`;
+      const successMessage = `✓ Tiquete #${idTicket} creado exitosamente`;
       setCreatedId(idTicket);
       setSuccess(successMessage);
       setSnackbar({ open: true, message: successMessage, severity: 'success' });
       setShowSuccessOverlay(true);
     } catch (e) {
-      const msg = e.response?.data?.message || e.response?.data?.error || e.message || 'Error al crear el ticket';
+      const msg = e.response?.data?.message || e.response?.data?.error || e.message || 'Error al crear el tiquete';
       setError(msg);
       setSnackbar({ open: true, message: msg, severity: 'error' });
     } finally {
@@ -244,7 +244,7 @@ export default function CreateTicket() {
       {/* Encabezado estilizado */}
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>Crear Nuevo Ticket</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>Crear Nuevo Tiquete</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             Complete el formulario para registrar su solicitud
           </Typography>
@@ -278,7 +278,7 @@ export default function CreateTicket() {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Título del Ticket"
+                label="Título del Tiquete"
                 name="titulo"
                 value={form.titulo}
                 onChange={handleChange}
@@ -505,7 +505,7 @@ export default function CreateTicket() {
               <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
                 <TextField
                   type="file"
-                  label="Imagen del Ticket"
+                  label="Imagen del Tiquete"
                   inputProps={{ accept: 'image/*' }}
                   onChange={handleChangeImage}
                   InputLabelProps={{ shrink: true }}
@@ -544,7 +544,7 @@ export default function CreateTicket() {
                     startIcon={!loading ? <SaveRoundedIcon /> : null}
                     sx={{ minWidth: 180, fontWeight: 600 }}
                   >
-                    {loading ? <CircularProgress size={20} /> : 'Guardar Ticket'}
+                    {loading ? <CircularProgress size={20} /> : 'Guardar Tiquete'}
                   </Button>
                   <Button
                     variant="outlined"
@@ -566,7 +566,7 @@ export default function CreateTicket() {
       <SuccessOverlay
         open={showSuccessOverlay}
         mode="create"
-        entity="Ticket"
+        entity="Tiquete"
         variant="extended"
         details={{
           id: createdId,

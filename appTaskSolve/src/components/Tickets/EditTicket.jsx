@@ -182,7 +182,7 @@ export default function EditTicket() {
       } catch (e) {
         if (e.name !== 'AbortError' && e.code !== 'ERR_CANCELED') {
           console.error('Error al cargar datos:', e);
-          setLoadError('Error al cargar los datos del ticket');
+          setLoadError('Error al cargar los datos del tiquete');
           setLoadingData(false);
         }
       }
@@ -318,19 +318,19 @@ export default function EditTicket() {
           }
         } catch (imageError) {
           console.error('Error al subir imagen:', imageError);
-          toast.error('Ticket actualizado pero no se pudo subir la imagen', {
+          toast.error('Tiquete actualizado pero no se pudo subir la imagen', {
             duration: 3000,
             position: 'top-center'
           });
         }
       }
 
-      const successMessage = `✓ Ticket #${id} actualizado exitosamente`;
+      const successMessage = `✓ Tiquete #${id} actualizado exitosamente`;
       setSuccess(successMessage);
       setSnackbar({ open: true, message: successMessage, severity: 'success' });
       setShowSuccessOverlay(true);
     } catch (e) {
-      const msg = e.response?.data?.message || e.response?.data?.error || e.message || 'Error al actualizar el ticket';
+      const msg = e.response?.data?.message || e.response?.data?.error || e.message || 'Error al actualizar el tiquete';
       setSnackbar({ open: true, message: msg, severity: 'error' });
     } finally {
       setLoading(false);
@@ -342,7 +342,7 @@ export default function EditTicket() {
       <Container maxWidth="lg" sx={{ py: 5, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
         <Box sx={{ textAlign: 'center' }}>
           <CircularProgress size={60} />
-          <Typography variant="body1" sx={{ mt: 2 }}>Cargando datos del ticket...</Typography>
+          <Typography variant="body1" sx={{ mt: 2 }}>Cargando datos del tiquete...</Typography>
         </Box>
       </Container>
     );
@@ -352,7 +352,7 @@ export default function EditTicket() {
     return (
       <Container maxWidth="lg" sx={{ py: 5 }}>
         <Alert severity="error" sx={{ mb: 2 }}>{loadError}</Alert>
-        <Button variant="outlined" onClick={() => navigate('/tickets')}>Volver a tickets</Button>
+        <Button variant="outlined" onClick={() => navigate('/tickets')}>Volver a tiquetes</Button>
       </Container>
     );
   }
@@ -399,9 +399,9 @@ export default function EditTicket() {
       {/* Encabezado */}
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>Editar Ticket #{id}</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>Editar Tiquete #{id}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Actualice la información del ticket
+            Actualice la información del tiquete
           </Typography>
         </Box>
         <Button variant="text" onClick={() => navigate(`/tickets/${id}`)} startIcon={<ArrowBackIcon />}>Volver</Button>
@@ -434,7 +434,7 @@ export default function EditTicket() {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Título del Ticket"
+                label="Título del Tiquete"
                 name="titulo"
                 value={form.titulo}
                 onChange={handleChange}
@@ -601,7 +601,7 @@ export default function EditTicket() {
             </Grid>
 
             <Grid item xs={12}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Imágenes del Ticket</Typography>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Imágenes del Tiquete</Typography>
               
               {/* Seleccionar nueva imagen */}
               <Paper sx={{ p: 2, mb: 3, bgcolor: 'background.default' }}>
@@ -612,7 +612,7 @@ export default function EditTicket() {
                     inputProps={{ accept: 'image/*' }}
                     onChange={handleChangeImage}
                     InputLabelProps={{ shrink: true }}
-                    helperText="(Opcional) Adjunte una imagen. Se guardará al guardar el ticket."
+                    helperText="(Opcional) Adjunte una imagen. Se guardará al guardar el tiquete."
                   />
                 </FormControl>
                 {fileURL && (
@@ -677,7 +677,7 @@ export default function EditTicket() {
                     startIcon={!loading ? <SaveRoundedIcon /> : null}
                     sx={{ minWidth: 180, fontWeight: 600 }}
                   >
-                    {loading ? <CircularProgress size={20} /> : 'Actualizar Ticket'}
+                    {loading ? <CircularProgress size={20} /> : 'Actualizar Tiquete'}
                   </Button>
                   <Button
                     variant="outlined"
@@ -698,9 +698,9 @@ export default function EditTicket() {
       <SuccessOverlay
         open={showSuccessOverlay}
         mode="update"
-        entity="Ticket"
+        entity="Tiquete"
         onClose={() => setShowSuccessOverlay(false)}
-        subtitle={success || `✓ Ticket #${id} actualizado exitosamente`}
+        subtitle={success || `✓ Tiquete #${id} actualizado exitosamente`}
         actions={[
           { label: 'Ver detalle', onClick: () => navigate(`/tickets/${id}`), variant: 'contained', color: 'warning' },
           { label: 'Ir al listado', onClick: () => navigate('/'), variant: 'outlined', color: 'warning' }

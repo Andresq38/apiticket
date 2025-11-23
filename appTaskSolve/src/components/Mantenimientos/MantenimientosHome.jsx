@@ -46,8 +46,8 @@ export default function MantenimientosHome() {
     },
     {
       key: 'tickets',
-      title: 'Tickets',
-      description: 'Crear Tickets.',
+      title: 'Tiquetes',
+      description: 'Crear Tiquetes.',
       // Panel ahora apunta al inicio (home) solicitado
       primary: '/',
       create: '/tickets/crear',
@@ -213,8 +213,8 @@ export default function MantenimientosHome() {
                       <Tooltip title="Ver panel de tickets">
                         <Button size="small" color={m.color} variant="contained" startIcon={<OpenInNewIcon />} onClick={() => navigate(m.primary)} sx={{ fontWeight:700 }}>Panel</Button>
                       </Tooltip>
-                      <Tooltip title="Crear ticket de prueba">
-                        <Button size="small" color={m.color} variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={() => navigate(m.create)} sx={{ fontWeight:700 }}>Nuevo Ticket</Button>
+                      <Tooltip title="Crear tiquete de prueba">
+                        <Button size="small" color={m.color} variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={() => navigate(m.create)} sx={{ fontWeight:700 }}>Nuevo Tiquete</Button>
                       </Tooltip>
                     </Stack>
                   </Box>
@@ -224,7 +224,7 @@ export default function MantenimientosHome() {
           </Grid>
         </Grid>
         <Typography variant="caption" sx={{ color: 'text.disabled', display:'block', textAlign:'center', mt: 6 }}>
-          © 2025 Sistema de Tickets
+          © 2025 Sistema de Tiquetes. Desarrollado por Joseph Segura, Andres Quesada y Andres Castillo
         </Typography>
       </Container>
     </Box>

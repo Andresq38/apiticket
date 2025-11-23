@@ -133,10 +133,10 @@ const Home = () => {
         setTickets(sorted);
       }
     } catch (err) {
-      console.error('Error al cargar tickets:', err);
+      console.error('Error al cargar tiquetes:', err);
       const msg = err?.response?.status
-        ? `Error ${err.response.status} al cargar tickets`
-        : (err?.message || 'Error al cargar tickets');
+        ? `Error ${err.response.status} al cargar tiquetes`
+        : (err?.message || 'Error al cargar tiquetes');
       setError(msg);
     } finally {
       setLoading(false);
@@ -160,7 +160,7 @@ const Home = () => {
       setDeletedTicketInfo(t);
       setShowDeleteSuccess(true);
     } catch (err) {
-      console.error('Error eliminando ticket:', err?.response?.status, err?.response?.data || err?.message);
+      console.error('Error eliminando tiquete:', err?.response?.status, err?.response?.data || err?.message);
       setSnackbar({ open: true, message: err?.response?.data?.error || err?.response?.data?.result || 'No se pudo eliminar', severity: 'error' });
     }
   };
@@ -210,7 +210,7 @@ const Home = () => {
   return (
     <Container sx={{ py: 4 }}>
       <Typography component="h1" variant="h2" align="center" gutterBottom>
-        Gestión de Tickets de Soporte
+        Gestión de Tiquetes de Soporte
       </Typography>
 
       {/* Toolbar: búsqueda, filtro y acciones */}
@@ -218,7 +218,7 @@ const Home = () => {
         <TextField
           size="small"
           label="Buscar"
-          placeholder="Ticket, título o estado"
+          placeholder="Tiquete, título o estado"
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(0); }}
         />
@@ -250,11 +250,11 @@ const Home = () => {
       </Box>
 
       <Typography variant="h5" align="center" color="text.secondary" mb={6}>
-        Consulta el estado de los tickets de soporte activos y recientes.
+        Consulta el estado de los tiquetes de soporte activos y recientes.
       </Typography>
 
       <Box textAlign="center" mb={2}>
-        <Typography variant="h5" color="primary">🎟️ Tickets</Typography>
+        <Typography variant="h5" color="primary">🎫️ Tiquetes</Typography>
       </Box>
 
       {loading && (
@@ -277,7 +277,7 @@ const Home = () => {
                     direction={orderBy === 'id_ticket' ? order : 'asc'}
                     onClick={() => handleRequestSort('id_ticket')}
                   >
-                    Ticket
+                    Tiquete
                   </TableSortLabel>
                 </TableCell>
                 <TableCell sortDirection={orderBy === 'titulo' ? order : false} sx={{ minWidth: 260 }}>
@@ -383,7 +383,7 @@ const Home = () => {
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Confirmar eliminación</DialogTitle>
         <DialogContent>
-          ¿Seguro que deseas eliminar el ticket #{targetTicket?.id_ticket}? Esta acción es permanente.
+          ¿Seguro que deseas eliminar el tiquete #{targetTicket?.id_ticket}? Esta acción es permanente.
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
@@ -402,8 +402,8 @@ const Home = () => {
       <SuccessOverlay
         open={showDeleteSuccess}
         mode="delete"
-        entity="Ticket"
-        subtitle={`El ticket #${deletedTicketInfo?.id_ticket} ha sido eliminado correctamente.`}
+        entity="Tiquete"
+        subtitle={`El tiquete #${deletedTicketInfo?.id_ticket} ha sido eliminado correctamente.`}
         onClose={() => { setShowDeleteSuccess(false); setDeletedTicketInfo(null); }}
         actions={[{
           label: 'Cerrar',
@@ -411,7 +411,7 @@ const Home = () => {
           variant: 'contained',
           color: 'error'
         }, {
-          label: 'Crear Ticket',
+          label: 'Crear Tiquete',
           onClick: () => { setShowDeleteSuccess(false); navigate('/tickets/crear'); },
           variant: 'outlined',
           color: 'error'

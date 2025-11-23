@@ -201,7 +201,7 @@ export default function TecnicoDetalle() {
             })}
           </Grid>
         ) : (
-          <Typography color="text.secondary">Sin tickets asignados</Typography>
+          <Typography color="text.secondary">Sin tiquetes asignados</Typography>
         )}
       </Paper>
 

@@ -275,9 +275,9 @@ class AsignacionModel
             $sqlUpdate = "UPDATE ticket SET id_tecnico = ?, id_estado = 2 WHERE id_ticket = ?";
             $this->enlace->executePrepared_DML($sqlUpdate, 'ii', [(int)$idTecnico, (int)$idTicket]);
 
-            // Registrar en historial
-            $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones) 
-                            VALUES (?, 2, ?)";
+            // Registrar en historial CON ID_USUARIO (sistema automático = NULL o admin)
+            $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones, id_usuario) 
+                            VALUES (?, 2, ?, NULL)";
             $this->enlace->executePrepared_DML($sqlHistorial, 'is', [
                 (int)$idTicket,
                 $justificacion

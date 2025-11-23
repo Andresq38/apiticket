@@ -177,7 +177,7 @@ export default function CambiarEstadoDialog({
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ bgcolor: 'primary.main', color: 'white' }}>
-        🔄 Cambiar Estado del Ticket #{ticket?.id_ticket}
+        🔄 Cambiar Estado del Tiquete #{ticket?.id_ticket}
       </DialogTitle>
       
       <DialogContent sx={{ mt: 2 }}>

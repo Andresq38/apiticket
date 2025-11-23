@@ -1,0 +1,14 @@
+[23-11-2025 01:02:21] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:02:21] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:02:42] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:02:42] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:03:20] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:03:20] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:04:43] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:04:43] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:05:13] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:05:14] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:05:35] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:05:36] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 77 - Message: foreach() argument must be of type array|object, null given
+ [23-11-2025 01:05:54] [user] error: File: C:\xampp\htdocs\apiticket\models\TicketModel.php - line: 531 - Message: El ID del ticket es obligatorio para actualizar.
+ 

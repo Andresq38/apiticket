@@ -212,12 +212,13 @@ class TicketModel
             $sqlUpdate = "UPDATE ticket SET id_estado = ? WHERE id_ticket = ?";
             $this->enlace->executePrepared_DML($sqlUpdate, 'ii', [$nuevoEstado, (int)$idTicket]);
 
-            // 7. Insertar en historial_estados
-            $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones) VALUES (?, ?, ?)";
-            $this->enlace->executePrepared_DML($sqlHistorial, 'iis', [
+            // 7. Insertar en historial_estados CON ID_USUARIO para trazabilidad
+            $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones, id_usuario) VALUES (?, ?, ?, ?)";
+            $this->enlace->executePrepared_DML($sqlHistorial, 'iiss', [
                 (int)$idTicket,
                 $nuevoEstado,
-                $observaciones
+                $observaciones,
+                $idUsuarioRemitente // CRÍTICO: registra quién hizo el cambio
             ]);
 
             // 8. Si el nuevo estado es "Cerrado" (id_estado = 5), actualizar fecha_cierre

@@ -139,7 +139,7 @@ const AsignacionesTecnicos = () => {
           📋 Tablero de Asignaciones
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Vista de tickets asignados por técnico con indicadores de urgencia según SLA
+          Vista de tiquetes asignados por técnico con indicadores de urgencia según SLA
         </Typography>
       </Box>
 
@@ -192,7 +192,7 @@ const AsignacionesTecnicos = () => {
                       {tecnico.nombre}
                     </Typography>
                     <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      {ticketsActivos.length} ticket{ticketsActivos.length !== 1 ? 's' : ''} activo{ticketsActivos.length !== 1 ? 's' : ''}
+                      {ticketsActivos.length} tiquete{ticketsActivos.length !== 1 ? 's' : ''} activo{ticketsActivos.length !== 1 ? 's' : ''}
                     </Typography>
                   </Box>
                 </Box>
@@ -203,7 +203,7 @@ const AsignacionesTecnicos = () => {
                 <Box sx={{ p: 2, flex: 1, overflow: 'auto', maxHeight: 600 }}>
                   {ticketsActivos.length === 0 ? (
                     <Alert severity="info" sx={{ mt: 1 }}>
-                      No hay tickets asignados
+                      No hay tiquetes asignados
                     </Alert>
                   ) : (
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

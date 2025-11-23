@@ -292,7 +292,7 @@ const Dashboard = () => {
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', display: 'flex', alignItems: 'center', gap: 1 }}>
                 <SpeedIcon sx={{ fontSize: 16 }} />
-                Monitoreo en tiempo real del sistema de tickets
+                Monitoreo en tiempo real del sistema de tiquetes
               </Typography>
             </Box>
           </Box>
@@ -361,7 +361,7 @@ const Dashboard = () => {
               Métricas Principales
             </Typography>
             <Typography variant="body2" sx={{ color: '#64748b' }}>
-              Resumen general del estado de tickets
+              Resumen general del estado de tiquetes
             </Typography>
           </Box>
           <Chip 
@@ -661,7 +661,7 @@ const Dashboard = () => {
             Tendencias Temporales
           </Typography>
           <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Evolución de tickets en los últimos 30 días
+            Evolución de tiquetes en los últimos 30 días
           </Typography>
         </Box>
         <Grid container spacing={3} sx={{ mb: 5 }}>
@@ -694,7 +694,7 @@ const Dashboard = () => {
                   </Box>
                   <Box>
                     <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', mb: 0.3 }}>
-                      Tendencia Mensual de Tickets
+                      Tendencia Mensual de Tiquetes
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.8rem' }}>
                       Comparativa de resolución a lo largo del año
@@ -874,7 +874,7 @@ const Dashboard = () => {
               }}>
                 <CategoryIcon sx={{ fontSize: 24 }} />
                 <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  Categorías de Tickets
+                  Categorías de Tiquetes
                 </Typography>
               </Box>
               <CardContent sx={{ p: 0 }}>
@@ -989,7 +989,7 @@ const Dashboard = () => {
                     tecnicos.map((tec, index) => {
                       const ticketsCount = parseInt(tec.tickets_abiertos);
                       const cargaColor = ticketsCount > 2 ? 'error' : ticketsCount > 0 ? 'warning' : 'success';
-                      const cargaText = ticketsCount === 0 ? 'Disponible' : `${ticketsCount} ticket${ticketsCount > 1 ? 's' : ''}`;
+                      const cargaText = ticketsCount === 0 ? 'Disponible' : `${ticketsCount} tiquete${ticketsCount > 1 ? 's' : ''}`;
                       const cargaBg = ticketsCount > 2 ? '#FFEBEE' : ticketsCount > 0 ? '#FFF8E1' : '#E8F5E9';
                       
                       return (

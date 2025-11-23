@@ -170,7 +170,7 @@ const Header = () => {
                 minWidth: 'auto'
               }}
             >
-              Tickets
+              Tiquetes
             </Button>
           </Box>
 

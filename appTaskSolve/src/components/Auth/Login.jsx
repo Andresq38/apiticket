@@ -293,7 +293,7 @@ export default function Login() {
             color="text.secondary"
             sx={{ display: 'block', textAlign: 'center', mt: 3 }}
           >
-            © 2025 Sistema de Tickets. Todos los derechos reservados.
+            © 2025 Sistema de Tiquetes. Desarrollado por Joseph Segura, Andres Quesada y Andres Castillo
           </Typography>
         </Paper>
       </Fade>

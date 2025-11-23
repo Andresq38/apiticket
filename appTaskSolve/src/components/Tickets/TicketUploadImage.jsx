@@ -24,8 +24,8 @@ export function TicketUploadImage() {
   const ticketSchema = yup.object({
     ticket_id: yup
       .number()
-      .typeError("Seleccione un ticket")
-      .required("El ticket es requerido"),
+      .typeError("Seleccione un tiquete")
+      .required("El tiquete es requerido"),
   });
   
   const {
@@ -124,7 +124,7 @@ export function TicketUploadImage() {
         <Grid container spacing={1}>
           <Grid size={12} sm={12}>
             <Typography variant="h5" gutterBottom>
-              Imágenes Ticket
+              Imágenes Tiquete
             </Typography>
           </Grid>
 
@@ -137,11 +137,11 @@ export function TicketUploadImage() {
                   control={control}
                   render={({ field }) => (
                     <>
-                      <InputLabel id="ticket_id">Ticket</InputLabel>
+                      <InputLabel id="ticket_id">Tiquete</InputLabel>
                       <Select
                         {...field}
                         labelId="ticket_id"
-                        label="Ticket"
+                        label="Tiquete"
                         value={field.value}
                       >
                         {dataTicket &&

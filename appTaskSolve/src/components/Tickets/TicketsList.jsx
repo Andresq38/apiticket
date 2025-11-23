@@ -85,8 +85,8 @@ export default function TicketsList() {
       setTickets(Array.isArray(data) ? data : []);
     } catch (e) {
       if (e.name !== 'AbortError' && e.code !== 'ERR_CANCELED') {
-        console.error('Error cargando tickets:', e);
-        setError(e.response?.data?.message || e.message || 'Error al cargar tickets');
+        console.error('Error cargando tiquetes:', e);
+        setError(e.response?.data?.message || e.message || 'Error al cargar tiquetes');
       }
     } finally {
       setLoading(false);
@@ -126,10 +126,10 @@ export default function TicketsList() {
     <Container sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>
-          Tickets
+          Tiquetes
         </Typography>
         <Button variant="contained" color="primary" onClick={() => navigate('/tickets/crear')}>
-          Crear Ticket
+          Crear Tiquete
         </Button>
       </Box>
 
@@ -142,7 +142,7 @@ export default function TicketsList() {
       {!!error && <Alert severity="error">{error}</Alert>}
 
       {!loading && !error && tickets.length === 0 && (
-        <Alert severity="info">No hay tickets para mostrar.</Alert>
+        <Alert severity="info">No hay tiquetes para mostrar.</Alert>
       )}
 
       <Grid container spacing={3} sx={{ mt: 1 }}>
@@ -177,7 +177,7 @@ export default function TicketsList() {
                 <CardContent>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
                     <Typography variant="subtitle2" color="text.secondary">
-                      Ticket #{t['Identificador del Ticket']}
+                      Tiquete #{t['Identificador del Ticket']}
                     </Typography>
                     {urgency?.pulse && (
                       <Chip 

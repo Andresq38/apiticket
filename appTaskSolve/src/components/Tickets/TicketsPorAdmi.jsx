@@ -77,7 +77,7 @@ export default function TicketsPorAdmi() {
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h2" gutterBottom sx={{ mb: 2 }}>
-        Tickets
+        Tiquetes
       </Typography>
 
       {loading && (
@@ -89,7 +89,7 @@ export default function TicketsPorAdmi() {
       {!!error && <Alert severity="error">{error}</Alert>}
 
       {!loading && !error && tickets.length === 0 && (
-        <Alert severity="info">No hay tickets para mostrar.</Alert>
+        <Alert severity="info">No hay tiquetes para mostrar.</Alert>
       )}
 
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 1 }}>
@@ -108,7 +108,7 @@ export default function TicketsPorAdmi() {
                 onClick={() => window.location.assign(`/tickets/${id}`)}
               >
                 <CardContent>
-                  <Typography variant="subtitle2" color="text.secondary">Ticket #{id}</Typography>
+                  <Typography variant="subtitle2" color="text.secondary">Tiquete #{id}</Typography>
                   <Typography variant="h6" sx={{ mb: 1 }}>{ticket.titulo}</Typography>
 
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1 }}>

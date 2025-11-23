@@ -369,7 +369,7 @@ export default function CreateTecnico() {
                         select
                         value={field.value ? 'true' : 'false'}
                         onChange={(e) => field.onChange(e.target.value === 'true')}
-                        helperText="Indica si el técnico está disponible para recibir tickets"
+                        helperText="Indica si el técnico está disponible para recibir tiquetes"
                       >
                         <MenuItem value="true">
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

@@ -136,10 +136,10 @@ const CategoriasList = () => {
           }}
         >
           <FolderSpecialIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-          Categorías de Tickets
+          Categorías de Tiquetes
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Gestiona y organiza los diferentes tipos de tickets del sistema
+          Gestiona y organiza los diferentes tipos de tiquetes del sistema
         </Typography>
       </Box>
 

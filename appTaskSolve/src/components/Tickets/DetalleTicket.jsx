@@ -14,9 +14,60 @@ import EditIcon from '@mui/icons-material/Edit';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import HistoryIcon from '@mui/icons-material/History';
 import { getApiOrigin } from '../../utils/apiBase';
 import { formatDateTime } from '../../utils/format';
 import CambiarEstadoDialog from '../common/CambiarEstadoDialog';
+import HistorialTimeline from '../common/HistorialTimeline';
+
+// Componente para cargar y mostrar el historial
+function HistorialTicketSection({ ticketId }) {
+  const [historial, setHistorial] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const apiBase = getApiOrigin();
+
+  useEffect(() => {
+    const fetchHistorial = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(`${apiBase}/apiticket/historial_estado/ticket/${ticketId}`);
+        const data = Array.isArray(res.data) ? res.data : [];
+        setHistorial(data);
+      } catch (err) {
+        console.error('Error al cargar historial:', err);
+        setError('No se pudo cargar el historial');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (ticketId) {
+      fetchHistorial();
+    }
+  }, [ticketId, apiBase]);
+
+  return (
+    <Paper sx={{ p: 3, mb: 4 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
+        <HistoryIcon sx={{ fontSize: 28, color: 'primary.main' }} />
+        <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
+          Historial Completo de Cambios de Estado
+        </Typography>
+      </Box>
+      
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error">{error}</Alert>
+      ) : (
+        <HistorialTimeline historial={historial} />
+      )}
+    </Paper>
+  );
+}
 
 export default function DetalleTicket() {
   const { id } = useParams();
@@ -52,7 +103,7 @@ export default function DetalleTicket() {
         setTicket(res.data || null);
       } catch (err) {
         console.error(err);
-        setError('No se pudo cargar la información del ticket.');
+        setError('No se pudo cargar la información del tiquete.');
       } finally {
         setLoading(false);
       }
@@ -98,7 +149,7 @@ export default function DetalleTicket() {
     if (!observaciones || observaciones.trim() === '') {
       setSnackbar({ 
         open: true, 
-        message: 'Las observaciones son obligatorias para cambiar el estado del ticket', 
+        message: 'Las observaciones son obligatorias para cambiar el estado del tiquete', 
         severity: 'error' 
       });
       return;
@@ -139,7 +190,7 @@ export default function DetalleTicket() {
       }
     } catch (err) {
       console.error('Error al cambiar estado:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Error al cambiar el estado del ticket';
+      const errorMessage = err.response?.data?.message || err.message || 'Error al cambiar el estado del tiquete';
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
@@ -154,7 +205,7 @@ export default function DetalleTicket() {
   if (error) return <Alert severity="error">{error}</Alert>;
 
   // If API returned no ticket
-  if (!ticket) return <Alert severity="info">Ticket no encontrado.</Alert>;
+  if (!ticket) return <Alert severity="info">Tiquete no encontrado.</Alert>;
 
   return (
     <Container sx={{ py: 4 }}>
@@ -170,7 +221,7 @@ export default function DetalleTicket() {
           onClick={() => navigate(`/tickets/editar/${id}`)}
           disabled={ticket?.estado?.nombre === 'Cerrado'}
         >
-          Editar Ticket
+          Editar Tiquete
         </Button>
         <Button 
           variant="contained" 
@@ -201,7 +252,7 @@ export default function DetalleTicket() {
             title: '⚠️ SLA VENCIDO', 
             color: '#d32f2f',
             bgColor: '#ffebee',
-            message: `Este ticket ha excedido su tiempo SLA por ${Math.abs(horas)} horas. Requiere atención inmediata.`
+            message: `Este tiquete ha excedido su tiempo SLA por ${Math.abs(horas)} horas. Requiere atención inmediata.`
           };
         } else if (horas <= 2) {
           urgencyConfig = { 
@@ -398,7 +449,7 @@ export default function DetalleTicket() {
                         {diasResolucion} {diasResolucion === 1 ? 'día' : 'días'} ({horasResolucion}h)
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {ticket.fecha_cierre ? 'Ticket cerrado' : 'En curso'}
+                        {ticket.fecha_cierre ? 'Tiquete cerrado' : 'En curso'}
                       </Typography>
                     </Box>
 
@@ -508,38 +559,12 @@ export default function DetalleTicket() {
         )}
       </Paper>
 
-      {/* Historial de estados */}
-      <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" color="primary" gutterBottom>Historial de estados</Typography>
-        {Array.isArray(ticket.historial_estados) && ticket.historial_estados.length > 0 ? (
-          <Grid container spacing={2}>
-            {ticket.historial_estados.map((h) => (
-              <Grid item xs={12} key={h.id_historial}>
-                <Paper sx={{ p: 2 }}>
-                  <Typography variant="subtitle2">{h.estado} — {h.fecha_cambio}</Typography>
-                  {h.observaciones && (
-                    <Typography variant="body2" color="text.secondary">{h.observaciones}</Typography>
-                  )}
-                  {/* Imágenes asociadas a este item de historial */}
-                  {ticket.imagenes_por_historial?.[h.id_historial]?.length > 0 && (
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 1 }}>
-                      {ticket.imagenes_por_historial[h.id_historial].map((img) => (
-                        <Box key={img.id_imagen} component="img" src={img.url} alt={`img-${img.id_imagen}`} sx={{ width: 120, height: 90, objectFit: 'cover', borderRadius: 1, border: '1px solid #eee' }} />
-                      ))}
-                    </Box>
-                  )}
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Typography color="text.secondary">Sin historial</Typography>
-        )}
-      </Paper>
+      {/* Historial de Estados Completo */}
+      <HistorialTicketSection ticketId={id} />
 
        {/* Imágenes (carrusel manual) */}
       <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" color="primary" gutterBottom>Imágenes del Ticket</Typography>
+        <Typography variant="h6" color="primary" gutterBottom>Imágenes del Tiquete</Typography>
         {Array.isArray(ticket.imagenes) && ticket.imagenes.length > 0 ? (
           (() => {
             const apiBase = getApiOrigin();
@@ -602,7 +627,7 @@ export default function DetalleTicket() {
             );
           })()
         ) : (
-          <Typography variant="body2">No hay imágenes asociadas a este ticket.</Typography>
+          <Typography variant="body2">No hay imágenes asociadas a este tiquete.</Typography>
         )}
       </Paper>
 

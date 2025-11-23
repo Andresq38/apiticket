@@ -160,7 +160,7 @@ export default function AsignacionManager() {
       if (res.data.success) {
         setSnackbar({
           open: true,
-          message: 'Ticket asignado manualmente con éxito',
+          message: 'Tiquete asignado manualmente con éxito',
           severity: 'success'
         });
         setOpenManual(false);
@@ -168,7 +168,7 @@ export default function AsignacionManager() {
       } else {
         setSnackbar({
           open: true,
-          message: res.data.message || 'Error al asignar ticket',
+          message: res.data.message || 'Error al asignar tiquete',
           severity: 'error'
         });
       }
@@ -176,7 +176,7 @@ export default function AsignacionManager() {
       console.error('Error en asignación manual:', err);
       setSnackbar({
         open: true,
-        message: err.response?.data?.message || 'Error al asignar ticket',
+        message: err.response?.data?.message || 'Error al asignar tiquete',
         severity: 'error'
       });
     } finally {
@@ -546,7 +546,7 @@ export default function AsignacionManager() {
       {/* Tickets Pendientes */}
       <Box sx={{ mb: 5 }}>
         <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-          📋 Tickets Pendientes de Asignación
+          📋 Tiquetes Pendientes de Asignación
           {ticketsPendientes.length > 0 && (
             <Chip 
               label={`${ticketsPendientes.length} pendiente${ticketsPendientes.length > 1 ? 's' : ''}`}
@@ -629,6 +629,8 @@ export default function AsignacionManager() {
               page={ticketsPage}
               onPageChange={(e, p) => setTicketsPage(p)}
               onRowsPerPageChange={(e) => { setTicketsRowsPerPage(parseInt(e.target.value, 10)); setTicketsPage(0); }}
+              labelRowsPerPage="Filas por página"
+              labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
             />
           </TableContainer>
         ) : (
@@ -797,6 +799,8 @@ export default function AsignacionManager() {
               page={tecnicosPage}
               onPageChange={(e, p) => setTecnicosPage(p)}
               onRowsPerPageChange={(e) => { setTecnicosRowsPerPage(parseInt(e.target.value, 10)); setTecnicosPage(0); }}
+              labelRowsPerPage="Filas por página"
+              labelDisplayedRows={({ from, to, count }) => `${from}–${to} de ${count !== -1 ? count : `más de ${to}`}`}
             />
           </TableContainer>
         ) : (
@@ -864,7 +868,7 @@ export default function AsignacionManager() {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <WorkIcon sx={{ fontSize: 20 }} />
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        Carga de trabajo: {tec.tickets_activos} ticket{tec.tickets_activos !== 1 ? 's' : ''} activo{tec.tickets_activos !== 1 ? 's' : ''}
+                        Carga de trabajo: {tec.tickets_activos} tiquete{tec.tickets_activos !== 1 ? 's' : ''} activo{tec.tickets_activos !== 1 ? 's' : ''}
                       </Typography>
                     </Box>
                   </Box>
@@ -1082,12 +1086,12 @@ export default function AsignacionManager() {
                                 <Typography variant="caption" color="text.secondary">•</Typography>
                                 <Typography 
                                   variant="caption" 
-                                  sx={{ 
+                                  sx={{
                                     color: tec.tickets_activos > 2 ? 'warning.main' : 'success.main',
                                     fontWeight: 600
                                   }}
                                 >
-                                  {tec.tickets_activos} ticket{tec.tickets_activos !== 1 ? 's' : ''} activo{tec.tickets_activos !== 1 ? 's' : ''}
+                                  {tec.tickets_activos} tiquete{tec.tickets_activos !== 1 ? 's' : ''} activo{tec.tickets_activos !== 1 ? 's' : ''}
                                 </Typography>
                               </Box>
                               {tec.especialidades && tec.especialidades.length > 0 && (
@@ -1169,7 +1173,7 @@ export default function AsignacionManager() {
                   fullWidth
                   multiline
                   rows={4}
-                  placeholder="Explica detalladamente por qué asignas este ticket a este técnico específico (mínimo 20 caracteres)"
+                  placeholder="Explica detalladamente por qué asignas este tiquete a este técnico específico (mínimo 20 caracteres)"
                   value={justificacion}
                   onChange={(e) => setJustificacion(e.target.value)}
                   required
@@ -1197,7 +1201,7 @@ export default function AsignacionManager() {
             disabled={processing || !selectedTecnico || !justificacion.trim()}
             startIcon={<CheckCircleIcon />}
           >
-            Asignar Ticket
+            Asignar Tiquete
           </Button>
         </DialogActions>
       </Dialog>

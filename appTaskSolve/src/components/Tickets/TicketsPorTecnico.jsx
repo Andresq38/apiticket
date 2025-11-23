@@ -10,7 +10,7 @@ import format from 'date-fns/format';
 import parse from 'date-fns/parse';
 import startOfWeek from 'date-fns/startOfWeek';
 import getDay from 'date-fns/getDay';
-import enUS from 'date-fns/locale/en-US';
+import es from 'date-fns/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
 import { getApiOrigin } from '../../utils/apiBase';
@@ -24,7 +24,7 @@ const TicketsPorTecnico = () => {
   const [error, setError] = useState(null);
   const theme = useTheme();
 
-  const locales = { 'en-US': enUS };
+  const locales = { 'es': es };
   const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
 
   const getStatusColor = (estado) => {
@@ -72,7 +72,7 @@ const TicketsPorTecnico = () => {
         const techTickets = data.filter(t => String(t.id_tecnico) === String(tecnicoSeleccionado));
         const mapped = techTickets.map(t => ({
           id_ticket: parseInt(t.id_ticket ?? t['Identificador del Ticket'] ?? t.id, 10),
-          titulo: t.titulo ?? t['Título'] ?? 'Ticket',
+          titulo: t.titulo ?? t['Título'] ?? 'Tiquete',
           estado: (t.estado && (t.estado.nombre ?? t.estado)) || (t['Estado actual'] ?? ''),
           sla: (t.sla && (t.sla.tiempo_restante ?? t.sla)) || (t['Tiempo restante SLA'] ?? ''),
           _raw: t
@@ -80,7 +80,7 @@ const TicketsPorTecnico = () => {
         setTickets(mapped);
       } catch (err) {
         console.error(err);
-        setError('No se pudieron cargar los tickets del técnico seleccionado');
+        setError('No se pudieron cargar los tiquetes del técnico seleccionado');
       } finally {
         setLoading(false);
       }
@@ -146,7 +146,7 @@ const TicketsPorTecnico = () => {
         const left = Math.min(x + 12, window.innerWidth - 320);
         const top = Math.min(y + 12, window.innerHeight - 120);
         setHoverPos({ left, top });
-        setHoveredTicket({ title: event.title, msg: 'Haga clic para ver un resumen detallado de este ticket.' });
+        setHoveredTicket({ title: event.title, msg: 'Haga clic para ver un resumen detallado de este tiquete.' });
         hoverTimeoutRef.current = setTimeout(() => { setHoveredTicket(null); setHoverPos(null); hoverTimeoutRef.current = null; }, 2500);
       }}
       onMouseLeave={() => { if (hoverTimeoutRef.current) { clearTimeout(hoverTimeoutRef.current); hoverTimeoutRef.current = null; } setHoveredTicket(null); setHoverPos(null); }}
@@ -199,9 +199,9 @@ const TicketsPorTecnico = () => {
     return (
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ marginLeft: 16 }}>
-          <button onClick={() => toolbarProps.onNavigate('TODAY')}>Today</button>
-          <button onClick={() => toolbarProps.onNavigate('PREV')}>Back</button>
-          <button onClick={() => toolbarProps.onNavigate('NEXT')}>Next</button>
+          <button onClick={() => toolbarProps.onNavigate('TODAY')}>Hoy</button>
+          <button onClick={() => toolbarProps.onNavigate('PREV')}>Atrás</button>
+          <button onClick={() => toolbarProps.onNavigate('NEXT')}>Siguiente</button>
         </div>
         <div style={{ fontWeight: 600 }}>{toolbarProps.label}</div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -224,7 +224,7 @@ const TicketsPorTecnico = () => {
   return (
     <Container sx={{ py: 4, pb: 8 }}>
       <Typography variant="h4" gutterBottom sx={{ mb: 3, color: 'primary.main', fontWeight: 700 }}>
-        Tickets Asignados por Técnico
+        Tiquetes Asignados por Técnico
       </Typography>
 
       <FormControl fullWidth variant="outlined" sx={{ mb: 4 }}>
@@ -286,7 +286,7 @@ const TicketsPorTecnico = () => {
         ) : (
           tecnicoSeleccionado && !loading && !error && (
             <Grid item xs={12}>
-              <Typography color="text.secondary">No hay tickets asignados para el técnico seleccionado.</Typography>
+              <Typography color="text.secondary">No hay tiquetes asignados para el técnico seleccionado.</Typography>
             </Grid>
           )
         )}
@@ -294,7 +294,7 @@ const TicketsPorTecnico = () => {
 
       {/* Calendar view below the tickets list */}
   <Box sx={{ mt: 2 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>Calendario de tickets (por fecha de asignación)</Typography>
+        <Typography variant="h5" sx={{ mb: 2 }}>Calendario de tiquetes (por fecha de asignación)</Typography>
         <Card>
           <CardContent sx={{ p: 0 }}>
             <div style={{ height: 640, paddingTop: 8, paddingRight: 8, overflow: 'hidden' }}>
