@@ -132,6 +132,63 @@ class ticket
         }
     }
 
+    /**
+     * Endpoint estricto: cambiar estado y subir imágenes en una sola operación.
+     * POST /apiticket/ticket/cambiarEstadoConImagen
+     * FormData: id_ticket, id_estado, observaciones, id_usuario_remitente, files[]
+     */
+    public function cambiarEstadoConImagen()
+    {
+        try {
+            $response = new Response();
+
+            // Validar presencia de campos en POST
+            $idTicket = isset($_POST['id_ticket']) ? (int)$_POST['id_ticket'] : null;
+            $idEstado = isset($_POST['id_estado']) ? (int)$_POST['id_estado'] : null;
+            $observaciones = isset($_POST['observaciones']) ? trim((string)$_POST['observaciones']) : '';
+            $idUsuarioRemitente = isset($_POST['id_usuario_remitente']) ? (string)$_POST['id_usuario_remitente'] : null;
+
+            if (!$idTicket || !$idEstado) {
+                $response->toJSON(['success' => false, 'message' => 'Parámetros id_ticket e id_estado requeridos']);
+                return;
+            }
+            if ($observaciones === '') {
+                $response->toJSON(['success' => false, 'message' => 'Observaciones obligatorias']);
+                return;
+            }
+            if (empty($_FILES)) {
+                $response->toJSON(['success' => false, 'message' => 'Debe adjuntar al menos una imagen']);
+                return;
+            }
+
+            // Consolidar archivos (soporta múltiples claves ej. file, file0, etc.)
+            $archivos = [];
+            foreach ($_FILES as $fileField => $fileData) {
+                // Si es arreglo múltiple (files[])
+                if (is_array($fileData['name'])) {
+                    $total = count($fileData['name']);
+                    for ($i = 0; $i < $total; $i++) {
+                        $archivos[] = [
+                            'name' => $fileData['name'][$i],
+                            'type' => $fileData['type'][$i],
+                            'tmp_name' => $fileData['tmp_name'][$i],
+                            'error' => $fileData['error'][$i],
+                            'size' => $fileData['size'][$i]
+                        ];
+                    }
+                } else {
+                    $archivos[] = $fileData;
+                }
+            }
+
+            $ticketM = new TicketModel();
+            $resultado = $ticketM->cambiarEstadoConImagen($idTicket, $idEstado, $observaciones, $idUsuarioRemitente, $archivos);
+            $response->toJSON($resultado);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
      public function create()
     {
         try {

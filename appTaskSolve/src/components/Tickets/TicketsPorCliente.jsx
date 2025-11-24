@@ -283,7 +283,7 @@ const TicketsPorCliente = () => {
                     borderLeft: `6px solid ${getStatusColor(ticket.estado)}`,
                     cursor: 'pointer'
                   }}
-                  onClick={() => window.location.assign(`/tickets/${ticket.id_ticket}`)}
+                  onClick={() => navigate(`/tickets/${ticket.id_ticket}`)}
                 >
                   <CardContent>
                     <Typography variant="h6">#{ticket.id_ticket} - {ticket.titulo}</Typography>
@@ -367,7 +367,7 @@ const TicketsPorCliente = () => {
         <DialogActions>
           <Button onClick={() => setSelectedTicket(null)}>Cerrar</Button>
           {selectedTicket && (
-            <Button variant="contained" onClick={() => window.location.assign(`/tickets/${selectedTicket.id_ticket ?? selectedTicket.id}`)}>Ver detalle</Button>
+            <Button variant="contained" onClick={() => navigate(`/tickets/${selectedTicket.id_ticket ?? selectedTicket.id}`)}>Ver detalle</Button>
           )}
         </DialogActions>
       </Dialog>

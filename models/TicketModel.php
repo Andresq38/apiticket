@@ -214,17 +214,30 @@ class TicketModel
 
             // 7. Insertar en historial_estados CON ID_USUARIO para trazabilidad
             $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones, id_usuario) VALUES (?, ?, ?, ?)";
-            $this->enlace->executePrepared_DML($sqlHistorial, 'iiss', [
-                (int)$idTicket,
-                $nuevoEstado,
-                $observaciones,
-                $idUsuarioRemitente // CRÍTICO: registra quién hizo el cambio
-            ]);
+            $this->enlace->executePrepared_DML($sqlHistorial, 'iiss', [ (int)$idTicket, $nuevoEstado, $observaciones, $idUsuarioRemitente ]);
+            // Obtener id_historial recién creado (para validaciones posteriores si se requiere)
+            $idHistorialRow = $this->enlace->ExecuteSQL("SELECT LAST_INSERT_ID() AS id_historial");
+            $idHistorial = isset($idHistorialRow[0]) ? (int)$idHistorialRow[0]->id_historial : null;
 
             // 8. Si el nuevo estado es "Cerrado" (id_estado = 5), actualizar fecha_cierre
             if ($nuevoEstado === 5) {
                 $sqlCierre = "UPDATE ticket SET fecha_cierre = NOW() WHERE id_ticket = ?";
                 $this->enlace->executePrepared_DML($sqlCierre, 'i', [(int)$idTicket]);
+            }
+
+            // VALIDACIÓN CRÍTICA DE IMÁGENES: Para avanzar a cualquier estado (excepto Pendiente→Asignado)
+            // se exige que el historial recién creado tenga al menos una imagen asociada.
+            // NOTA: Esta validación se aplica DESPUÉS de crear el historial pero ANTES de confirmar.
+            // El endpoint cambiarEstadoConImagen debe usarse para garantizar esto.
+            if ($estadoActual !== 1 || $nuevoEstado !== 2) {
+                // Para cualquier transición que NO sea Pendiente→Asignado, validar imágenes
+                $sqlCountImgs = "SELECT COUNT(*) AS total FROM historial_imagen hi
+                                 WHERE hi.id_historial_estado = ?";
+                $resImg = $this->enlace->executePrepared($sqlCountImgs, 'i', [ (int)$idHistorial ]);
+                $totalImgs = isset($resImg[0]) ? (int)$resImg[0]->total : 0;
+                if ($totalImgs === 0) {
+                    throw new Exception('ADVERTENCIA: Debe usar el endpoint /cambiarEstadoConImagen para adjuntar evidencia obligatoria. No se permiten cambios de estado sin imágenes documentales (excepto asignación automática).');
+                }
             }
 
             // 9. GENERAR NOTIFICACIONES
@@ -239,13 +252,55 @@ class TicketModel
 
             return [
                 'success' => true,
-                'message' => 'Estado del ticket actualizado correctamente a: ' . $estadosValidos[$nuevoEstado]
+                'message' => 'Estado del ticket actualizado correctamente a: ' . $estadosValidos[$nuevoEstado],
+                'id_historial' => $idHistorial
             ];
         } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => $e->getMessage()
             ];
+        }
+    }
+
+    /**
+     * Cambiar estado con imágenes en una sola operación (endpoint estricto).
+     * Requiere al menos UNA imagen adjunta siempre que se cambie de estado.
+     */
+    public function cambiarEstadoConImagen($idTicket, $nuevoEstado, $observaciones, $idUsuarioRemitente, $files)
+    {
+        try {
+            if (!$idTicket || !$nuevoEstado) { throw new Exception('Parámetros incompletos'); }
+            if (!$observaciones || trim($observaciones) === '') { throw new Exception('Observaciones obligatorias'); }
+            if (empty($files) || !is_array($files) || count($files) === 0) { throw new Exception('Debe adjuntar al menos una imagen'); }
+
+            // Reutilizar validaciones de flujo usando método existente (sin imágenes)
+            $validacionPrevia = $this->cambiarEstado($idTicket, $nuevoEstado, $observaciones, $idUsuarioRemitente);
+            if (!$validacionPrevia['success']) { return $validacionPrevia; }
+            $idHistorial = $validacionPrevia['id_historial'] ?? null;
+            if (!$idHistorial) { throw new Exception('No se pudo obtener historial para asociar imágenes'); }
+
+            // Subir imágenes y asociarlas
+            $imgModel = new ImagenModel();
+            $subidas = [];
+            foreach ($files as $f) {
+                if (!isset($f['name']) || $f['error'] !== 0) { continue; }
+                $resultado = $imgModel->uploadForHistorial($f, $idTicket, $idHistorial);
+                if ($resultado['success']) {
+                    $subidas[] = [ 'id_imagen' => $resultado['id_imagen'], 'filename' => $resultado['filename'] ];
+                }
+            }
+            if (count($subidas) === 0) {
+                throw new Exception('No se pudo procesar ninguna imagen. Operación cancelada.');
+            }
+            return [
+                'success' => true,
+                'message' => 'Estado e imágenes registrados correctamente',
+                'imagenes' => $subidas,
+                'id_historial' => $idHistorial
+            ];
+        } catch (Exception $e) {
+            return [ 'success' => false, 'message' => $e->getMessage() ];
         }
     }
 
@@ -348,13 +403,19 @@ class TicketModel
                 $ticket->imagenes = [];
             }
 
-            // Historial de estados
+            // Historial de estados (extendido con estado anterior)
             try {
-                $sqlHist = "SELECT h.id_historial, h.id_ticket, h.id_estado, e.nombre AS estado, h.fecha_cambio, h.observaciones
-                            FROM historial_estados h
-                            JOIN estado e ON e.id_estado = h.id_estado
-                            WHERE h.id_ticket = ?
-                            ORDER BY h.fecha_cambio ASC";
+                $sqlHist = "SELECT he.id_historial,
+                                    he.id_ticket,
+                                    he.id_estado_actual AS id_estado,
+                                    he.estado_actual_nombre AS estado,
+                                    he.id_estado_anterior,
+                                    he.estado_anterior_nombre,
+                                    he.fecha_cambio,
+                                    he.observaciones
+                             FROM historial_estados_ext he
+                             WHERE he.id_ticket = ?
+                             ORDER BY he.fecha_cambio ASC";
                 $hist = $this->enlace->executePrepared($sqlHist, 'i', [(int)$idTicket]);
                 $ticket->historial_estados = is_array($hist) ? $hist : [];
             } catch (Exception $e) {
@@ -566,6 +627,35 @@ class TicketModel
                 $sets[] = 'id_tecnico = ?';
                 $types .= 'i';
                 $params[] = (int)$objeto->id_tecnico;
+            }
+            
+            // Si se proporciona id_etiqueta, derivar y actualizar id_categoria
+            if (isset($objeto->id_etiqueta)) {
+                $idEtiqueta = (int)$objeto->id_etiqueta;
+                
+                // Verificar que la etiqueta existe
+                $chkEt = $this->enlace->executePrepared(
+                    "SELECT id_etiqueta FROM etiqueta WHERE id_etiqueta = ?", 
+                    'i', 
+                    [$idEtiqueta], 
+                    'asoc'
+                );
+                if (empty($chkEt)) {
+                    throw new Exception('La etiqueta seleccionada no existe');
+                }
+                
+                // Obtener la categoría asociada a esta etiqueta
+                $sqlCat = "SELECT id_categoria_ticket FROM categoria_etiqueta WHERE id_etiqueta = ? LIMIT 1";
+                $cat = $this->enlace->executePrepared($sqlCat, 'i', [$idEtiqueta], 'asoc');
+                
+                if (!empty($cat) && isset($cat[0]['id_categoria_ticket'])) {
+                    $idCategoria = (int)$cat[0]['id_categoria_ticket'];
+                    $sets[] = 'id_categoria = ?';
+                    $types .= 'i';
+                    $params[] = $idCategoria;
+                } else {
+                    throw new Exception('No se pudo derivar la categoría desde la etiqueta proporcionada');
+                }
             }
 
             if (empty($sets)) {

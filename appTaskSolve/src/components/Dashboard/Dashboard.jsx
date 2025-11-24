@@ -37,8 +37,15 @@ import {
   Assignment as AssignmentIcon,
   Dashboard as DashboardIcon,
   Speed as SpeedIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  CheckCircle as CheckCircleIcon,
+  HourglassEmpty as HourglassIcon,
+  Error as ErrorIcon,
+  Group as GroupIcon
 } from '@mui/icons-material';
+import KPICard from './KPICard';
+import SLAGauge from './SLAGauge';
+import ActivityTimeline from './ActivityTimeline';
 import { getApiOrigin } from '../../utils/apiBase';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -64,6 +71,7 @@ const Dashboard = () => {
   const [distribucion, setDistribucion] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [kpiTrends, setKpiTrends] = useState({});
   const navigate = useNavigate();
 
   const getApiBase = () => getApiOrigin();
@@ -145,6 +153,36 @@ const Dashboard = () => {
         return acc;
       }, {});
 
+      // Calcular tendencias y sparklines (simulado - en producción vendría del backend)
+      const generateSparkline = (base) => {
+        return Array.from({ length: 7 }, (_, i) => ({
+          value: Math.floor(base * (0.8 + Math.random() * 0.4))
+        }));
+      };
+
+      const trendsData = {
+        resueltos: {
+          trend: 'up',
+          value: 12,
+          sparkline: generateSparkline(distribucionPorEstado['Resuelto'] || 0)
+        },
+        abiertos: {
+          trend: 'down',
+          value: -8,
+          sparkline: generateSparkline(distribucionPorEstado['Pendiente'] || 0)
+        },
+        enProceso: {
+          trend: 'up',
+          value: 5,
+          sparkline: generateSparkline((distribucionPorEstado['Asignado'] || 0) + (distribucionPorEstado['En Proceso'] || 0))
+        },
+        total: {
+          trend: 'up',
+          value: 3,
+          sparkline: generateSparkline(totalTickets)
+        }
+      };
+
       setStats({
         totalCategorias,
         totalTecnicos,
@@ -164,10 +202,16 @@ const Dashboard = () => {
       }));
       setDistribucion(distData);
 
+      setKpiTrends(trendsData);
       setLoading(false);
     } catch (err) {
       console.error('Error al cargar datos del dashboard:', err);
-      setError(`Error al cargar datos. Código: ${err.response?.status || 'desconocido'}`);
+      const errorMessage = err.response?.status 
+        ? `Error al cargar datos. Código HTTP: ${err.response.status}` 
+        : err.message 
+        ? `Error: ${err.message}`
+        : 'Error al conectar con el servidor. Verifica que Apache esté corriendo en http://localhost:81';
+      setError(errorMessage);
       setLoading(false);
     }
   };
@@ -242,26 +286,22 @@ const Dashboard = () => {
   return (
     <Box sx={{ 
       minHeight: '100vh', 
-      py: 3, 
+      py: 4, 
       px: 2,
-      background: 'linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%)',
-      '@keyframes pulse': {
-        '0%, 100%': { opacity: 1 },
-        '50%': { opacity: 0.7 }
-      }
+      bgcolor: '#fafafa'
     }}>
       <Container maxWidth="xl">
-        {/* Header Principal */}
+        {/* Header Principal - Con Color y Detalles */}
         <Box sx={{ 
-          mb: 4, 
-          background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-          borderRadius: 2,
-          p: 3,
+          mb: 4,
+          background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 50%, #0d47a1 100%)',
+          borderRadius: 3,
+          p: 3.5,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          boxShadow: '0 4px 20px rgba(15, 23, 42, 0.4)',
-          border: '1px solid rgba(148, 163, 184, 0.1)',
+          boxShadow: '0 10px 30px rgba(25, 118, 210, 0.3)',
+          border: '3px solid rgba(255, 255, 255, 0.2)',
           position: 'relative',
           overflow: 'hidden',
           '&::before': {
@@ -269,823 +309,953 @@ const Dashboard = () => {
             position: 'absolute',
             top: 0,
             right: 0,
-            width: '300px',
+            width: '450px',
             height: '100%',
-            background: 'radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 70%)',
+            background: 'radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 60%)',
             pointerEvents: 'none'
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #2e7d32, #1976d2, #ed6c02, #d32f2f)',
+            backgroundSize: '300% 100%',
+            animation: 'rainbowShift 5s linear infinite'
           }
         }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, position: 'relative', zIndex: 1 }}>
-            <Box sx={{ 
-              bgcolor: 'rgba(99, 102, 241, 0.2)',
-              borderRadius: 2,
-              p: 1.5,
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, position: 'relative', zIndex: 1 }}>
+            <Box sx={{
+              bgcolor: 'rgba(255, 255, 255, 0.25)',
+              borderRadius: '50%',
+              p: 2,
               display: 'flex',
-              border: '2px solid rgba(99, 102, 241, 0.3)',
-              boxShadow: '0 0 20px rgba(99, 102, 241, 0.3)'
+              border: '3px solid rgba(255, 255, 255, 0.4)',
+              boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
+              animation: 'floatAnimation 3s ease-in-out infinite'
             }}>
-              <DashboardIcon sx={{ fontSize: 36, color: '#818cf8' }} />
+              <DashboardIcon sx={{ fontSize: 40, color: 'white' }} />
             </Box>
             <Box>
-              <Typography variant="h4" sx={{ fontWeight: 700, color: 'white', mb: 0.5, letterSpacing: '-0.5px' }}>
-                Panel Ejecutivo de Operaciones
+              <Typography variant="h3" sx={{ fontWeight: 900, color: 'white', mb: 0.5, letterSpacing: '-1px', textShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
+                📊 Panel Ejecutivo
               </Typography>
-              <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', display: 'flex', alignItems: 'center', gap: 1 }}>
-                <SpeedIcon sx={{ fontSize: 16 }} />
+              <Typography variant="body1" sx={{ color: 'rgba(255, 255, 255, 0.95)', fontWeight: 600, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: 1 }}>
+                <SpeedIcon sx={{ fontSize: 18 }} />
                 Monitoreo en tiempo real del sistema de tiquetes
               </Typography>
             </Box>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, position: 'relative', zIndex: 1 }}>
-            <Button
-              variant="contained"
-              startIcon={<AssignmentIcon />}
-              onClick={() => navigate('/asignaciones/gestionar')}
-              sx={{
-                bgcolor: '#6366f1',
-                color: 'white',
-                fontWeight: 600,
-                px: 3,
-                py: 1,
-                borderRadius: 2,
-                textTransform: 'none',
-                boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)',
-                '&:hover': {
-                  bgcolor: '#4f46e5',
-                  boxShadow: '0 6px 20px rgba(99, 102, 241, 0.5)',
-                  transform: 'translateY(-2px)'
-                },
-                transition: 'all 0.3s'
-              }}
-            >
-              Gestión de Asignaciones
-            </Button>
-            <Tooltip title="Actualizar datos">
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, position: 'relative', zIndex: 1 }}>
+            <Tooltip title="Actualizar datos" arrow>
               <IconButton 
-                onClick={() => window.location.reload()}
+                onClick={() => fetchDashboardData()}
                 sx={{ 
-                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  bgcolor: 'rgba(255, 255, 255, 0.25)',
                   color: 'white',
-                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' }
+                  border: '2px solid rgba(255, 255, 255, 0.4)',
+                  '&:hover': { 
+                    bgcolor: 'rgba(255, 255, 255, 0.35)',
+                    transform: 'rotate(180deg)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)'
+                  },
+                  transition: 'all 0.5s'
                 }}
               >
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
-            <Chip 
-              icon={<AccessTimeIcon sx={{ color: 'white !important', fontSize: 18 }} />}
-              label={new Date().toLocaleDateString('es-CR', { 
-                day: '2-digit', 
-                month: 'short', 
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-              sx={{ 
-                bgcolor: 'rgba(255, 255, 255, 0.15)',
-                color: 'white',
-                fontWeight: 600,
-                fontSize: '0.85rem',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)'
+            <Button
+              variant="contained"
+              startIcon={<AssignmentIcon />}
+              onClick={() => navigate('/asignaciones/gestionar')}
+              sx={{
+                bgcolor: 'white',
+                color: 'primary.main',
+                fontWeight: 800,
+                px: 3.5,
+                py: 1.3,
+                borderRadius: 2.5,
+                textTransform: 'none',
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)',
+                border: '2px solid rgba(25, 118, 210, 0.2)',
+                '&:hover': {
+                  bgcolor: '#f8fafc',
+                  boxShadow: '0 8px 28px rgba(0, 0, 0, 0.3)',
+                  transform: 'translateY(-3px)',
+                  borderColor: 'primary.main'
+                },
+                transition: 'all 0.3s'
               }}
-            />
+            >
+              Gestionar Asignaciones
+            </Button>
           </Box>
         </Box>
 
-        {/* SECCIÓN: MÉTRICAS RÁPIDAS */}
-        <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-              <AssessmentIcon sx={{ fontSize: 24, color: '#6366f1' }} />
-              Métricas Principales
-            </Typography>
-            <Typography variant="body2" sx={{ color: '#64748b' }}>
-              Resumen general del estado de tiquetes
-            </Typography>
-          </Box>
-          <Chip 
-            icon={<SpeedIcon sx={{ fontSize: 16 }} />}
-            label="Actualizado" 
-            size="small"
-            sx={{ 
-              bgcolor: '#10b981', 
-              color: 'white',
-              fontWeight: 600,
-              animation: 'pulse 2s infinite'
-            }} 
-          />
-        </Box>
-        <Grid container spacing={3} sx={{ mb: 5 }}>
+        {/* SECCIÓN: MÉTRICAS PRINCIPALES - CON COLOR Y DETALLES */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {/* KPI Card - Resueltos */}
           <Grid item xs={12} sm={6} md={3}>
             <Card sx={{ 
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-              boxShadow: '0 2px 8px rgba(16, 185, 129, 0.2)',
+              bgcolor: 'white',
+              borderRadius: 3,
+              boxShadow: '0 4px 12px rgba(46, 125, 50, 0.15)',
+              border: '3px solid',
+              borderColor: 'success.main',
               transition: 'all 0.3s',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              '&:hover': { 
-                transform: 'translateY(-2px)', 
-                boxShadow: '0 8px 24px rgba(16, 185, 129, 0.3)'
-              }
-            }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', mb: 1, fontWeight: 500, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5 }}>
-                      Resueltos
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', lineHeight: 1 }}>
-                      {stats.distribucionPorEstado['Resuelto'] || 0}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ bgcolor: 'rgba(255, 255, 255, 0.15)', borderRadius: 1.5, p: 1.2, display: 'flex' }}>
-                    <ConfirmationNumberIcon sx={{ fontSize: 26, color: 'white' }} />
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.2)',
-              transition: 'all 0.3s',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              '&:hover': { 
-                transform: 'translateY(-2px)', 
-                boxShadow: '0 8px 24px rgba(59, 130, 246, 0.3)'
-              }
-            }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', mb: 1, fontWeight: 500, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5 }}>
-                      Abiertos
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', lineHeight: 1 }}>
-                      {stats.distribucionPorEstado['Pendiente'] || 0}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ bgcolor: 'rgba(255, 255, 255, 0.15)', borderRadius: 1.5, p: 1.2, display: 'flex' }}>
-                    <PlayArrowIcon sx={{ fontSize: 26, color: 'white' }} />
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.2)',
-              transition: 'all 0.3s',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              '&:hover': { 
-                transform: 'translateY(-2px)', 
-                boxShadow: '0 8px 24px rgba(245, 158, 11, 0.3)'
-              }
-            }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', mb: 1, fontWeight: 500, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5 }}>
-                      En Proceso
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', lineHeight: 1 }}>
-                      {(stats.distribucionPorEstado['Asignado'] || 0) + (stats.distribucionPorEstado['En Proceso'] || 0)}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ bgcolor: 'rgba(255, 255, 255, 0.15)', borderRadius: 1.5, p: 1.2, display: 'flex' }}>
-                    <AccessTimeIcon sx={{ fontSize: 26, color: 'white' }} />
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} sm={6} md={3}>
-            <Card sx={{ 
-              borderRadius: 2,
-              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-              boxShadow: '0 2px 8px rgba(99, 102, 241, 0.2)',
-              transition: 'all 0.3s',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              '&:hover': { 
-                transform: 'translateY(-2px)', 
-                boxShadow: '0 8px 24px rgba(99, 102, 241, 0.3)'
-              }
-            }}>
-              <CardContent sx={{ p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <Box>
-                    <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.8)', mb: 1, fontWeight: 500, textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: 0.5 }}>
-                      Total
-                    </Typography>
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'white', lineHeight: 1 }}>
-                      {stats.totalTickets || 0}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ bgcolor: 'rgba(255, 255, 255, 0.15)', borderRadius: 1.5, p: 1.2, display: 'flex' }}>
-                    <ConfirmationNumberIcon sx={{ fontSize: 26, color: 'white' }} />
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        {/* SECCIÓN: ANÁLISIS DE DISTRIBUCIÓN */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CategoryIcon sx={{ fontSize: 24, color: '#3b82f6' }} />
-            Análisis de Distribución
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Visualización por estado y categoría
-          </Typography>
-        </Box>
-        <Grid container spacing={3} sx={{ mb: 5 }}>
-          <Grid item xs={12} lg={6}>
-            {/* Distribución por Estado */}
-            <Card sx={{ 
-              borderRadius: 3, 
-              height: '100%', 
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-              border: '1px solid #e0e0e0',
-              transition: 'all 0.3s',
+              position: 'relative',
               overflow: 'hidden',
-              '&:hover': {
-                boxShadow: '0 4px 20px rgba(0,0,0,0.12)'
+              '&:hover': { 
+                boxShadow: '0 8px 24px rgba(46, 125, 50, 0.3)',
+                transform: 'translateY(-6px)',
+                borderColor: 'success.dark'
+              },
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '5px',
+                background: 'linear-gradient(90deg, #2e7d32, #4caf50, #2e7d32)',
+                backgroundSize: '200% 100%',
+                animation: 'gradientShift 3s linear infinite'
               }
             }}>
-              <Box sx={{ 
-                background: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
-                p: 2.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5
-              }}>
-                <Box sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)', borderRadius: 1.5, p: 1, display: 'flex' }}>
-                  <AssessmentIcon sx={{ fontSize: 24, color: 'white' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: 'white' }}>
-                  Distribución por Estado
-                </Typography>
-              </Box>
-              <CardContent sx={{ p: 2.5 }}>
-                
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={statusData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={80}
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      {statusData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <RechartsTooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-
-                {/* Leyenda personalizada */}
-                <Box sx={{ display: 'flex', justifyContent: 'space-around', mt: 2 }}>
-                  {statusData.map((item) => (
-                    <Box key={item.name} sx={{ textAlign: 'center' }}>
-                      <Box sx={{ 
-                        width: 10, 
-                        height: 10, 
-                        borderRadius: '50%', 
-                        bgcolor: item.color,
-                        mx: 'auto',
-                        mb: 0.5
-                      }} />
-                      <Typography variant="caption" sx={{ fontWeight: 600, display: 'block', fontSize: '0.75rem' }}>
-                        {item.name}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
-                        {item.value} Tickets
-                      </Typography>
-                    </Box>
-                  ))}
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
-
-          <Grid item xs={12} lg={6}>
-            {/* Top Categorías */}
-            <Card sx={{ 
-              borderRadius: 3, 
-              height: '100%', 
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-              border: '1px solid #e0e0e0',
-              transition: 'all 0.3s',
-              overflow: 'hidden',
-              '&:hover': {
-                boxShadow: '0 4px 20px rgba(0,0,0,0.12)'
-              }
-            }}>
-              <Box sx={{ 
-                background: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
-                p: 2.5,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5
-              }}>
-                <Box sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)', borderRadius: 1.5, p: 1, display: 'flex' }}>
-                  <CategoryIcon sx={{ fontSize: 24, color: 'white' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: 'white' }}>
-                  Top 5 Categorías
-                </Typography>
-              </Box>
-              <CardContent sx={{ p: 2.5 }}>
-                
-                <Grid container spacing={1.5}>
-                  {Object.entries(stats.distribucionPorCategoria).slice(0, 5).map(([name, value], idx) => {
-                    const colors = [
-                      'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                      'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                      'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                      'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                      'linear-gradient(135deg, #64748b 0%, #475569 100%)'
-                    ];
-                    return (
-                      <Grid item xs={12} key={idx}>
-                        <Box sx={{ 
-                          background: colors[idx],
-                          borderRadius: 2,
-                          p: 1.5,
-                          textAlign: 'center',
-                          color: 'white',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'space-between',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                          transition: 'all 0.3s',
-                          '&:hover': {
-                            transform: 'translateX(4px)',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                          }
-                        }}>
-                          <Typography variant="body2" sx={{ fontWeight: 600, flex: 1, textAlign: 'left' }}>
-                            {name.length > 25 ? name.substring(0, 25) + '...' : name}
-                          </Typography>
-                          <Typography variant="h5" sx={{ fontWeight: 'bold', ml: 2 }}>
-                            {value}
-                          </Typography>
-                        </Box>
-                      </Grid>
-                    );
-                  })}
-                </Grid>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-
-        {/* SECCIÓN: TENDENCIAS TEMPORALES */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <TrendingUpIcon sx={{ fontSize: 24, color: '#10b981' }} />
-            Tendencias Temporales
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Evolución de tiquetes en los últimos 30 días
-          </Typography>
-        </Box>
-        <Grid container spacing={3} sx={{ mb: 5 }}>
-          <Grid item xs={12}>
-            <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-              border: '1px solid #e0e0e0',
-              transition: 'all 0.3s',
-              overflow: 'hidden',
-              '&:hover': {
-                boxShadow: '0 4px 20px rgba(0,0,0,0.12)'
-              }
-            }}>
-              <Box sx={{ 
-                background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-                p: 3,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <Box sx={{ 
-                    bgcolor: 'rgba(255, 255, 255, 0.2)',
-                    borderRadius: 2,
-                    p: 1,
-                    display: 'flex'
+              <CardContent sx={{ p: 3.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
+                  <Box sx={{
+                    bgcolor: 'success.light',
+                    borderRadius: '50%',
+                    width: 56,
+                    height: 56,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '3px solid',
+                    borderColor: 'success.light',
+                    boxShadow: '0 4px 12px rgba(46, 125, 50, 0.2)'
                   }}>
-                    <TrendingUpIcon sx={{ fontSize: 24, color: 'white' }} />
+                    <CheckCircleIcon sx={{ fontSize: 32, color: 'success.dark' }} />
                   </Box>
-                  <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', mb: 0.3 }}>
-                      Tendencia Mensual de Tiquetes
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.8rem' }}>
-                      Comparativa de resolución a lo largo del año
-                    </Typography>
-                  </Box>
+                  <Chip 
+                    label="✓ OK" 
+                    size="small"
+                    sx={{ 
+                      bgcolor: 'success.main',
+                      color: 'white',
+                      fontWeight: 800,
+                      height: 26,
+                      fontSize: '0.75rem',
+                      px: 1
+                    }}
+                  />
                 </Box>
-                <Chip 
-                  label={`Año ${new Date().getFullYear()}`}
-                  sx={{ 
-                    bgcolor: 'white',
-                    color: '#667eea', 
-                    fontWeight: 700,
-                    fontSize: '0.8rem',
-                    height: 28
-                  }} 
-                />
-              </Box>
-
-              <CardContent sx={{ p: 3, bgcolor: '#fafafa' }}>
-                <Box sx={{ 
-                  bgcolor: 'white', 
-                  borderRadius: 2, 
-                  p: 2,
-                  boxShadow: '0 1px 4px rgba(0,0,0,0.05)'
-                }}>
-                  <ResponsiveContainer width="100%" height={280}>
-                    <LineChart data={monthlyData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
-                      <defs>
-                        <linearGradient id="colorResueltos" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#66BB6A" stopOpacity={0.1}/>
-                          <stop offset="95%" stopColor="#66BB6A" stopOpacity={0}/>
-                        </linearGradient>
-                        <linearGradient id="colorSinResolver" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#f5576c" stopOpacity={0.1}/>
-                          <stop offset="95%" stopColor="#f5576c" stopOpacity={0}/>
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e8e8e8" vertical={false} />
-                      <XAxis 
-                        dataKey="month" 
-                        tick={{ fontSize: 12, fill: '#666', fontWeight: 500 }} 
-                        stroke="#ccc"
-                        tickLine={false}
-                      />
-                      <YAxis 
-                        tick={{ fontSize: 12, fill: '#666', fontWeight: 500 }} 
-                        stroke="#ccc"
-                        tickLine={false}
-                      />
-                      <RechartsTooltip 
-                        contentStyle={{ 
-                          borderRadius: 10, 
-                          border: 'none',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                          padding: '12px'
-                        }}
-                        labelStyle={{ fontWeight: 600, marginBottom: 8 }}
-                      />
-                      <Legend 
-                        iconType="circle" 
-                        wrapperStyle={{ 
-                          fontSize: '13px', 
-                          fontWeight: 600,
-                          paddingTop: '15px'
-                        }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="Resueltos" 
-                        stroke="#10b981" 
-                        strokeWidth={3}
-                        dot={{ fill: '#10b981', r: 4, strokeWidth: 3, stroke: '#fff' }}
-                        activeDot={{ r: 6, strokeWidth: 3 }}
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="Sin Resolver" 
-                        stroke="#f59e0b" 
-                        strokeWidth={3}
-                        dot={{ fill: '#f59e0b', r: 4, strokeWidth: 3, stroke: '#fff' }}
-                        activeDot={{ r: 6, strokeWidth: 3 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </Box>
-
-                {/* Estadísticas Resumidas */}
-                <Grid container spacing={2} sx={{ mt: 2 }}>
-                  <Grid item xs={12} sm={4}>
-                    <Box sx={{ 
-                      textAlign: 'center', 
-                      p: 2.5, 
-                      borderRadius: 2,
-                      bgcolor: 'rgba(16, 185, 129, 0.08)',
-                      border: '1px solid rgba(16, 185, 129, 0.2)'
-                    }}>
-                      <Typography variant="h4" sx={{ fontWeight: 700, color: '#10b981', mb: 0.5 }}>
-                        {monthlyData.reduce((sum, item) => sum + item.Resueltos, 0)}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                        Total Resueltos
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Box sx={{ 
-                      textAlign: 'center', 
-                      p: 2.5, 
-                      borderRadius: 2,
-                      bgcolor: 'rgba(245, 158, 11, 0.08)',
-                      border: '1px solid rgba(245, 158, 11, 0.2)'
-                    }}>
-                      <Typography variant="h4" sx={{ fontWeight: 700, color: '#f59e0b', mb: 0.5 }}>
-                        {monthlyData.reduce((sum, item) => sum + item['Sin Resolver'], 0)}
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                        Total Sin Resolver
-                      </Typography>
-                    </Box>
-                  </Grid>
-                  <Grid item xs={12} sm={4}>
-                    <Box sx={{ 
-                      textAlign: 'center', 
-                      p: 2.5, 
-                      borderRadius: 2,
-                      bgcolor: 'rgba(99, 102, 241, 0.08)',
-                      border: '1px solid rgba(99, 102, 241, 0.2)'
-                    }}>
-                      <Typography variant="h4" sx={{ fontWeight: 700, color: '#6366f1', mb: 0.5 }}>
-                        {(() => {
-                          const totalResueltos = monthlyData.reduce((sum, item) => sum + item.Resueltos, 0);
-                          const totalSinResolver = monthlyData.reduce((sum, item) => sum + item['Sin Resolver'], 0);
-                          const total = totalResueltos + totalSinResolver;
-                          return total > 0 ? Math.round((totalResueltos / total) * 100) : 0;
-                        })()}%
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 600 }}>
-                        Tasa de Resolución
-                      </Typography>
-                    </Box>
-                  </Grid>
-                </Grid>
+                <Typography variant="h2" sx={{ fontWeight: 900, color: 'success.main', mb: 1, fontSize: '2.8rem', textShadow: '0 2px 4px rgba(46, 125, 50, 0.1)' }}>
+                  {stats.distribucionPorEstado['Resuelto'] || 0}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Tiquetes Resueltos
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
-        </Grid>
 
-        {/* SECCIÓN: DATOS DETALLADOS */}
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', mb: 0.5, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <PeopleIcon sx={{ fontSize: 24, color: '#f59e0b' }} />
-            Datos Detallados
-          </Typography>
-          <Typography variant="body2" sx={{ color: '#64748b' }}>
-            Información específica de categorías y equipo técnico
-          </Typography>
-        </Box>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          {/* KPI Card - Abiertos */}
+          <Grid item xs={12} sm={6} md={3}>
             <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-              border: '1px solid #e0e0e0',
-              overflow: 'hidden',
+              bgcolor: 'white',
+              borderRadius: 3,
+              boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)',
+              border: '3px solid',
+              borderColor: 'primary.main',
               transition: 'all 0.3s',
-              '&:hover': {
-                boxShadow: '0 4px 20px rgba(0,0,0,0.12)'
+              position: 'relative',
+              overflow: 'hidden',
+              '&:hover': { 
+                boxShadow: '0 8px 24px rgba(25, 118, 210, 0.3)',
+                transform: 'translateY(-6px)',
+                borderColor: 'primary.dark'
+              },
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '5px',
+                background: 'linear-gradient(90deg, #1976d2, #42a5f5, #1976d2)',
+                backgroundSize: '200% 100%',
+                animation: 'gradientShift 3s linear infinite'
               }
             }}>
-              <Box sx={{ 
-                p: 2.5, 
-                background: 'linear-gradient(135deg, #475569 0%, #334155 100%)',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5
-              }}>
-                <CategoryIcon sx={{ fontSize: 24 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  Categorías de Tiquetes
-                </Typography>
-              </Box>
-              <CardContent sx={{ p: 0 }}>
-                <Box sx={{ maxHeight: 320, overflow: 'auto' }}>
-                  {categorias.length > 0 ? (
-                    categorias.map((cat, index) => (
-                      <Box 
-                        key={cat.id_categoria}
-                        sx={{ 
-                          p: 2.5,
-                          borderBottom: index < categorias.length - 1 ? '1px solid' : 'none',
-                          borderColor: 'divider',
-                          transition: 'all 0.3s',
-                          cursor: 'pointer',
-                          '&:hover': {
-                            bgcolor: 'rgba(102, 126, 234, 0.04)',
-                            borderLeft: '3px solid #667eea',
-                            pl: 3
-                          }
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                            <Box sx={{
-                              width: 36,
-                              height: 36,
-                              borderRadius: '8px',
-                              background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              color: 'white',
-                              fontWeight: 700,
-                              fontSize: '0.85rem',
-                              flexShrink: 0
-                            }}>
-                              {cat.id_categoria}
-                            </Box>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="body1" sx={{ fontWeight: 600, color: '#2c3e50', mb: 0.5 }}>
-                                {cat.nombre}
-                              </Typography>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <LabelIcon sx={{ fontSize: 14, color: '#667eea' }} />
-                                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
-                                    {cat.num_etiquetas} etiquetas
-                                  </Typography>
-                                </Box>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                  <AccessTimeIcon sx={{ fontSize: 14, color: '#f093fb' }} />
-                                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
-                                    {cat.sla_nombre}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            </Box>
-                          </Box>
-                          <Chip 
-                            label={`${cat.cantidad_tickets || 0} tickets`}
-                            size="small"
-                            sx={{ 
-                              bgcolor: '#667eea',
-                              color: 'white',
-                              fontWeight: 600,
-                              fontSize: '0.75rem',
-                              height: 24
-                            }}
-                          />
-                        </Box>
-                      </Box>
-                    ))
+              <CardContent sx={{ p: 3.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
+                  <Box sx={{
+                    bgcolor: 'primary.light',
+                    borderRadius: '50%',
+                    width: 56,
+                    height: 56,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '3px solid',
+                    borderColor: 'primary.light',
+                    boxShadow: '0 4px 12px rgba(25, 118, 210, 0.2)'
+                  }}>
+                    <PlayArrowIcon sx={{ fontSize: 32, color: 'primary.dark' }} />
+                  </Box>
+                  {(stats.distribucionPorEstado['Pendiente'] || 0) > 10 ? (
+                    <Chip 
+                      label="⚠ ALTO" 
+                      size="small"
+                      sx={{ 
+                        bgcolor: 'error.main',
+                        color: 'white',
+                        fontWeight: 800,
+                        height: 26,
+                        fontSize: '0.75rem',
+                        px: 1,
+                        animation: 'pulse 2s infinite'
+                      }}
+                    />
                   ) : (
-                    <Box sx={{ p: 4, textAlign: 'center' }}>
-                      <Typography variant="body2" color="text.secondary">
-                        📋 No hay categorías disponibles
-                      </Typography>
-                    </Box>
+                    <Chip 
+                      label="→ NEW" 
+                      size="small"
+                      sx={{ 
+                        bgcolor: 'primary.main',
+                        color: 'white',
+                        fontWeight: 800,
+                        height: 26,
+                        fontSize: '0.75rem',
+                        px: 1
+                      }}
+                    />
                   )}
                 </Box>
+                <Typography variant="h2" sx={{ fontWeight: 900, color: 'primary.main', mb: 1, fontSize: '2.8rem', textShadow: '0 2px 4px rgba(25, 118, 210, 0.1)' }}>
+                  {stats.distribucionPorEstado['Pendiente'] || 0}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Tiquetes Abiertos
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          {/* KPI Card - En Proceso */}
+          <Grid item xs={12} sm={6} md={3}>
             <Card sx={{ 
-              borderRadius: 3, 
-              boxShadow: '0 2px 12px rgba(0,0,0,0.08)',
-              border: '1px solid #e0e0e0',
-              overflow: 'hidden',
+              bgcolor: 'white',
+              borderRadius: 3,
+              boxShadow: '0 4px 12px rgba(237, 108, 2, 0.15)',
+              border: '3px solid',
+              borderColor: 'warning.main',
               transition: 'all 0.3s',
-              '&:hover': {
-                boxShadow: '0 4px 20px rgba(0,0,0,0.12)'
+              position: 'relative',
+              overflow: 'hidden',
+              '&:hover': { 
+                boxShadow: '0 8px 24px rgba(237, 108, 2, 0.3)',
+                transform: 'translateY(-6px)',
+                borderColor: 'warning.dark'
+              },
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '5px',
+                background: 'linear-gradient(90deg, #ed6c02, #ff9800, #ed6c02)',
+                backgroundSize: '200% 100%',
+                animation: 'gradientShift 3s linear infinite'
               }
             }}>
-              <Box sx={{ 
-                p: 2.5, 
-                background: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
-                color: 'white',
+              <CardContent sx={{ p: 3.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
+                  <Box sx={{
+                    bgcolor: 'warning.light',
+                    borderRadius: '50%',
+                    width: 56,
+                    height: 56,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '3px solid',
+                    borderColor: 'warning.light',
+                    boxShadow: '0 4px 12px rgba(237, 108, 2, 0.2)',
+                    animation: 'pulse 2s infinite'
+                  }}>
+                    <HourglassIcon sx={{ fontSize: 32, color: 'warning.dark' }} />
+                  </Box>
+                  <Chip 
+                    label="⏱ ACTIVE" 
+                    size="small"
+                    sx={{ 
+                      bgcolor: 'warning.main',
+                      color: 'white',
+                      fontWeight: 800,
+                      height: 26,
+                      fontSize: '0.75rem',
+                      px: 1
+                    }}
+                  />
+                </Box>
+                <Typography variant="h2" sx={{ fontWeight: 900, color: 'warning.main', mb: 1, fontSize: '2.8rem', textShadow: '0 2px 4px rgba(237, 108, 2, 0.1)' }}>
+                  {(stats.distribucionPorEstado['Asignado'] || 0) + (stats.distribucionPorEstado['En Proceso'] || 0)}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  En Proceso
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* KPI Card - Total */}
+          <Grid item xs={12} sm={6} md={3}>
+            <Card sx={{ 
+              bgcolor: 'white',
+              borderRadius: 3,
+              boxShadow: '0 4px 12px rgba(156, 39, 176, 0.15)',
+              border: '3px solid',
+              borderColor: 'secondary.main',
+              transition: 'all 0.3s',
+              position: 'relative',
+              overflow: 'hidden',
+              '&:hover': { 
+                boxShadow: '0 8px 24px rgba(156, 39, 176, 0.3)',
+                transform: 'translateY(-6px)',
+                borderColor: 'secondary.dark'
+              },
+              '&::before': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                height: '5px',
+                background: 'linear-gradient(90deg, #9c27b0, #ba68c8, #9c27b0)',
+                backgroundSize: '200% 100%',
+                animation: 'gradientShift 3s linear infinite'
+              }
+            }}>
+              <CardContent sx={{ p: 3.5 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
+                  <Box sx={{
+                    bgcolor: 'secondary.light',
+                    borderRadius: '50%',
+                    width: 56,
+                    height: 56,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '3px solid',
+                    borderColor: 'secondary.light',
+                    boxShadow: '0 4px 12px rgba(156, 39, 176, 0.2)'
+                  }}>
+                    <ConfirmationNumberIcon sx={{ fontSize: 32, color: 'secondary.dark' }} />
+                  </Box>
+                  <Chip 
+                    label="Σ ALL" 
+                    size="small"
+                    sx={{ 
+                      bgcolor: 'secondary.main',
+                      color: 'white',
+                      fontWeight: 800,
+                      height: 26,
+                      fontSize: '0.75rem',
+                      px: 1
+                    }}
+                  />
+                </Box>
+                <Typography variant="h2" sx={{ fontWeight: 900, color: 'secondary.main', mb: 1, fontSize: '2.8rem', textShadow: '0 2px 4px rgba(156, 39, 176, 0.1)' }}>
+                  {stats.totalTickets || 0}
+                </Typography>
+                <Typography variant="body2" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Total de Tiquetes
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+
+        <style>
+          {`
+            @keyframes gradientShift {
+              0% { background-position: 0% 50%; }
+              100% { background-position: 200% 50%; }
+            }
+            @keyframes pulse {
+              0%, 100% { opacity: 1; transform: scale(1); }
+              50% { opacity: 0.8; transform: scale(0.98); }
+            }
+          `}
+        </style>
+
+        {/* SECCIÓN: DISTRIBUCIÓN POR ESTADO - BARRAS HORIZONTALES */}
+        <Card sx={{ 
+          bgcolor: 'white',
+          borderRadius: 2,
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          border: '1px solid #f0f0f0',
+          mb: 4
+        }}>
+          <Box sx={{ p: 3, borderBottom: '1px solid #f0f0f0' }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', fontSize: '1.125rem' }}>
+              Distribución por Estado
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
+              Estado actual de todos los tiquetes del sistema
+            </Typography>
+          </Box>
+          <CardContent sx={{ p: 3 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              {/* Resueltos */}
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CheckCircleIcon sx={{ fontSize: 18, color: '#10b981' }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                      Resueltos
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: '#10b981' }}>
+                    {stats.distribucionPorEstado['Resuelto'] || 0} ({stats.totalTickets > 0 ? Math.round((stats.distribucionPorEstado['Resuelto'] || 0) / stats.totalTickets * 100) : 0}%)
+                  </Typography>
+                </Box>
+                <Box sx={{ 
+                  width: '100%', 
+                  height: 8, 
+                  bgcolor: '#f0f0f0', 
+                  borderRadius: 1,
+                  overflow: 'hidden'
+                }}>
+                  <Box sx={{ 
+                    width: `${stats.totalTickets > 0 ? (stats.distribucionPorEstado['Resuelto'] || 0) / stats.totalTickets * 100 : 0}%`,
+                    height: '100%',
+                    bgcolor: '#10b981',
+                    transition: 'width 1s ease'
+                  }} />
+                </Box>
+              </Box>
+
+              {/* En Proceso */}
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <HourglassIcon sx={{ fontSize: 18, color: '#f59e0b' }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                      En Proceso
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: '#f59e0b' }}>
+                    {(stats.distribucionPorEstado['Asignado'] || 0) + (stats.distribucionPorEstado['En Proceso'] || 0)} ({stats.totalTickets > 0 ? Math.round(((stats.distribucionPorEstado['Asignado'] || 0) + (stats.distribucionPorEstado['En Proceso'] || 0)) / stats.totalTickets * 100) : 0}%)
+                  </Typography>
+                </Box>
+                <Box sx={{ 
+                  width: '100%', 
+                  height: 8, 
+                  bgcolor: '#f0f0f0', 
+                  borderRadius: 1,
+                  overflow: 'hidden'
+                }}>
+                  <Box sx={{ 
+                    width: `${stats.totalTickets > 0 ? ((stats.distribucionPorEstado['Asignado'] || 0) + (stats.distribucionPorEstado['En Proceso'] || 0)) / stats.totalTickets * 100 : 0}%`,
+                    height: '100%',
+                    bgcolor: '#f59e0b',
+                    transition: 'width 1s ease'
+                  }} />
+                </Box>
+              </Box>
+
+              {/* Pendientes */}
+              <Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <PlayArrowIcon sx={{ fontSize: 18, color: '#3b82f6' }} />
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                      Pendientes
+                    </Typography>
+                  </Box>
+                  <Typography variant="body2" sx={{ fontWeight: 700, color: '#3b82f6' }}>
+                    {stats.distribucionPorEstado['Pendiente'] || 0} ({stats.totalTickets > 0 ? Math.round((stats.distribucionPorEstado['Pendiente'] || 0) / stats.totalTickets * 100) : 0}%)
+                  </Typography>
+                </Box>
+                <Box sx={{ 
+                  width: '100%', 
+                  height: 8, 
+                  bgcolor: '#f0f0f0', 
+                  borderRadius: 1,
+                  overflow: 'hidden'
+                }}>
+                  <Box sx={{ 
+                    width: `${stats.totalTickets > 0 ? (stats.distribucionPorEstado['Pendiente'] || 0) / stats.totalTickets * 100 : 0}%`,
+                    height: '100%',
+                    bgcolor: '#3b82f6',
+                    transition: 'width 1s ease'
+                  }} />
+                </Box>
+              </Box>
+
+              {/* Cerrados */}
+              {stats.distribucionPorEstado['Cerrado'] > 0 && (
+                <Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CloseIcon sx={{ fontSize: 18, color: '#64748b' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
+                        Cerrados
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: '#64748b' }}>
+                      {stats.distribucionPorEstado['Cerrado'] || 0} ({stats.totalTickets > 0 ? Math.round((stats.distribucionPorEstado['Cerrado'] || 0) / stats.totalTickets * 100) : 0}%)
+                    </Typography>
+                  </Box>
+                  <Box sx={{ 
+                    width: '100%', 
+                    height: 8, 
+                    bgcolor: '#f0f0f0', 
+                    borderRadius: 1,
+                    overflow: 'hidden'
+                  }}>
+                    <Box sx={{ 
+                      width: `${stats.totalTickets > 0 ? (stats.distribucionPorEstado['Cerrado'] || 0) / stats.totalTickets * 100 : 0}%`,
+                      height: '100%',
+                      bgcolor: '#64748b',
+                      transition: 'width 1s ease'
+                    }} />
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* SECCIÓN: TOP CATEGORÍAS - MEJORADO */}
+        <Card sx={{ 
+          bgcolor: 'white',
+          borderRadius: 3,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          border: '2px solid',
+          borderColor: 'primary.main',
+          mb: 4,
+          overflow: 'hidden'
+        }}>
+          <Box sx={{ 
+            p: 3, 
+            background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2
+          }}>
+            <Box sx={{
+              bgcolor: 'rgba(255,255,255,0.25)',
+              borderRadius: '50%',
+              p: 1.5,
+              display: 'flex',
+              border: '2px solid rgba(255,255,255,0.4)'
+            }}>
+              <CategoryIcon sx={{ fontSize: 28, color: 'white' }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', fontSize: '1.25rem' }}>
+                Top 5 Categorías
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', mt: 0.3 }}>
+                Categorías con mayor cantidad de tiquetes
+              </Typography>
+            </Box>
+          </Box>
+          <CardContent sx={{ p: 0 }}>
+            {Object.entries(stats.distribucionPorCategoria).slice(0, 5).map(([name, value], idx) => {
+              const rankColors = [
+                { bg: 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)', text: '#b8860b', icon: '①' },
+                { bg: 'linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%)', text: '#757575', icon: '②' },
+                { bg: 'linear-gradient(135deg, #cd7f32 0%, #daa520 100%)', text: '#8b4513', icon: '③' },
+                { bg: 'linear-gradient(135deg, #42a5f5 0%, #64b5f6 100%)', text: '#1976d2', icon: '④' },
+                { bg: 'linear-gradient(135deg, #66bb6a 0%, #81c784 100%)', text: '#2e7d32', icon: '⑤' }
+              ];
+              const config = rankColors[idx];
+              const percentage = stats.totalTickets > 0 ? Math.round((value / stats.totalTickets) * 100) : 0;
+              
+              return (
+                <Box 
+                  key={idx}
+                  sx={{ 
+                    px: 3,
+                    py: 3,
+                    borderBottom: idx < 4 ? '1px solid #e0e0e0' : 'none',
+                    transition: 'all 0.3s',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    '&:hover': {
+                      bgcolor: '#f8f9fa',
+                      transform: 'translateX(8px)',
+                      boxShadow: 'inset 4px 0 0 ' + config.text
+                    }
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flex: 1 }}>
+                      <Box sx={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '12px',
+                        background: config.bg,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 900,
+                        fontSize: '1.1rem',
+                        color: config.text,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        border: '2px solid white'
+                      }}>
+                        <span style={{ fontSize: '1.5rem', fontWeight: 900 }}>{config.icon}</span>
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: '#1e293b', mb: 0.5 }}>
+                          {name}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
+                            {value} tickets
+                          </Typography>
+                          <Box sx={{ 
+                            width: 2, 
+                            height: 2, 
+                            borderRadius: '50%', 
+                            bgcolor: '#cbd5e1' 
+                          }} />
+                          <Typography variant="caption" sx={{ color: config.text, fontWeight: 700 }}>
+                            {percentage}%
+                          </Typography>
+                        </Box>
+                      </Box>
+                    </Box>
+                    <Chip 
+                      label={value}
+                      size="medium"
+                      sx={{ 
+                        bgcolor: config.text,
+                        color: 'white',
+                        fontWeight: 800,
+                        fontSize: '0.9rem',
+                        minWidth: 60,
+                        height: 32,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ 
+                    width: '100%', 
+                    height: 6, 
+                    bgcolor: '#f0f0f0', 
+                    borderRadius: 3,
+                    overflow: 'hidden'
+                  }}>
+                    <Box sx={{ 
+                      width: `${percentage}%`,
+                      height: '100%',
+                      background: config.bg,
+                      transition: 'width 1.5s ease',
+                      boxShadow: '0 0 8px ' + config.text
+                    }} />
+                  </Box>
+                </Box>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        {/* SECCIÓN: TENDENCIA ANUAL - MEJORADO */}
+        <Card sx={{ 
+          bgcolor: 'white',
+          borderRadius: 3,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+          border: '2px solid',
+          borderColor: 'success.main',
+          mb: 4,
+          overflow: 'hidden'
+        }}>
+          <Box sx={{ 
+            p: 3, 
+            background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{
+                bgcolor: 'rgba(255,255,255,0.25)',
+                borderRadius: '50%',
+                p: 1.5,
                 display: 'flex',
-                alignItems: 'center',
-                gap: 1.5
+                border: '2px solid rgba(255,255,255,0.4)'
               }}>
-                <PeopleIcon sx={{ fontSize: 24 }} />
-                <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                  Equipo Técnico
+                <TrendingUpIcon sx={{ fontSize: 28, color: 'white' }} />
+              </Box>
+              <Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', fontSize: '1.25rem' }}>
+                  Tendencia Anual
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', mt: 0.3 }}>
+                  Comparativa de resolución mensual
                 </Typography>
               </Box>
+            </Box>
+            <Chip 
+              label={`${new Date().getFullYear()}`}
+              sx={{ 
+                bgcolor: 'white',
+                color: 'success.dark',
+                fontWeight: 800,
+                fontSize: '0.95rem',
+                height: 36,
+                px: 2,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+              }} 
+            />
+          </Box>
+          <CardContent sx={{ p: 3, bgcolor: '#fafafa' }}>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
+                <defs>
+                  <linearGradient id="colorResueltos" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#2e7d32" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#2e7d32" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorSinResolver" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#ed6c02" stopOpacity={0.1}/>
+                    <stop offset="95%" stopColor="#ed6c02" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
+                <XAxis 
+                  dataKey="month" 
+                  tick={{ fontSize: 13, fill: '#64748b', fontWeight: 600 }} 
+                  stroke="#cbd5e1"
+                  tickLine={false}
+                />
+                <YAxis 
+                  tick={{ fontSize: 13, fill: '#64748b', fontWeight: 600 }} 
+                  stroke="#cbd5e1"
+                  tickLine={false}
+                />
+                <RechartsTooltip 
+                  contentStyle={{ 
+                    borderRadius: 12, 
+                    border: '2px solid #e0e0e0',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                    padding: '12px 16px',
+                    fontWeight: 600
+                  }}
+                />
+                <Legend 
+                  iconType="circle" 
+                  wrapperStyle={{ 
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    paddingTop: '20px'
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Resueltos" 
+                  stroke="#2e7d32" 
+                  strokeWidth={3}
+                  dot={{ fill: '#2e7d32', r: 5, strokeWidth: 2, stroke: 'white' }}
+                  activeDot={{ r: 7, strokeWidth: 3 }}
+                  fill="url(#colorResueltos)"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="Sin Resolver" 
+                  stroke="#ed6c02" 
+                  strokeWidth={3}
+                  dot={{ fill: '#ed6c02', r: 5, strokeWidth: 2, stroke: 'white' }}
+                  activeDot={{ r: 7, strokeWidth: 3 }}
+                  fill="url(#colorSinResolver)"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        {/* SECCIÓN: EQUIPO TÉCNICO - MEJORADO */}
+        <Grid container spacing={3}>
+          <Grid item xs={12}>
+            <Card sx={{ 
+              bgcolor: 'white',
+              borderRadius: 3,
+              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+              border: '2px solid',
+              borderColor: 'secondary.main',
+              overflow: 'hidden'
+            }}>
+              <Box sx={{ 
+                p: 3, 
+                background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 2
+              }}>
+                <Box sx={{
+                  bgcolor: 'rgba(255,255,255,0.25)',
+                  borderRadius: '50%',
+                  p: 1.5,
+                  display: 'flex',
+                  border: '2px solid rgba(255,255,255,0.4)'
+                }}>
+                  <GroupIcon sx={{ fontSize: 28, color: 'white' }} />
+                </Box>
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', fontSize: '1.25rem' }}>
+                    Equipo Técnico
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', mt: 0.3 }}>
+                    Disponibilidad y carga de trabajo del equipo
+                  </Typography>
+                </Box>
+              </Box>
               <CardContent sx={{ p: 0 }}>
-                <Box sx={{ maxHeight: 320, overflow: 'auto' }}>
+                <Grid container>
                   {tecnicos.length > 0 ? (
                     tecnicos.map((tec, index) => {
-                      const ticketsCount = parseInt(tec.tickets_abiertos);
-                      const cargaColor = ticketsCount > 2 ? 'error' : ticketsCount > 0 ? 'warning' : 'success';
+                      const ticketsCount = parseInt(tec.tickets_abiertos) || 0;
                       const cargaText = ticketsCount === 0 ? 'Disponible' : `${ticketsCount} tiquete${ticketsCount > 1 ? 's' : ''}`;
-                      const cargaBg = ticketsCount > 2 ? '#FFEBEE' : ticketsCount > 0 ? '#FFF8E1' : '#E8F5E9';
+                      const statusConfig = ticketsCount > 2 
+                        ? { bg: '#fef2f2', color: 'error.main', icon: '🔴', label: 'Ocupado', border: '#fee2e2' }
+                        : ticketsCount > 0 
+                        ? { bg: '#fffbeb', color: 'warning.main', icon: '🟡', label: 'Trabajando', border: '#fef3c7' }
+                        : { bg: '#f0fdf4', color: 'success.main', icon: '🟢', label: 'Disponible', border: '#dcfce7' };
                       
                       return (
-                        <Box 
-                          key={tec.id_tecnico}
-                          sx={{ 
-                            p: 2.5,
-                            borderBottom: index < tecnicos.length - 1 ? '1px solid' : 'none',
-                            borderColor: 'divider',
-                            transition: 'all 0.3s',
-                            cursor: 'pointer',
-                            '&:hover': {
-                              bgcolor: 'rgba(240, 147, 251, 0.04)',
-                              borderLeft: '3px solid #f093fb',
-                              pl: 3
-                            }
-                          }}
-                        >
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', mb: 1.5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flex: 1 }}>
-                              <Box sx={{
-                              width: 36,
-                              height: 36,
+                        <Grid item xs={12} sm={6} md={4} key={tec.id_tecnico}>
+                          <Box 
+                            sx={{ 
+                              p: 3.5,
+                              borderRight: { xs: 'none', md: index % 3 !== 2 ? '1px solid #e0e0e0' : 'none' },
+                              borderBottom: index < tecnicos.length - 3 ? '1px solid #e0e0e0' : 'none',
+                              transition: 'all 0.3s',
+                              position: 'relative',
+                              '&:hover': {
+                                bgcolor: '#f8f9fa',
+                                transform: 'translateY(-4px)',
+                                boxShadow: '0 8px 24px rgba(0,0,0,0.08)'
+                              }
+                            }}
+                          >
+                            <Box sx={{ 
+                              position: 'absolute',
+                              top: 12,
+                              right: 12,
+                              width: 12,
+                              height: 12,
                               borderRadius: '50%',
-                              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                              bgcolor: statusConfig.color,
+                              boxShadow: `0 0 0 3px ${statusConfig.bg}`,
+                              animation: ticketsCount > 0 ? 'pulse 2s infinite' : 'none'
+                            }} />
+                            
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
+                              <Box sx={{
+                                width: 56,
+                                height: 56,
+                                borderRadius: '16px',
+                                background: `linear-gradient(135deg, ${statusConfig.bg} 0%, white 100%)`,
+                                border: `3px solid ${statusConfig.border}`,
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                color: 'white',
-                                fontWeight: 700,
-                                fontSize: '0.85rem',
-                                flexShrink: 0
+                                color: statusConfig.color,
+                                fontWeight: 800,
+                                fontSize: '1.1rem',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
                               }}>
-                                {tec.id_tecnico}
+                                {tec.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                               </Box>
                               <Box sx={{ flex: 1 }}>
-                                <Typography variant="body1" sx={{ fontWeight: 600, color: '#2c3e50', mb: 0.3 }}>
+                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1e293b', mb: 0.5, fontSize: '1rem' }}>
                                   {tec.nombre}
                                 </Typography>
-                                <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem', display: 'block' }}>
-                                  {tec.correo}
-                                </Typography>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                                  <Box component="span" sx={{ fontSize: '0.7rem', color: statusConfig.color }}>{statusConfig.icon}</Box>
+                                  <Typography variant="caption" sx={{ fontWeight: 700, color: statusConfig.color }}>
+                                    {statusConfig.label}
+                                  </Typography>
+                                </Box>
                               </Box>
                             </Box>
-                            <Chip
-                              label={cargaText}
-                              size="small"
-                              sx={{ 
-                                fontWeight: 600,
-                                fontSize: '0.75rem',
-                                height: 24,
-                                bgcolor: cargaBg,
-                                color: ticketsCount > 2 ? '#f5576c' : ticketsCount > 0 ? '#FFA726' : '#66BB6A',
-                                border: `1px solid ${ticketsCount > 2 ? '#f5576c' : ticketsCount > 0 ? '#FFA726' : '#66BB6A'}`
-                              }}
-                            />
-                          </Box>
-                          {tec.especialidades && (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8, ml: 5.5 }}>
-                              {tec.especialidades.split(',').slice(0, 3).map((esp, idx) => (
-                                <Chip
-                                  key={idx}
-                                  icon={<SchoolIcon sx={{ fontSize: 12 }} />}
-                                  label={esp.trim()}
-                                  size="small"
-                                  sx={{ 
-                                    fontSize: '0.7rem', 
-                                    height: 22,
-                                    bgcolor: 'rgba(102, 126, 234, 0.08)',
-                                    color: '#667eea',
-                                    fontWeight: 500,
-                                    '& .MuiChip-icon': {
-                                      color: '#667eea',
-                                      ml: 0.5
-                                    }
-                                  }}
-                                />
-                              ))}
+                            
+                            <Box sx={{ 
+                              bgcolor: statusConfig.bg, 
+                              borderRadius: 2, 
+                              p: 1.5,
+                              border: `2px solid ${statusConfig.border}`,
+                              mb: 2
+                            }}>
+                              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, display: 'block', mb: 0.5 }}>
+                                Carga de trabajo
+                              </Typography>
+                              <Typography variant="h6" sx={{ fontWeight: 900, color: statusConfig.color }}>
+                                {cargaText}
+                              </Typography>
                             </Box>
-                          )}
-                        </Box>
+                            {tec.especialidades && (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                {tec.especialidades.split(',').slice(0, 2).map((esp, idx) => (
+                                  <Chip
+                                    key={idx}
+                                    label={esp.trim()}
+                                    size="small"
+                                    sx={{ 
+                                      fontSize: '0.7rem', 
+                                      height: 20,
+                                      bgcolor: '#f0f0f0',
+                                      color: '#64748b'
+                                    }}
+                                  />
+                                ))}
+                              </Box>
+                            )}
+                          </Box>
+                        </Grid>
                       );
                     })
                   ) : (
-                    <Box sx={{ p: 4, textAlign: 'center' }}>
-                      <Typography variant="body2" color="text.secondary">
-                        👥 No hay técnicos disponibles
-                      </Typography>
-                    </Box>
+                    <Grid item xs={12}>
+                      <Box sx={{ p: 4, textAlign: 'center' }}>
+                        <Typography variant="body2" color="text.secondary">
+                          No hay técnicos disponibles
+                        </Typography>
+                      </Box>
+                    </Grid>
                   )}
-                </Box>
+                </Grid>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
       </Container>
+
+      {/* Animaciones CSS */}
+      <style>
+        {`
+          @keyframes rainbowShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+          }
+          @keyframes floatAnimation {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+          }
+        `}
+      </style>
     </Box>
   );
 };

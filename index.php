@@ -36,6 +36,7 @@ require_once "controllers/core/AuthMiddleware.php";
 
 /***--- Agregar todos los modelos*/
 require_once "models/AsignacionModel.php";
+require_once "models/AsignacionRegistroModel.php";
 require_once "models/Categoria_etiquetaModel.php";
 require_once "models/Categoria_ticketModel.php";
 require_once "models/EspecialidadModel.php";

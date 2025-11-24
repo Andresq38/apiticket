@@ -28,6 +28,7 @@
     "prop-types": "^15.8.1",
     "react": "^19.1.1",
     "react-big-calendar": "^1.19.4",
+    "react-circular-progressbar": "^2.2.0",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.65.0",
     "react-hot-toast": "^2.6.0",

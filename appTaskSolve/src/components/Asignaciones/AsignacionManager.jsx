@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
+import AsignacionService from '../../services/AsignacionService';
 import {
   Container, Typography, Box, Card, CardContent, Grid, Button, 
   CircularProgress, Alert, Chip, Divider, Dialog, DialogTitle,
@@ -30,6 +31,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { getApiOrigin } from '../../utils/apiBase';
+import SuccessOverlay from '../common/SuccessOverlay';
 
 export default function AsignacionManager() {
   const [ticketsPendientes, setTicketsPendientes] = useState([]);
@@ -58,6 +60,10 @@ export default function AsignacionManager() {
   
   // Estado para resultados de autotriage
   const [resultadosAutotriage, setResultadosAutotriage] = useState(null);
+  
+  // Estados para overlay de éxito
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+  const [asignacionExitosa, setAsignacionExitosa] = useState(null);
 
   const apiBase = getApiOrigin();
 
@@ -80,16 +86,34 @@ export default function AsignacionManager() {
     try {
       setLoading(true);
       setError(null);
-      const [ticketsRes, tecnicosRes] = await Promise.all([
-        axios.get(`${apiBase}/apiticket/asignacion/pendientes`),
-        axios.get(`${apiBase}/apiticket/asignacion/tecnicos`)
+      
+      console.log('🔄 Recargando datos de asignaciones...');
+      
+      // Usar AsignacionService en lugar de axios directo
+      const [tickets, tecnicos] = await Promise.all([
+        AsignacionService.getTicketsPendientes(),
+        AsignacionService.getTecnicosDisponibles()
       ]);
 
-      setTicketsPendientes(Array.isArray(ticketsRes.data) ? ticketsRes.data : []);
-      setTecnicos(Array.isArray(tecnicosRes.data) ? tecnicosRes.data : []);
+      console.log('📋 Tickets recibidos:', tickets?.length || 0);
+      console.log('👥 Técnicos recibidos:', tecnicos?.length || 0);
+
+      // Validar que las respuestas sean arrays válidos
+      const ticketsArray = Array.isArray(tickets) ? tickets : [];
+      const tecnicosArray = Array.isArray(tecnicos) ? tecnicos : [];
+      
+      setTicketsPendientes(ticketsArray);
+      setTecnicos(tecnicosArray);
+      
+      // No mostrar error si simplemente no hay datos
+      if (ticketsArray.length === 0 && tecnicosArray.length === 0) {
+        console.log('⚠️ No hay tickets pendientes ni técnicos disponibles en este momento');
+      }
+      
+      console.log('✅ Datos actualizados correctamente');
     } catch (err) {
-      console.error('Error al cargar datos:', err);
-      setError('Error al cargar la información');
+      console.error('❌ Error al cargar datos:', err);
+      setError('Error al cargar la información. Verifique que el servidor esté corriendo en el puerto 81.');
     } finally {
       setLoading(false);
     }
@@ -102,20 +126,21 @@ export default function AsignacionManager() {
 
     try {
       setProcessing(true);
-      const res = await axios.post(`${apiBase}/apiticket/asignacion/automatico`);
+      // Usar AsignacionService en lugar de axios directo
+      const result = await AsignacionService.asignarAutomatico();
       
-      if (res.data.success) {
-        setResultadosAutotriage(res.data);
+      if (result.success) {
+        setResultadosAutotriage(result);
         setSnackbar({
           open: true,
-          message: `Asignación automática completada: ${res.data.total_exitosos}/${res.data.total_procesados} exitosas`,
+          message: `Asignación automática completada: ${result.total_exitosos}/${result.total_procesados} exitosas`,
           severity: 'success'
         });
         fetchData(); // Recargar datos
       } else {
         setSnackbar({
           open: true,
-          message: res.data.message || 'Error en asignación automática',
+          message: result.message || 'Error en asignación automática',
           severity: 'error'
         });
       }
@@ -132,6 +157,27 @@ export default function AsignacionManager() {
   };
 
   const handleOpenManual = (ticket) => {
+    // Verificar que el ticket aún está pendiente
+    if (ticket.id_tecnico) {
+      setSnackbar({ 
+        open: true, 
+        message: 'Este ticket ya tiene un técnico asignado. Recargando datos...', 
+        severity: 'warning' 
+      });
+      fetchData(); // Recargar para actualizar la lista
+      return;
+    }
+    
+    if (parseInt(ticket.id_estado) !== 1) {
+      setSnackbar({ 
+        open: true, 
+        message: 'Solo se pueden asignar tickets en estado Pendiente. Recargando datos...', 
+        severity: 'warning' 
+      });
+      fetchData();
+      return;
+    }
+    
     setSelectedTicket(ticket);
     setSelectedTecnico('');
     setJustificacion('');
@@ -151,26 +197,76 @@ export default function AsignacionManager() {
 
     try {
       setProcessing(true);
-      const res = await axios.post(`${apiBase}/apiticket/asignacion/manual`, {
+      
+      // Obtener ID del usuario desde localStorage para auditoría
+      let idUsuarioAsigna = null;
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          idUsuarioAsigna = user.id;
+        }
+      } catch (e) {
+        console.error('Error al obtener usuario:', e);
+      }
+      
+      // Usar AsignacionService en lugar de axios directo
+      const result = await AsignacionService.asignarManual({
         id_ticket: selectedTicket.id_ticket,
         id_tecnico: parseInt(selectedTecnico),
-        justificacion: justificacion.trim()
+        justificacion: justificacion.trim(),
+        id_usuario_asigna: idUsuarioAsigna
       });
 
-      if (res.data.success) {
-        setSnackbar({
-          open: true,
-          message: 'Tiquete asignado manualmente con éxito',
-          severity: 'success'
+      console.log('📤 Resultado de asignación:', result);
+      
+      if (result.success) {
+        console.log('✅ Asignación exitosa');
+        
+        // Obtener información del técnico seleccionado
+        const tecnicoAsignado = tecnicos.find(t => t.id_tecnico === parseInt(selectedTecnico));
+        const nombreTecnico = tecnicoAsignado?.nombre || 'técnico';
+        const correoTecnico = tecnicoAsignado?.correo || '';
+        
+        // Guardar datos de la asignación exitosa
+        setAsignacionExitosa({
+          id_ticket: selectedTicket.id_ticket,
+          titulo: selectedTicket.titulo,
+          prioridad: selectedTicket.prioridad,
+          categoria: selectedTicket.categoria_nombre,
+          tecnico: nombreTecnico,
+          correo: correoTecnico,
+          justificacion: justificacion.trim()
         });
+        
         setOpenManual(false);
-        fetchData();
+        setShowSuccessOverlay(true);
+        setSelectedTicket(null);
+        setSelectedTecnico('');
+        setJustificacion('');
+        
+        // Recargar datos después de un pequeño delay para asegurar que el backend actualizó
+        setTimeout(() => {
+          console.log('🔄 Recargando datos después de asignación exitosa...');
+          fetchData();
+        }, 500);
       } else {
+        console.log('❌ Error en asignación:', result.message);
+        // Mostrar el mensaje específico del backend
         setSnackbar({
           open: true,
-          message: res.data.message || 'Error al asignar tiquete',
+          message: result.message || 'Error al asignar tiquete',
           severity: 'error'
         });
+        // Si el error es porque el ticket ya no está pendiente, cerrar el diálogo y recargar
+        if (result.message && (
+          result.message.includes('estado Pendiente') || 
+          result.message.includes('ya tiene un técnico')
+        )) {
+          console.log('🔄 Ticket ya no disponible, cerrando modal y recargando...');
+          setOpenManual(false);
+          setTimeout(() => fetchData(), 300);
+        }
       }
     } catch (err) {
       console.error('Error en asignación manual:', err);
@@ -197,8 +293,8 @@ export default function AsignacionManager() {
     
     const filtered = tecnicos.filter(tec => {
       const tieneEspecialidad = tec.especialidades?.some(esp => {
-        const match = parseInt(esp.id_categoria) === parseInt(idCategoria) ||
-                      parseInt(esp.id_categoria_ticket) === parseInt(idCategoria);
+        // La especialidad solo tiene id_categoria (según schema y backend)
+        const match = parseInt(esp.id_categoria) === parseInt(idCategoria);
         return match;
       });
       if (tec.especialidades?.length > 0) {
@@ -293,23 +389,45 @@ export default function AsignacionManager() {
   return (
     <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Header mejorado con diseño moderno */}
-      <Box sx={{ mb: 5 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Box>
-            <Typography variant="h4" sx={{ fontWeight: 800, mb: 0.5, display: 'flex', alignItems: 'center', gap: 1.25 }}>
-              <Box sx={{ 
-                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-                borderRadius: 2,
-                p: 1.25,
-                display: 'flex'
-              }}>
-                <AssignmentIcon sx={{ fontSize: 30, color: 'white' }} />
-              </Box>
-              Gestión de Asignaciones
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Autotriage y asignación manual de tickets a técnicos especializados
-            </Typography>
+      <Box sx={{ 
+        mb: 3,
+        background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+        borderRadius: 2,
+        p: 2.5,
+        boxShadow: '0 4px 12px rgba(25, 118, 210, 0.2)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          width: '300px',
+          height: '100%',
+          background: 'radial-gradient(circle at top right, rgba(255, 255, 255, 0.1), transparent 60%)',
+          pointerEvents: 'none'
+        }
+      }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <Box sx={{ 
+              bgcolor: 'rgba(255, 255, 255, 0.25)',
+              borderRadius: '50%',
+              p: 1,
+              display: 'flex',
+              border: '2px solid rgba(255, 255, 255, 0.3)'
+            }}>
+              <AssignmentIcon sx={{ fontSize: 24, color: 'white' }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: 'white', mb: 0 }}>
+                Gestión de Asignaciones
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 400, fontSize: '0.85rem' }}>
+                Autotriage y asignación manual de tickets a técnicos especializados
+              </Typography>
+            </Box>
           </Box>
           <Stack direction="row" spacing={1.5} alignItems="center">
             <ToggleButtonGroup
@@ -317,6 +435,22 @@ export default function AsignacionManager() {
               value={vista}
               exclusive
               onChange={(e, v) => v && setVista(v)}
+              sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: 2,
+                '& .MuiToggleButton-root': {
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  fontWeight: 600,
+                  '&.Mui-selected': {
+                    bgcolor: 'white',
+                    color: 'primary.main',
+                    '&:hover': {
+                      bgcolor: 'white'
+                    }
+                  }
+                }
+              }}
             >
               <ToggleButton value="simple">Vista simple</ToggleButton>
               <ToggleButton value="detallada">Vista detallada</ToggleButton>
@@ -326,13 +460,24 @@ export default function AsignacionManager() {
               placeholder="Buscar tickets o técnicos"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
+              sx={{
+                bgcolor: 'white',
+                borderRadius: 2,
+                '& .MuiOutlinedInput-root': {
+                  fontWeight: 500
+                }
+              }}
             />
-            <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel>Prioridad</InputLabel>
+            <FormControl size="small" sx={{ minWidth: 120, bgcolor: 'white', borderRadius: 2 }}>
               <Select
-                label="Prioridad"
                 value={filtroPrioridad}
                 onChange={(e) => setFiltroPrioridad(e.target.value)}
+                displayEmpty
+                sx={{
+                  '& .MuiSelect-select': {
+                    py: 1
+                  }
+                }}
               >
                 <MenuItem value="Todas">Todas</MenuItem>
                 <MenuItem value="Alta">Alta</MenuItem>
@@ -340,17 +485,39 @@ export default function AsignacionManager() {
                 <MenuItem value="Baja">Baja</MenuItem>
               </Select>
             </FormControl>
-            <Tooltip title="Actualizar">
+            <Tooltip title="Actualizar" arrow>
               <span>
-                <IconButton onClick={fetchData} disabled={loading || processing}>
+                <IconButton 
+                  onClick={fetchData} 
+                  disabled={loading || processing}
+                  sx={{
+                    bgcolor: 'rgba(255, 255, 255, 0.2)',
+                    color: 'white',
+                    border: '2px solid rgba(255, 255, 255, 0.3)',
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.3)'
+                    }
+                  }}
+                >
                   <RefreshIcon />
                 </IconButton>
               </span>
             </Tooltip>
             {vista === 'simple' && (
-              <Tooltip title="Exportar CSV">
+              <Tooltip title="Exportar CSV" arrow>
                 <span>
-                  <IconButton onClick={exportTicketsCSV} disabled={filteredTickets.length === 0}>
+                  <IconButton 
+                    onClick={exportTicketsCSV} 
+                    disabled={filteredTickets.length === 0}
+                    sx={{
+                      bgcolor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'white',
+                      border: '2px solid rgba(255, 255, 255, 0.3)',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.3)'
+                      }
+                    }}
+                  >
                     <DownloadIcon />
                   </IconButton>
                 </span>
@@ -358,31 +525,39 @@ export default function AsignacionManager() {
             )}
           </Stack>
         </Box>
+      </Box>
 
-        {/* Panel de métricas */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+      {/* Panel de métricas mejorado */}
+      <Box sx={{ mb: 4 }}>
+
+        <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
             <Card sx={{ 
-              background: 'linear-gradient(135deg, #FF9800 0%, #F57C00 100%)',
+              background: 'linear-gradient(135deg, #ed6c02 0%, #e65100 100%)',
               color: 'white',
-              borderRadius: 3,
-              boxShadow: 3
+              borderRadius: 2,
+              boxShadow: '0 2px 8px rgba(237, 108, 2, 0.2)',
+              transition: 'all 0.3s',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(237, 108, 2, 0.3)'
+              }
             }}>
-              <CardContent sx={{ py: 2.5 }}>
+              <CardContent sx={{ py: 2, px: 2.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box sx={{ 
                     bgcolor: 'rgba(255,255,255,0.2)',
-                    borderRadius: 2,
-                    p: 1.5,
+                    borderRadius: '50%',
+                    p: 1.25,
                     display: 'flex'
                   }}>
-                    <ConfirmationNumberIcon sx={{ fontSize: 32 }} />
+                    <ConfirmationNumberIcon sx={{ fontSize: 28 }} />
                   </Box>
                   <Box>
-                    <Typography variant="h3" sx={{ fontWeight: 'bold', lineHeight: 1 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1, mb: 0.3 }}>
                       {ticketsPendientes.length}
                     </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500, fontSize: '0.85rem' }}>
                       Tickets Pendientes
                     </Typography>
                   </Box>
@@ -393,26 +568,31 @@ export default function AsignacionManager() {
           
           <Grid item xs={12} md={4}>
             <Card sx={{ 
-              background: 'linear-gradient(135deg, #2196F3 0%, #1976D2 100%)',
+              background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
               color: 'white',
-              borderRadius: 3,
-              boxShadow: 3
+              borderRadius: 2,
+              boxShadow: '0 2px 8px rgba(25, 118, 210, 0.2)',
+              transition: 'all 0.3s',
+              '&:hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)'
+              }
             }}>
-              <CardContent sx={{ py: 2.5 }}>
+              <CardContent sx={{ py: 2, px: 2.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <Box sx={{ 
                     bgcolor: 'rgba(255,255,255,0.2)',
-                    borderRadius: 2,
-                    p: 1.5,
+                    borderRadius: '50%',
+                    p: 1.25,
                     display: 'flex'
                   }}>
-                    <PeopleIcon sx={{ fontSize: 32 }} />
+                    <PeopleIcon sx={{ fontSize: 28 }} />
                   </Box>
                   <Box>
-                    <Typography variant="h3" sx={{ fontWeight: 'bold', lineHeight: 1 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1, mb: 0.3 }}>
                       {tecnicos.length}
                     </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ opacity: 0.9, fontWeight: 500, fontSize: '0.85rem' }}>
                       Técnicos Disponibles
                     </Typography>
                   </Box>
@@ -424,30 +604,31 @@ export default function AsignacionManager() {
           <Grid item xs={12} md={4}>
             <Button
               variant="contained"
-              size="large"
+              size="medium"
               fullWidth
-              startIcon={<PlayArrowIcon />}
+              startIcon={processing ? <CircularProgress size={18} sx={{ color: 'white' }} /> : <PlayArrowIcon />}
               onClick={handleAutoAsignar}
               disabled={processing || ticketsPendientes.length === 0}
               sx={{
                 height: '100%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                fontSize: '1.1rem',
+                background: 'linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%)',
+                fontSize: '1rem',
                 fontWeight: 700,
-                borderRadius: 3,
-                boxShadow: 3,
-                py: 3,
+                borderRadius: 2,
+                boxShadow: '0 2px 8px rgba(156, 39, 176, 0.2)',
+                py: 2,
+                transition: 'all 0.3s',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)',
+                  background: 'linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%)',
                   transform: 'translateY(-2px)',
-                  boxShadow: 6
+                  boxShadow: '0 4px 12px rgba(156, 39, 176, 0.3)'
                 },
                 '&:disabled': {
-                  background: 'grey.400'
+                  background: '#bdbdbd'
                 }
               }}
             >
-              Ejecutar Autotriage
+              {processing ? 'Procesando...' : '▶ Ejecutar Autotriage'}
             </Button>
           </Grid>
         </Grid>
@@ -545,16 +726,44 @@ export default function AsignacionManager() {
 
       {/* Tickets Pendientes */}
       <Box sx={{ mb: 5 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-          📋 Tiquetes Pendientes de Asignación
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1.5, 
+          mb: 2,
+          pb: 1.5,
+          borderBottom: '2px solid',
+          borderColor: 'warning.main'
+        }}>
+          <Box sx={{
+            bgcolor: 'warning.main',
+            borderRadius: '8px',
+            p: 1,
+            display: 'flex'
+          }}>
+            <ConfirmationNumberIcon sx={{ fontSize: 24, color: 'white' }} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+              Tiquetes Pendientes de Asignación
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#64748b' }}>
+              Tickets esperando asignación a técnicos especializados
+            </Typography>
+          </Box>
           {ticketsPendientes.length > 0 && (
             <Chip 
               label={`${ticketsPendientes.length} pendiente${ticketsPendientes.length > 1 ? 's' : ''}`}
-              color="warning"
-              sx={{ fontWeight: 700 }}
+              sx={{ 
+                bgcolor: 'warning.main',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '0.85rem',
+                height: 28
+              }}
             />
           )}
-        </Typography>
+        </Box>
 
         {loading ? (
           <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
@@ -742,14 +951,42 @@ export default function AsignacionManager() {
 
       {/* Técnicos Disponibles */}
       <Box sx={{ mb: 5 }}>
-        <Typography variant="h5" sx={{ fontWeight: 700, mb: 3, display: 'flex', alignItems: 'center', gap: 1 }}>
-          👥 Equipo Técnico Disponible
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1.5, 
+          mb: 2,
+          pb: 1.5,
+          borderBottom: '2px solid',
+          borderColor: 'success.main'
+        }}>
+          <Box sx={{
+            bgcolor: 'success.main',
+            borderRadius: '8px',
+            p: 1,
+            display: 'flex'
+          }}>
+            <PeopleIcon sx={{ fontSize: 24, color: 'white' }} />
+          </Box>
+          <Box sx={{ flex: 1 }}>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: '#1e293b' }}>
+              Equipo Técnico Disponible
+            </Typography>
+            <Typography variant="caption" sx={{ color: '#64748b' }}>
+              Técnicos especializados listos para asignación
+            </Typography>
+          </Box>
           <Chip 
             label={`${tecnicos.filter(t => t.disponibilidad).length} disponibles`}
-            color="success"
-            sx={{ fontWeight: 700 }}
+            sx={{ 
+              bgcolor: 'success.main',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              height: 28
+            }}
           />
-        </Typography>
+        </Box>
         {loading ? (
           <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
             <CardContent>
@@ -1216,6 +1453,41 @@ export default function AsignacionManager() {
           {snackbar.message}
         </Alert>
       )}
+
+      {/* Overlay de éxito */}
+      <SuccessOverlay
+        open={showSuccessOverlay}
+        mode="assign"
+        entity="Tiquete"
+        variant="extended"
+        title="¡Tiquete asignado!"
+        subtitle={asignacionExitosa ? `✓ Tiquete #${asignacionExitosa.id_ticket} asignado exitosamente` : ''}
+        details={{
+          id: asignacionExitosa?.id_ticket,
+          prioridad: asignacionExitosa?.prioridad,
+          categoria: asignacionExitosa?.categoria,
+          extra: [
+            { label: 'Técnico asignado', value: asignacionExitosa?.tecnico },
+            { label: 'Correo', value: asignacionExitosa?.correo },
+            { label: 'Resumen', value: asignacionExitosa?.titulo?.length > 60 ? asignacionExitosa.titulo.slice(0, 57) + '…' : asignacionExitosa?.titulo }
+          ].filter(item => item.value)
+        }}
+        onClose={() => {
+          setShowSuccessOverlay(false);
+          setAsignacionExitosa(null);
+        }}
+        actions={[
+          { 
+            label: 'Ver listado', 
+            onClick: () => { 
+              setShowSuccessOverlay(false); 
+              setAsignacionExitosa(null);
+            }, 
+            variant: 'contained', 
+            color: 'success' 
+          }
+        ]}
+      />
     </Container>
   );
 }

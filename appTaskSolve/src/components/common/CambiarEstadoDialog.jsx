@@ -109,45 +109,25 @@ export default function CambiarEstadoDialog({
       setLoading(true);
       setError('');
 
-      // Paso 1: Cambiar el estado del ticket
-      const cambioResponse = await axios.put(`${apiBase}/apiticket/ticket/cambiarEstado/${ticket.id_ticket}`, {
-        nuevo_estado: parseInt(nuevoEstado),
-        observaciones: observaciones.trim(),
-        id_usuario_remitente: user.id
+      // Modo estricto: un solo request con imágenes y cambio de estado
+      const formData = new FormData();
+      formData.append('id_ticket', ticket.id_ticket);
+      formData.append('id_estado', parseInt(nuevoEstado));
+      formData.append('observaciones', observaciones.trim());
+      formData.append('id_usuario_remitente', user.id);
+      imagenes.forEach((file, idx) => {
+        formData.append('files[]', file);
+      });
+
+      setUploading(true);
+      const cambioResponse = await axios.post(`${apiBase}/apiticket/ticket/cambiarEstadoConImagen`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
       if (!cambioResponse.data.success) {
-        throw new Error(cambioResponse.data.message || 'Error al cambiar el estado');
+        throw new Error(cambioResponse.data.message || 'Error al cambiar el estado con imágenes');
       }
 
-      // Paso 2: Obtener el ID del último historial insertado para este ticket
-      const historialResponse = await axios.get(`${apiBase}/apiticket/historial_estado/ticket/${ticket.id_ticket}`);
-      const historiales = Array.isArray(historialResponse.data) ? historialResponse.data : [];
-      
-      if (historiales.length === 0) {
-        throw new Error('No se pudo obtener el historial creado');
-      }
-
-      // El último historial es el que acabamos de crear
-      const ultimoHistorial = historiales[historiales.length - 1];
-      const idHistorial = ultimoHistorial.id_historial;
-
-      // Paso 3: Subir cada imagen y asociarla al historial
-      setUploading(true);
-      const uploadPromises = imagenes.map(async (file) => {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('id_ticket', ticket.id_ticket);
-        formData.append('id_historial', idHistorial);
-
-        return axios.post(`${apiBase}/apiticket/imagen/uploadHistorial`, formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-      });
-
-      await Promise.all(uploadPromises);
-
-      // Éxito
       onSuccess && onSuccess();
       handleClose();
     } catch (err) {

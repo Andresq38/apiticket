@@ -1,0 +1,25 @@
+[24-11-2025 19:39:58] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:39:58] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:00] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:00] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:08] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:08] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:23] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:24] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:50] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:51] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:54] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:44:54] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:47:32] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:47:32] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:49:19] [user] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [24-11-2025 19:51:13] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 83 - Message: foreach() argument must be of type array|object, null given
+ [24-11-2025 19:51:14] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 83 - Message: foreach() argument must be of type array|object, null given
+ [24-11-2025 19:51:17] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 83 - Message: foreach() argument must be of type array|object, null given
+ [24-11-2025 19:51:17] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 83 - Message: foreach() argument must be of type array|object, null given
+ [24-11-2025 19:51:20] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 83 - Message: foreach() argument must be of type array|object, null given
+ [24-11-2025 19:51:20] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 83 - Message: foreach() argument must be of type array|object, null given
+ [24-11-2025 19:53:49] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 83 - Message: foreach() argument must be of type array|object, null given
+ [24-11-2025 19:56:13] [user] error: File: C:\xampp\htdocs\apiticket\models\Historial_EstadoModel.php - line: 83 - Message: foreach() argument must be of type array|object, null given
+ [24-11-2025 21:18:50] [user] error: File: C:\xampp\htdocs\apiticket\models\TicketModel.php - line: 538 - Message: Faltan campos requeridos: titulo, descripcion, id_usuario
+ 

@@ -61,7 +61,7 @@ class Asignacion
     /**
      * Asignación manual
      * POST /apiticket/asignacion/manual
-     * Body: { "id_ticket": 123, "id_tecnico": 1, "justificacion": "..." }
+     * Body: { "id_ticket": 123, "id_tecnico": 1, "justificacion": "...", "id_usuario_asigna": "..." }
      */
     public function manual()
     {
@@ -82,7 +82,8 @@ class Asignacion
             $result = $asignacion->asignarManual(
                 $body->id_ticket,
                 $body->id_tecnico,
-                $body->justificacion ?? null
+                $body->justificacion ?? null,
+                $body->id_usuario_asigna ?? null
             );
             $response->toJSON($result);
         } catch (Exception $e) {

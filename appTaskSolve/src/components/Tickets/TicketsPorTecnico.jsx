@@ -269,7 +269,7 @@ const TicketsPorTecnico = () => {
               <Card
                 elevation={2}
                 sx={{ borderRadius: 2, borderLeft: `6px solid ${getStatusColor(ticket.estado)}`, cursor: 'pointer', position: 'relative' }}
-                onClick={() => window.location.assign(`/tickets/${ticket.id_ticket}`)}
+                onClick={() => navigate(`/tickets/${ticket.id_ticket}`)}
               >
                 <CardContent>
                   <Typography variant="h6">#{ticket.id_ticket} - {ticket.titulo}</Typography>
@@ -355,7 +355,7 @@ const TicketsPorTecnico = () => {
         <DialogActions>
           <Button onClick={() => setSelectedTicket(null)}>Cerrar</Button>
           {selectedTicket && (
-            <Button variant="contained" onClick={() => window.location.assign(`/tickets/${selectedTicket.id_ticket ?? selectedTicket.id}`)}>Ver detalle</Button>
+            <Button variant="contained" onClick={() => navigate(`/tickets/${selectedTicket.id_ticket ?? selectedTicket.id}`)}>Ver detalle</Button>
           )}
         </DialogActions>
       </Dialog>

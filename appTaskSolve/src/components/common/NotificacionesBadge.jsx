@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   IconButton, Badge, Menu, MenuItem, Typography, Box, Divider, 
   Button, ListItemIcon, ListItemText, Chip 
@@ -12,31 +12,35 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getApiOrigin } from '../../utils/apiBase';
 import { formatDateTime } from '../../utils/format';
+import NotificacionService from '../../services/NotificacionService';
 
 export default function NotificacionesBadge({ userId }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notificaciones, setNotificaciones] = useState([]);
   const [countNoLeidas, setCountNoLeidas] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState('disconnected'); // 'connected', 'connecting', 'disconnected', 'error'
   const navigate = useNavigate();
+  const eventSourceRef = useRef(null);
 
   const open = Boolean(anchorEl);
   const apiBase = getApiOrigin();
 
-  // Cargar notificaciones no leídas y el contador
+  // Cargar notificaciones no leídas y el contador (fallback manual)
   const fetchNotificaciones = async () => {
     if (!userId) return;
     
     try {
       setLoading(true);
-      const [notifRes, countRes] = await Promise.all([
-        axios.get(`${apiBase}/apiticket/notificacion/noLeidas/${userId}`),
-        axios.get(`${apiBase}/apiticket/notificacion/contarNoLeidas/${userId}`)
+      // Usar NotificacionService en lugar de axios directo
+      const [notifs, count] = await Promise.all([
+        NotificacionService.getNoLeidas(userId),
+        NotificacionService.contarNoLeidas(userId)
       ]);
 
-      const notifs = Array.isArray(notifRes.data) ? notifRes.data : (notifRes.data?.data || []);
-      setNotificaciones(notifs);
-      setCountNoLeidas(countRes.data?.count || 0);
+      const notificaciones = Array.isArray(notifs) ? notifs : (notifs?.data || []);
+      setNotificaciones(notificaciones);
+      setCountNoLeidas(count);
     } catch (error) {
       console.error('Error al cargar notificaciones:', error);
     } finally {
@@ -44,16 +48,118 @@ export default function NotificacionesBadge({ userId }) {
     }
   };
 
-  // Cargar notificaciones al montar y cada 30 segundos
+  // Conectar a SSE para notificaciones en tiempo real
   useEffect(() => {
+    if (!userId) return;
+
+    let reconnectTimeout;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 5;
+    const RECONNECT_INTERVAL = 5000; // 5 segundos
+
+    const connectSSE = () => {
+      // Limpiar conexión anterior si existe
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+      }
+
+      try {
+        setConnectionStatus('connecting');
+        const eventSource = new EventSource(`${apiBase}/apiticket/notificationstream/stream/${userId}`);
+        eventSourceRef.current = eventSource;
+
+        // Evento: conexión establecida
+        eventSource.onopen = () => {
+          console.log('✅ SSE conectado - notificaciones en tiempo real activas');
+          setConnectionStatus('connected');
+          reconnectAttempts = 0; // Reset contador de reintentos
+        };
+
+        // Evento: nueva notificación recibida
+        eventSource.addEventListener('notification', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('🔔 Nueva notificación recibida:', data);
+            
+            setCountNoLeidas(data.count || 0);
+            
+            // Si hay última notificación, actualizar lista completa
+            if (data.latest) {
+              fetchNotificaciones(); // Refrescar lista completa
+            }
+          } catch (error) {
+            console.error('Error al procesar evento notification:', error);
+          }
+        });
+
+        // Evento: heartbeat (servidor sigue activo)
+        eventSource.addEventListener('heartbeat', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.log('💓 Heartbeat SSE:', data.timestamp);
+          } catch (error) {
+            console.error('Error al procesar heartbeat:', error);
+          }
+        });
+
+        // Evento: error en servidor
+        eventSource.addEventListener('error', (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            console.warn('⚠️ Error SSE del servidor:', data.message);
+          } catch (error) {
+            // Silenciar errores de parsing
+          }
+        });
+
+        // Error de conexión
+        eventSource.onerror = (error) => {
+          console.error('❌ Error en conexión SSE:', error);
+          setConnectionStatus('error');
+          eventSource.close();
+
+          // Intentar reconexión automática
+          if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            reconnectAttempts++;
+            console.log(`🔄 Reintentando conexión SSE (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+            reconnectTimeout = setTimeout(connectSSE, RECONNECT_INTERVAL);
+          } else {
+            console.warn('⚠️ Máximo de reintentos SSE alcanzado. Usando fallback polling.');
+            setConnectionStatus('disconnected');
+            // Fallback: polling cada 30 segundos
+            reconnectTimeout = setInterval(fetchNotificaciones, 30000);
+          }
+        };
+
+      } catch (error) {
+        console.error('Error al crear EventSource:', error);
+        setConnectionStatus('error');
+      }
+    };
+
+    // Iniciar conexión SSE
+    connectSSE();
+
+    // Cargar notificaciones iniciales
     fetchNotificaciones();
-    const interval = setInterval(fetchNotificaciones, 30000);
-    return () => clearInterval(interval);
-  }, [userId]);
+
+    // Cleanup al desmontar
+    return () => {
+      if (eventSourceRef.current) {
+        console.log('🔌 Cerrando conexión SSE');
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+        clearInterval(reconnectTimeout);
+      }
+    };
+  }, [userId, apiBase]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
-    fetchNotificaciones(); // Refrescar al abrir
+    fetchNotificaciones(); // Refrescar al abrir para obtener lista completa
   };
 
   const handleClose = () => {
@@ -63,9 +169,8 @@ export default function NotificacionesBadge({ userId }) {
   const handleMarcarComoLeida = async (id, event) => {
     event.stopPropagation();
     try {
-      await axios.put(`${apiBase}/apiticket/notificacion/marcarLeida/${id}`, {
-        id_usuario: userId
-      });
+      // Usar NotificacionService en lugar de axios directo
+      await NotificacionService.marcarComoLeida(id, userId);
       fetchNotificaciones(); // Recargar lista
     } catch (error) {
       console.error('Error al marcar como leída:', error);
@@ -74,9 +179,8 @@ export default function NotificacionesBadge({ userId }) {
 
   const handleMarcarTodasLeidas = async () => {
     try {
-      await axios.post(`${apiBase}/apiticket/notificacion/marcarTodasLeidas`, {
-        id_usuario: userId
-      });
+      // Usar NotificacionService en lugar de axios directo
+      await NotificacionService.marcarTodasLeidas(userId);
       fetchNotificaciones();
     } catch (error) {
       console.error('Error al marcar todas como leídas:', error);
@@ -100,12 +204,29 @@ export default function NotificacionesBadge({ userId }) {
       <IconButton
         color="inherit"
         onClick={handleClick}
-        sx={{ ml: 1 }}
+        sx={{ ml: 1, position: 'relative' }}
         aria-label={`${countNoLeidas} notificaciones no leídas`}
       >
         <Badge badgeContent={countNoLeidas} color="error">
           {countNoLeidas > 0 ? <NotificationsIcon /> : <NotificationsNoneIcon />}
         </Badge>
+        {/* Indicador de estado de conexión SSE */}
+        {connectionStatus === 'connected' && (
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 2,
+              right: 2,
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              bgcolor: 'success.main',
+              border: '2px solid white',
+              boxShadow: 1
+            }}
+            title="Tiempo real activo"
+          />
+        )}
       </IconButton>
 
       <Menu

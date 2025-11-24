@@ -61,22 +61,31 @@ class Historial_EstadoModel
     public function getByTicket($idTicket)
     {
         try {
-            $vSql = "SELECT he.*, 
-                            e.nombre AS estado_nombre,
+            $vSql = "SELECT he.id_historial,
+                            he.id_ticket,
+                            he.id_estado_actual AS id_estado,
+                            he.id_estado_anterior,
+                            he.estado_actual_nombre AS estado_nombre,
+                            he.estado_anterior_nombre AS estado_anterior_nombre,
+                            he.fecha_cambio,
+                            he.observaciones,
+                            he.id_usuario,
                             u.nombre AS usuario_nombre,
                             u.correo AS usuario_correo
-                     FROM historial_estados he
-                     LEFT JOIN estado e ON he.id_estado = e.id_estado
+                     FROM historial_estados_ext he
                      LEFT JOIN usuario u ON he.id_usuario = u.id_usuario
                      WHERE he.id_ticket = ?
                      ORDER BY he.fecha_cambio ASC";
             
             $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idTicket]);
             
-            // Para cada entrada de historial, obtener las imágenes asociadas
-            foreach ($vResultado as &$historial) {
-                $historial->imagenes = $this->getImagenesByHistorial($historial->id_historial);
+            // Verificar que $vResultado no sea null antes de iterar
+            if ($vResultado === null || !is_array($vResultado)) {
+                return [];
             }
+            
+            // Nota: Las imágenes están asociadas al ticket, no al historial individual
+            // Por lo tanto, NO agregamos imágenes por historial aquí
             
             return $vResultado;
         } catch (Exception $e) {
@@ -85,18 +94,14 @@ class Historial_EstadoModel
     }
 
     /**
-     * Obtener imágenes asociadas a un registro de historial
+     * DEPRECADO: Las imágenes están asociadas al ticket, no al historial
+     * La tabla imagen tiene estructura (id_imagen, id_ticket, imagen)
+     * No existe columna id_historial
      */
     public function getImagenesByHistorial($idHistorial)
     {
-        try {
-            $vSql = "SELECT * FROM imagen WHERE id_historial = ? ORDER BY id_imagen ASC";
-            $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idHistorial]);
-            return $vResultado;
-        } catch (Exception $e) {
-            handleException($e);
-            return [];
-        }
+        // Método deprecado - la tabla imagen no tiene id_historial
+        return [];
     }
 
     /**
@@ -135,11 +140,17 @@ class Historial_EstadoModel
     public function getUltimoByTicket($idTicket)
     {
         try {
-            $vSql = "SELECT he.*, 
-                            e.nombre AS estado_nombre,
+            $vSql = "SELECT he.id_historial,
+                            he.id_ticket,
+                            he.id_estado_actual AS id_estado,
+                            he.id_estado_anterior,
+                            he.estado_actual_nombre AS estado_nombre,
+                            he.estado_anterior_nombre AS estado_anterior_nombre,
+                            he.fecha_cambio,
+                            he.observaciones,
+                            he.id_usuario,
                             u.nombre AS usuario_nombre
-                     FROM historial_estados he
-                     LEFT JOIN estado e ON he.id_estado = e.id_estado
+                     FROM historial_estados_ext he
                      LEFT JOIN usuario u ON he.id_usuario = u.id_usuario
                      WHERE he.id_ticket = ?
                      ORDER BY he.fecha_cambio DESC

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import TicketService from '../../services/TicketService';
 import { 
   Container, Typography, CircularProgress, Box, Alert, 
   TextField, Button, Paper, Chip, Grid, Rating, 
@@ -93,31 +94,33 @@ export default function DetalleTicket() {
 
   const getApiBase = () => getApiOrigin();
 
+  // Función reutilizable para cargar ticket
+  const fetchTicket = async () => {
+    try {
+      setLoading(true);
+      // Usar TicketService en lugar de axios directo
+      const data = await TicketService.getById(id);
+      setTicket(data || null);
+      setError(null);
+    } catch (err) {
+      console.error(err);
+      setError('No se pudo cargar la información del tiquete.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchTicket = async () => {
-      const apiBase = getApiBase();
-      try {
-        // Use the endpoint that returns the ticket with related objects (usuario, tecnico, categoria, sla, etiquetas)
-        const res = await axios.get(`${apiBase}/apiticket/ticket/getTicketCompletoById/${id}`);
-        // API returns the ticket object directly in res.data
-        setTicket(res.data || null);
-      } catch (err) {
-        console.error(err);
-        setError('No se pudo cargar la información del tiquete.');
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchTicket();
   }, [id]);
 
   const fetchEstados = async () => {
     setLoadingEstados(true);
     try {
-      const apiBase = getApiBase();
-      const res = await axios.get(`${apiBase}/apiticket/estado`);
-      const estados = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-      setEstadosDisponibles(estados);
+      // Usar TicketService en lugar de axios directo
+      const estados = await TicketService.getEstados();
+      const estadosArray = Array.isArray(estados) ? estados : (estados?.data || []);
+      setEstadosDisponibles(estadosArray);
     } catch (err) {
       console.error('Error al cargar estados:', err);
       setSnackbar({ open: true, message: 'Error al cargar estados disponibles', severity: 'error' });
@@ -156,8 +159,6 @@ export default function DetalleTicket() {
     }
 
     try {
-      const apiBase = getApiBase();
-      
       // Obtener el ID del usuario desde localStorage
       let idUsuarioRemitente = null;
       try {
@@ -170,23 +171,24 @@ export default function DetalleTicket() {
         console.error('Error al obtener usuario:', e);
       }
 
-      const response = await axios.post(`${apiBase}/apiticket/ticket/cambiarEstado`, {
+      // Usar TicketService en lugar de axios directo
+      const response = await TicketService.cambiarEstado({
         id_ticket: parseInt(id),
         id_estado: parseInt(nuevoEstado),
         observaciones: observaciones.trim(),
         id_usuario_remitente: idUsuarioRemitente
       });
 
-      if (response.data.success) {
-        setSnackbar({ open: true, message: response.data.message || 'Estado actualizado correctamente', severity: 'success' });
+      if (response.success) {
+        setSnackbar({ open: true, message: response.message || 'Estado actualizado correctamente', severity: 'success' });
         handleCloseDialog();
         
         // Recargar el ticket para reflejar los cambios
         setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+          fetchTicket();
+        }, 500);
       } else {
-        setSnackbar({ open: true, message: response.data.message || 'Error al actualizar estado', severity: 'error' });
+        setSnackbar({ open: true, message: response.message || 'Error al actualizar estado', severity: 'error' });
       }
     } catch (err) {
       console.error('Error al cambiar estado:', err);
@@ -670,8 +672,10 @@ export default function DetalleTicket() {
             message: 'Estado actualizado correctamente con imágenes adjuntas', 
             severity: 'success' 
           });
-          // Recargar ticket después de 1.5s
-          setTimeout(() => window.location.reload(), 1500);
+          // Recargar ticket después de 500ms
+          setTimeout(() => {
+            fetchTicket();
+          }, 500);
         }}
       />
 

@@ -103,9 +103,28 @@ class RoutesController
                             ucfirst(strtolower($controller)),      // Primera mayúscula (Auth, Ticket, etc.)
                             strtolower($controller),               // todo minúsculas
                         ];
+                        
+                        // Mapeo especial para controladores con nombres largos
+                        $controllerMap = [
+                            'notificationstream' => 'NotificationStreamController',
+                            'NotificationStream' => 'NotificationStreamController'
+                        ];
+                        
                         $controllerClass = null;
-                        foreach ($candidates as $cand) {
-                            if (class_exists($cand)) { $controllerClass = $cand; break; }
+                        
+                        // Primero verificar mapeo especial
+                        if (isset($controllerMap[$controller])) {
+                            $mapped = $controllerMap[$controller];
+                            if (class_exists($mapped)) {
+                                $controllerClass = $mapped;
+                            }
+                        }
+                        
+                        // Si no encontró en mapeo, buscar en candidatos
+                        if (!$controllerClass) {
+                            foreach ($candidates as $cand) {
+                                if (class_exists($cand)) { $controllerClass = $cand; break; }
+                            }
                         }
                         if ($controllerClass) {
                             $response = new $controllerClass();

@@ -130,22 +130,26 @@ CREATE TABLE historial_estados (
   id_estado INT NOT NULL,
   fecha_cambio DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   observaciones TEXT,
+  id_usuario VARCHAR(20) NULL,
   PRIMARY KEY (id_historial),
   FOREIGN KEY (id_ticket) REFERENCES ticket(id_ticket)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  FOREIGN KEY (id_estado) REFERENCES estado(id_estado)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-CREATE TABLE imagen (
-  id_imagen INT NOT NULL AUTO_INCREMENT,
-  url VARCHAR(255) NOT NULL,
-  id_historial INT,
-  id_usuario VARCHAR(20),
-  PRIMARY KEY (id_imagen),
-  FOREIGN KEY (id_historial) REFERENCES historial_estados(id_historial)
-    ON DELETE SET NULL ON UPDATE CASCADE,
+  FOREIGN KEY (id_estado) REFERENCES estado(id_estado),
   FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
     ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- NOTA CRÍTICA: La estructura real de la tabla imagen es:
+-- imagen(id_imagen, id_ticket, imagen) donde 'imagen' almacena el nombre del archivo
+-- La tabla historial_imagen mantiene la relación N:N con historial_estados
+CREATE TABLE imagen (
+  id_imagen INT NOT NULL AUTO_INCREMENT,
+  id_ticket INT NOT NULL,
+  imagen VARCHAR(255) NOT NULL COMMENT 'Nombre del archivo de imagen',
+  PRIMARY KEY (id_imagen),
+  FOREIGN KEY (id_ticket) REFERENCES ticket(id_ticket)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  INDEX idx_ticket (id_ticket)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE notificacion (
@@ -161,6 +165,29 @@ CREATE TABLE notificacion (
     ON DELETE CASCADE ON UPDATE CASCADE,
   FOREIGN KEY (id_usuario_remitente) REFERENCES usuario(id_usuario)
     ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Tabla de auditoría de asignaciones de tickets
+CREATE TABLE asignacion (
+  id_asignacion INT NOT NULL AUTO_INCREMENT,
+  id_ticket INT NOT NULL,
+  id_tecnico INT NOT NULL,
+  fecha_asignacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  metodo ENUM('Automatica','Manual') NOT NULL,
+  justificacion TEXT NOT NULL,
+  puntaje_calculado INT NULL COMMENT 'Puntaje del algoritmo autotriage',
+  id_usuario_asigna VARCHAR(20) NULL COMMENT 'Usuario que realizó la asignación manual',
+  PRIMARY KEY (id_asignacion),
+  FOREIGN KEY (id_ticket) REFERENCES ticket(id_ticket)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_tecnico) REFERENCES tecnico(id_tecnico)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  FOREIGN KEY (id_usuario_asigna) REFERENCES usuario(id_usuario)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  INDEX idx_ticket (id_ticket),
+  INDEX idx_tecnico (id_tecnico),
+  INDEX idx_fecha (fecha_asignacion),
+  INDEX idx_metodo (metodo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE historial_imagen (
@@ -183,6 +210,22 @@ CREATE TABLE ticket_imagen (
   FOREIGN KEY (id_imagen) REFERENCES imagen(id_imagen)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Vista extendida para historial con estado anterior (trazabilidad mejorada)
+CREATE OR REPLACE VIEW historial_estados_ext AS
+SELECT 
+  he.id_historial,
+  he.id_ticket,
+  he.id_estado AS id_estado_actual,
+  LAG(he.id_estado) OVER (PARTITION BY he.id_ticket ORDER BY he.fecha_cambio ASC) AS id_estado_anterior,
+  he.fecha_cambio,
+  he.observaciones,
+  he.id_usuario,
+  ea.nombre AS estado_anterior_nombre,
+  ec.nombre AS estado_actual_nombre
+FROM historial_estados he
+LEFT JOIN estado ec ON ec.id_estado = he.id_estado
+LEFT JOIN estado ea ON ea.id_estado = LAG(he.id_estado) OVER (PARTITION BY he.id_ticket ORDER BY he.fecha_cambio ASC);
 
 -- =================================================================
 -- PASO 2: MODIFICACIONES ESTRUCTURALES (ALTER TABLE)

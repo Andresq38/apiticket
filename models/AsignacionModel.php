@@ -189,7 +189,9 @@ class AsignacionModel
                     $ticket->id_ticket,
                     $tecnicoAsignado->id_tecnico,
                     'Automatica',
-                    $justificacion
+                    $justificacion,
+                    $calculos['puntaje'], // Pasar el puntaje calculado
+                    null // No hay usuario asignador en modo automático
                 );
 
                 $resultados[] = array_merge($resultadoAsignacion, [
@@ -220,7 +222,7 @@ class AsignacionModel
     /**
      * Asignación manual
      */
-    public function asignarManual($idTicket, $idTecnico, $justificacion = null)
+    public function asignarManual($idTicket, $idTecnico, $justificacion = null, $idUsuarioAsigna = null)
     {
         try {
             // Validar que el ticket esté en estado Pendiente
@@ -256,7 +258,14 @@ class AsignacionModel
                 ? "Asignación manual: " . $justificacion
                 : "Asignación manual realizada por administrador";
 
-            return $this->ejecutarAsignacion($idTicket, $idTecnico, 'Manual', $justificacionFinal);
+            return $this->ejecutarAsignacion(
+                $idTicket, 
+                $idTecnico, 
+                'Manual', 
+                $justificacionFinal,
+                null, // No hay puntaje en asignación manual
+                $idUsuarioAsigna
+            );
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -268,7 +277,7 @@ class AsignacionModel
     /**
      * Ejecutar la asignación (común para automática y manual)
      */
-    private function ejecutarAsignacion($idTicket, $idTecnico, $metodo, $justificacion)
+    private function ejecutarAsignacion($idTicket, $idTecnico, $metodo, $justificacion, $puntajeCalculado = null, $idUsuarioAsigna = null)
     {
         try {
             // Actualizar el ticket
@@ -277,11 +286,27 @@ class AsignacionModel
 
             // Registrar en historial CON ID_USUARIO (sistema automático = NULL o admin)
             $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones, id_usuario) 
-                            VALUES (?, 2, ?, NULL)";
-            $this->enlace->executePrepared_DML($sqlHistorial, 'is', [
+                            VALUES (?, 2, ?, ?)";
+            $this->enlace->executePrepared_DML($sqlHistorial, 'iss', [
                 (int)$idTicket,
-                $justificacion
+                $justificacion,
+                $idUsuarioAsigna
             ]);
+
+            // NUEVO: Registrar en tabla de auditoría de asignaciones
+            try {
+                $asignacionRegModel = new AsignacionRegistroModel();
+                $asignacionRegModel->registrar(
+                    $idTicket,
+                    $idTecnico,
+                    $metodo,
+                    $justificacion,
+                    $puntajeCalculado,
+                    $idUsuarioAsigna
+                );
+            } catch (Exception $e) {
+                error_log("Error al registrar asignación en auditoría: " . $e->getMessage());
+            }
 
             // Incrementar carga de trabajo del técnico
             $sqlCarga = "UPDATE tecnico SET carga_trabajo = carga_trabajo + 1 WHERE id_tecnico = ?";

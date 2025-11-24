@@ -105,7 +105,7 @@ export default function TicketsPorAdmi() {
                     cursor: 'pointer',
                     '&:hover': { boxShadow: 8 }
                   }}
-                onClick={() => window.location.assign(`/tickets/${id}`)}
+                onClick={() => navigate(`/tickets/${id}`)}
               >
                 <CardContent>
                   <Typography variant="subtitle2" color="text.secondary">Tiquete #{id}</Typography>
