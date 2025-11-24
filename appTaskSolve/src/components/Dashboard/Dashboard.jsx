@@ -41,7 +41,9 @@ import {
   CheckCircle as CheckCircleIcon,
   HourglassEmpty as HourglassIcon,
   Error as ErrorIcon,
-  Group as GroupIcon
+  Group as GroupIcon,
+  Work as WorkIcon,
+  Email as EmailIcon
 } from '@mui/icons-material';
 import KPICard from './KPICard';
 import SLAGauge from './SLAGauge';
@@ -1086,161 +1088,364 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* SECCIÓN: EQUIPO TÉCNICO - MEJORADO */}
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Card sx={{ 
-              bgcolor: 'white',
-              borderRadius: 3,
-              boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-              border: '2px solid',
-              borderColor: 'secondary.main',
-              overflow: 'hidden'
-            }}>
-              <Box sx={{ 
-                p: 3, 
-                background: 'linear-gradient(135deg, #9c27b0 0%, #ba68c8 100%)',
+        {/* SECCIÓN: EQUIPO TÉCNICO - ESTILO PROFESIONAL MEJORADO */}
+        <Box sx={{ mb: 4 }}>
+          {/* Header Profesional - Estilo Panel Ejecutivo */}
+          <Box sx={{ 
+            background: 'linear-gradient(135deg, #7b1fa2 0%, #9c27b0 50%, #ba68c8 100%)',
+            borderRadius: 4,
+            p: 3.5,
+            mb: 3,
+            boxShadow: '0 8px 32px rgba(156, 39, 176, 0.25)',
+            position: 'relative',
+            overflow: 'hidden',
+            border: '2px solid rgba(255, 255, 255, 0.15)',
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'radial-gradient(circle at top right, rgba(255,255,255,0.15), transparent 60%)',
+              pointerEvents: 'none'
+            },
+            '@keyframes floatAnimation': {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' }
+            }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2.5, position: 'relative', zIndex: 1 }}>
+              <Box sx={{
+                bgcolor: 'rgba(255, 255, 255, 0.25)',
+                borderRadius: '50%',
+                p: 2,
                 display: 'flex',
-                alignItems: 'center',
-                gap: 2
+                border: '3px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)',
+                animation: 'floatAnimation 3s ease-in-out infinite'
               }}>
-                <Box sx={{
-                  bgcolor: 'rgba(255,255,255,0.25)',
-                  borderRadius: '50%',
-                  p: 1.5,
-                  display: 'flex',
-                  border: '2px solid rgba(255,255,255,0.4)'
-                }}>
-                  <GroupIcon sx={{ fontSize: 28, color: 'white' }} />
-                </Box>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', fontSize: '1.25rem' }}>
-                    Equipo Técnico
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', mt: 0.3 }}>
-                    Disponibilidad y carga de trabajo del equipo
-                  </Typography>
-                </Box>
+                <GroupIcon sx={{ fontSize: 40, color: 'white' }} />
               </Box>
-              <CardContent sx={{ p: 0 }}>
-                <Grid container>
-                  {tecnicos.length > 0 ? (
-                    tecnicos.map((tec, index) => {
-                      const ticketsCount = parseInt(tec.tickets_abiertos) || 0;
-                      const cargaText = ticketsCount === 0 ? 'Disponible' : `${ticketsCount} tiquete${ticketsCount > 1 ? 's' : ''}`;
-                      const statusConfig = ticketsCount > 2 
-                        ? { bg: '#fef2f2', color: 'error.main', icon: '🔴', label: 'Ocupado', border: '#fee2e2' }
-                        : ticketsCount > 0 
-                        ? { bg: '#fffbeb', color: 'warning.main', icon: '🟡', label: 'Trabajando', border: '#fef3c7' }
-                        : { bg: '#f0fdf4', color: 'success.main', icon: '🟢', label: 'Disponible', border: '#dcfce7' };
-                      
-                      return (
-                        <Grid item xs={12} sm={6} md={4} key={tec.id_tecnico}>
-                          <Box 
-                            sx={{ 
-                              p: 3.5,
-                              borderRight: { xs: 'none', md: index % 3 !== 2 ? '1px solid #e0e0e0' : 'none' },
-                              borderBottom: index < tecnicos.length - 3 ? '1px solid #e0e0e0' : 'none',
-                              transition: 'all 0.3s',
-                              position: 'relative',
-                              '&:hover': {
-                                bgcolor: '#f8f9fa',
-                                transform: 'translateY(-4px)',
-                                boxShadow: '0 8px 24px rgba(0,0,0,0.08)'
-                              }
-                            }}
-                          >
-                            <Box sx={{ 
+              <Box>
+                <Typography variant="h3" sx={{ 
+                  fontWeight: 900, 
+                  color: 'white', 
+                  mb: 0.5, 
+                  letterSpacing: '-1px', 
+                  textShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                  fontSize: '2rem'
+                }}>
+                  👥 EQUIPO TÉCNICO
+                </Typography>
+                <Typography variant="body1" sx={{ 
+                  color: 'rgba(255, 255, 255, 0.95)', 
+                  fontWeight: 600, 
+                  fontSize: '0.95rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1
+                }}>
+                  <WorkIcon sx={{ fontSize: 18 }} />
+                  Disponibilidad y carga de trabajo en tiempo real
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Grid de Técnicos - Tarjetas Individuales Estilo KPI */}
+          <Grid container spacing={3}>
+            {tecnicos.length > 0 ? (
+              tecnicos.map((tec) => {
+                const ticketsCount = parseInt(tec.tickets_abiertos) || 0;
+                const cargaText = ticketsCount === 0 ? 'Sin asignaciones' : `${ticketsCount} ticket${ticketsCount > 1 ? 's' : ''} activo${ticketsCount > 1 ? 's' : ''}`;
+                
+                // Configuración de estado con colores profesionales
+                const statusConfig = ticketsCount > 3 
+                  ? { 
+                      gradient: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+                      bg: '#ffebee',
+                      color: '#d32f2f',
+                      icon: '🔴',
+                      label: 'Alta Carga',
+                      border: '#ef9a9a',
+                      chipBg: '#d32f2f'
+                    }
+                  : ticketsCount > 1 
+                  ? { 
+                      gradient: 'linear-gradient(135deg, #f57c00 0%, #ff9800 100%)',
+                      bg: '#fff3e0',
+                      color: '#f57c00',
+                      icon: '🟡',
+                      label: 'Trabajando',
+                      border: '#ffcc80',
+                      chipBg: '#f57c00'
+                    }
+                  : ticketsCount === 1
+                  ? {
+                      gradient: 'linear-gradient(135deg, #1976d2 0%, #2196f3 100%)',
+                      bg: '#e3f2fd',
+                      color: '#1976d2',
+                      icon: '🔵',
+                      label: 'Ocupado',
+                      border: '#90caf9',
+                      chipBg: '#1976d2'
+                    }
+                  : { 
+                      gradient: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                      bg: '#e8f5e9',
+                      color: '#2e7d32',
+                      icon: '🟢',
+                      label: 'Disponible',
+                      border: '#a5d6a7',
+                      chipBg: '#2e7d32'
+                    };
+                
+                return (
+                  <Grid item xs={12} sm={6} md={4} key={tec.id_tecnico}>
+                    <Card sx={{ 
+                      bgcolor: 'white',
+                      borderRadius: 3,
+                      boxShadow: `0 4px 12px ${statusConfig.color}25`,
+                      border: '3px solid',
+                      borderColor: statusConfig.border,
+                      transition: 'all 0.3s',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      height: '100%',
+                      '&:hover': { 
+                        boxShadow: `0 8px 28px ${statusConfig.color}35`,
+                        transform: 'translateY(-8px)',
+                        borderColor: statusConfig.color
+                      },
+                      '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '6px',
+                        background: statusConfig.gradient,
+                        animation: 'gradientShift 3s linear infinite'
+                      },
+                      '@keyframes gradientShift': {
+                        '0%': { backgroundPosition: '0% 50%' },
+                        '100%': { backgroundPosition: '200% 50%' }
+                      }
+                    }}>
+                      <CardContent sx={{ p: 3.5 }}>
+                        {/* Indicador de Estado Animado */}
+                        <Box sx={{ 
+                          position: 'absolute',
+                          top: 20,
+                          right: 20,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          bgcolor: statusConfig.bg,
+                          px: 1.5,
+                          py: 0.5,
+                          borderRadius: 2,
+                          border: `2px solid ${statusConfig.border}`,
+                          boxShadow: `0 2px 8px ${statusConfig.color}20`
+                        }}>
+                          <Box sx={{ 
+                            width: 10,
+                            height: 10,
+                            borderRadius: '50%',
+                            bgcolor: statusConfig.color,
+                            animation: ticketsCount > 0 ? 'pulse 2s infinite' : 'none',
+                            '@keyframes pulse': {
+                              '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                              '50%': { opacity: 0.6, transform: 'scale(1.2)' }
+                            }
+                          }} />
+                          <Typography variant="caption" sx={{ 
+                            fontWeight: 800, 
+                            color: statusConfig.color,
+                            fontSize: '0.7rem'
+                          }}>
+                            {statusConfig.label}
+                          </Typography>
+                        </Box>
+
+                        {/* Avatar y Nombre */}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3, mt: 1 }}>
+                          <Box sx={{
+                            width: 72,
+                            height: 72,
+                            borderRadius: 3,
+                            background: statusConfig.gradient,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white',
+                            fontWeight: 900,
+                            fontSize: '1.5rem',
+                            boxShadow: `0 6px 20px ${statusConfig.color}30`,
+                            border: '3px solid white',
+                            position: 'relative',
+                            '&::after': {
+                              content: '""',
                               position: 'absolute',
-                              top: 12,
-                              right: 12,
-                              width: 12,
-                              height: 12,
-                              borderRadius: '50%',
-                              bgcolor: statusConfig.color,
-                              boxShadow: `0 0 0 3px ${statusConfig.bg}`,
-                              animation: ticketsCount > 0 ? 'pulse 2s infinite' : 'none'
-                            }} />
-                            
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2.5 }}>
-                              <Box sx={{
-                                width: 56,
-                                height: 56,
-                                borderRadius: '16px',
-                                background: `linear-gradient(135deg, ${statusConfig.bg} 0%, white 100%)`,
-                                border: `3px solid ${statusConfig.border}`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: statusConfig.color,
-                                fontWeight: 800,
-                                fontSize: '1.1rem',
-                                boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
-                              }}>
-                                {tec.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
-                              </Box>
-                              <Box sx={{ flex: 1 }}>
-                                <Typography variant="body1" sx={{ fontWeight: 700, color: '#1e293b', mb: 0.5, fontSize: '1rem' }}>
-                                  {tec.nombre}
-                                </Typography>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
-                                  <Box component="span" sx={{ fontSize: '0.7rem', color: statusConfig.color }}>{statusConfig.icon}</Box>
-                                  <Typography variant="caption" sx={{ fontWeight: 700, color: statusConfig.color }}>
-                                    {statusConfig.label}
-                                  </Typography>
-                                </Box>
-                              </Box>
-                            </Box>
-                            
-                            <Box sx={{ 
-                              bgcolor: statusConfig.bg, 
-                              borderRadius: 2, 
-                              p: 1.5,
+                              inset: -6,
+                              borderRadius: 3,
                               border: `2px solid ${statusConfig.border}`,
-                              mb: 2
-                            }}>
-                              <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, display: 'block', mb: 0.5 }}>
-                                Carga de trabajo
-                              </Typography>
-                              <Typography variant="h6" sx={{ fontWeight: 900, color: statusConfig.color }}>
-                                {cargaText}
-                              </Typography>
-                            </Box>
-                            {tec.especialidades && (
-                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                                {tec.especialidades.split(',').slice(0, 2).map((esp, idx) => (
-                                  <Chip
-                                    key={idx}
-                                    label={esp.trim()}
-                                    size="small"
-                                    sx={{ 
-                                      fontSize: '0.7rem', 
-                                      height: 20,
-                                      bgcolor: '#f0f0f0',
-                                      color: '#64748b'
-                                    }}
-                                  />
-                                ))}
-                              </Box>
-                            )}
+                              pointerEvents: 'none'
+                            }
+                          }}>
+                            {tec.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                           </Box>
-                        </Grid>
-                      );
-                    })
-                  ) : (
-                    <Grid item xs={12}>
-                      <Box sx={{ p: 4, textAlign: 'center' }}>
-                        <Typography variant="body2" color="text.secondary">
-                          No hay técnicos disponibles
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  )}
-                </Grid>
-              </CardContent>
-            </Card>
+                          <Box sx={{ flex: 1 }}>
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 800, 
+                              color: '#1e293b', 
+                              mb: 0.5,
+                              fontSize: '1.1rem',
+                              lineHeight: 1.2
+                            }}>
+                              {tec.nombre}
+                            </Typography>
+                            <Typography variant="caption" sx={{ 
+                              color: '#64748b',
+                              fontWeight: 600,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5
+                            }}>
+                              <EmailIcon sx={{ fontSize: 12 }} />
+                              ID: {tec.id_usuario}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Estadística de Carga - Estilo KPI */}
+                        <Box sx={{ 
+                          bgcolor: statusConfig.bg,
+                          borderRadius: 2.5,
+                          p: 2.5,
+                          border: `3px solid ${statusConfig.border}`,
+                          mb: 2.5,
+                          textAlign: 'center',
+                          position: 'relative',
+                          overflow: 'hidden',
+                          '&::before': {
+                            content: '""',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: `linear-gradient(135deg, ${statusConfig.color}08, transparent)`,
+                            pointerEvents: 'none'
+                          }
+                        }}>
+                          <Typography variant="caption" sx={{ 
+                            color: '#64748b', 
+                            fontWeight: 700, 
+                            display: 'block', 
+                            mb: 1,
+                            textTransform: 'uppercase',
+                            letterSpacing: 0.5,
+                            fontSize: '0.65rem'
+                          }}>
+                            Carga Actual
+                          </Typography>
+                          <Typography variant="h4" sx={{ 
+                            fontWeight: 900, 
+                            color: statusConfig.color,
+                            fontSize: '2rem',
+                            textShadow: `0 2px 4px ${statusConfig.color}15`,
+                            mb: 0.5
+                          }}>
+                            {ticketsCount}
+                          </Typography>
+                          <Typography variant="caption" sx={{ 
+                            color: statusConfig.color,
+                            fontWeight: 600,
+                            fontSize: '0.75rem'
+                          }}>
+                            {cargaText}
+                          </Typography>
+                        </Box>
+
+                        {/* Especialidades */}
+                        {tec.especialidades && (
+                          <Box>
+                            <Typography variant="caption" sx={{ 
+                              color: '#64748b', 
+                              fontWeight: 700,
+                              display: 'block',
+                              mb: 1,
+                              textTransform: 'uppercase',
+                              letterSpacing: 0.5,
+                              fontSize: '0.65rem'
+                            }}>
+                              Especialidades
+                            </Typography>
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
+                              {tec.especialidades.split(',').slice(0, 3).map((esp, idx) => (
+                                <Chip
+                                  key={idx}
+                                  label={esp.trim()}
+                                  size="small"
+                                  sx={{ 
+                                    fontSize: '0.7rem',
+                                    height: 24,
+                                    bgcolor: '#f1f5f9',
+                                    color: '#475569',
+                                    fontWeight: 600,
+                                    border: '1px solid #e2e8f0',
+                                    '&:hover': {
+                                      bgcolor: '#e2e8f0'
+                                    }
+                                  }}
+                                />
+                              ))}
+                              {tec.especialidades.split(',').length > 3 && (
+                                <Chip
+                                  label={`+${tec.especialidades.split(',').length - 3}`}
+                                  size="small"
+                                  sx={{ 
+                                    fontSize: '0.7rem',
+                                    height: 24,
+                                    bgcolor: statusConfig.color,
+                                    color: 'white',
+                                    fontWeight: 700
+                                  }}
+                                />
+                              )}
+                            </Box>
+                          </Box>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </Grid>
+                );
+              })
+            ) : (
+              <Grid item xs={12}>
+                <Card elevation={0} sx={{ 
+                  borderRadius: 4,
+                  background: 'linear-gradient(135deg, rgba(156, 39, 176, 0.05) 0%, rgba(186, 104, 200, 0.05) 100%)',
+                  border: '2px dashed',
+                  borderColor: 'secondary.light',
+                  py: 6
+                }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <GroupIcon sx={{ fontSize: 64, color: 'secondary.light', mb: 2, opacity: 0.5 }} />
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.secondary', mb: 1 }}>
+                      No hay técnicos disponibles
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      No se encontraron técnicos registrados en el sistema
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
           </Grid>
-        </Grid>
+        </Box>
       </Container>
 
       {/* Animaciones CSS */}

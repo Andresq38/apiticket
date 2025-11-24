@@ -8,12 +8,13 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
  * SuccessOverlay reusable dialog.
  * Props:
  *  - open: boolean
- *  - mode: 'create' | 'update' | 'delete'
+ *  - mode: 'create' | 'update' | 'delete' | 'assign'
  *  - entity: string (e.g. 'Categoría', 'Técnico', 'Ticket')
  *  - gender: 'masculine' | 'feminine' (default: 'feminine')
  *  - onClose: () => void
  *  - actions: array of { label, onClick, variant ('contained'|'outlined'), color }
  *  - subtitle: optional custom subtitle text
+ *  - title: optional custom title
  */
 export default function SuccessOverlay({
   open,
@@ -23,6 +24,7 @@ export default function SuccessOverlay({
   onClose,
   actions = [],
   subtitle,
+  title: customTitle,
   variant = 'default', // 'default' | 'extended'
   details, // optional: { id, prioridad, categoria, etiqueta, extra: [{label, value}] }
   illustration, // optional React node for custom hero instead of default colored circle
@@ -30,15 +32,26 @@ export default function SuccessOverlay({
   const isCreate = mode === 'create';
   const isUpdate = mode === 'update';
   const isDelete = mode === 'delete';
+  const isAssign = mode === 'assign';
   const isMasculine = gender === 'masculine';
 
-  const verb = isCreate ? (isMasculine ? 'creado' : 'creada') : isUpdate ? (isMasculine ? 'actualizado' : 'actualizada') : (isMasculine ? 'eliminado' : 'eliminada');
-  const title = `¡${entity} ${verb}!`;
+  const verb = isCreate 
+    ? (isMasculine ? 'creado' : 'creada') 
+    : isUpdate 
+      ? (isMasculine ? 'actualizado' : 'actualizada') 
+      : isAssign
+        ? (isMasculine ? 'asignado' : 'asignada')
+        : (isMasculine ? 'eliminado' : 'eliminada');
+  
+  const title = customTitle || `¡${entity} ${verb}!`;
+  
   const defaultSubtitle = isCreate
     ? `${isMasculine ? 'El' : 'La'} ${entity.toLowerCase()} se registró correctamente. Puedes continuar sin abandonar la pantalla.`
     : isUpdate
       ? `Los cambios ${isMasculine ? 'del' : 'de la'} ${entity.toLowerCase()} se guardaron correctamente.`
-      : `${isMasculine ? 'El' : 'La'} ${entity.toLowerCase()} se eliminó correctamente. Esta acción no se puede deshacer.`;
+      : isAssign
+        ? `${isMasculine ? 'El' : 'La'} ${entity.toLowerCase()} se asignó correctamente.`
+        : `${isMasculine ? 'El' : 'La'} ${entity.toLowerCase()} se eliminó correctamente. Esta acción no se puede deshacer.`;
 
   const renderHero = () => {
     if (illustration) return (
@@ -51,7 +64,7 @@ export default function SuccessOverlay({
         <Box sx={{
           width: 100,
           height: 100,
-          bgcolor: isCreate ? 'success.main' : isUpdate ? 'warning.main' : 'error.main',
+          bgcolor: isCreate ? 'success.main' : isUpdate ? 'warning.main' : isAssign ? 'success.main' : 'error.main',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
@@ -69,6 +82,7 @@ export default function SuccessOverlay({
         }}>
           {isCreate && <CheckCircleIcon sx={{ fontSize: 64, color: 'common.white' }} />}
           {isUpdate && <AutoFixHighIcon sx={{ fontSize: 64, color: 'common.white' }} />}
+          {isAssign && <CheckCircleIcon sx={{ fontSize: 64, color: 'common.white' }} />}
           {isDelete && <DeleteForeverIcon sx={{ fontSize: 64, color: 'common.white' }} />}
         </Box>
       </Box>
@@ -111,7 +125,7 @@ export default function SuccessOverlay({
             <Divider sx={{ mb: 2 }} />
             <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" sx={{ mb: 2 }}>
               {details.id && (
-                <Chip color={isCreate ? 'success' : isUpdate ? 'info' : 'error'} variant="outlined" label={`ID: #${details.id}`} />
+                <Chip color={isCreate ? 'success' : isUpdate ? 'info' : isAssign ? 'success' : 'error'} variant="outlined" label={`ID: #${details.id}`} />
               )}
               {details.prioridad && (
                 <Chip color={details.prioridad === 'Alta' ? 'error' : details.prioridad === 'Media' ? 'warning' : 'info'} label={`Prioridad: ${details.prioridad}`} />
@@ -141,14 +155,14 @@ export default function SuccessOverlay({
             key={idx}
             onClick={a.onClick}
             variant={a.variant || 'contained'}
-            color={a.color || (isCreate ? 'success' : isUpdate ? 'warning' : 'error')}
+            color={a.color || (isCreate ? 'success' : isUpdate ? 'warning' : isAssign ? 'success' : 'error')}
             sx={{ minWidth: 160, fontWeight: 700 }}
           >
             {a.label}
           </Button>
         ))}
         {!actions.length && (
-          <Button onClick={onClose} variant="contained" color={isCreate ? 'success' : isUpdate ? 'warning' : 'error'} sx={{ minWidth: 160, fontWeight: 700 }}>
+          <Button onClick={onClose} variant="contained" color={isCreate ? 'success' : isUpdate ? 'warning' : isAssign ? 'success' : 'error'} sx={{ minWidth: 160, fontWeight: 700 }}>
             Cerrar
           </Button>
         )}

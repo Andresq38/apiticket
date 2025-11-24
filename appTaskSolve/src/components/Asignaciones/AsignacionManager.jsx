@@ -113,7 +113,13 @@ export default function AsignacionManager() {
       console.log('✅ Datos actualizados correctamente');
     } catch (err) {
       console.error('❌ Error al cargar datos:', err);
-      setError('Error al cargar la información. Verifique que el servidor esté corriendo en el puerto 81.');
+      // Solo mostrar error si es un problema de conexión real, no si simplemente no hay datos
+      if (err.code === 'ERR_NETWORK' || err.message?.includes('Network Error')) {
+        setError('Error al cargar la información. Verifique que el servidor esté corriendo en el puerto 81.');
+      } else if (err.response?.status >= 500) {
+        setError('Error del servidor. Por favor, contacte al administrador.');
+      }
+      // Si es un 404 o no hay datos, no mostramos error, solo dejamos las listas vacías
     } finally {
       setLoading(false);
     }
@@ -245,11 +251,7 @@ export default function AsignacionManager() {
         setSelectedTecnico('');
         setJustificacion('');
         
-        // Recargar datos después de un pequeño delay para asegurar que el backend actualizó
-        setTimeout(() => {
-          console.log('🔄 Recargando datos después de asignación exitosa...');
-          fetchData();
-        }, 500);
+        // La recarga se hará cuando el usuario cierre el modal de éxito
       } else {
         console.log('❌ Error en asignación:', result.message);
         // Mostrar el mensaje específico del backend
@@ -775,15 +777,206 @@ export default function AsignacionManager() {
             </CardContent>
           </Card>
         ) : ticketsPendientes.length === 0 ? (
-          <Card sx={{ borderRadius: 3, boxShadow: 2 }}>
-            <CardContent sx={{ py: 8, textAlign: 'center' }}>
-              <CheckCircleIcon sx={{ fontSize: 80, color: 'success.main', mb: 2 }} />
-              <Typography variant="h6" color="text.secondary">
-                ✅ No hay tickets pendientes de asignación
+          <Card 
+            elevation={0}
+            sx={{ 
+              borderRadius: 4, 
+              background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.05) 0%, rgba(129, 199, 132, 0.05) 100%)',
+              border: '2px dashed',
+              borderColor: 'success.light',
+              overflow: 'hidden',
+              position: 'relative'
+            }}
+          >
+            <Box
+              sx={{
+                position: 'absolute',
+                top: -50,
+                right: -50,
+                width: 200,
+                height: 200,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(76, 175, 80, 0.1) 0%, transparent 70%)',
+                pointerEvents: 'none'
+              }}
+            />
+            <Box
+              sx={{
+                position: 'absolute',
+                bottom: -30,
+                left: -30,
+                width: 150,
+                height: 150,
+                borderRadius: '50%',
+                background: 'radial-gradient(circle, rgba(129, 199, 132, 0.08) 0%, transparent 70%)',
+                pointerEvents: 'none'
+              }}
+            />
+            <CardContent sx={{ py: 10, px: 4, textAlign: 'center', position: 'relative' }}>
+              <Box
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 120,
+                  height: 120,
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #4caf50 0%, #81c784 100%)',
+                  boxShadow: '0 8px 24px rgba(76, 175, 80, 0.3)',
+                  mb: 3,
+                  position: 'relative',
+                  '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    inset: -8,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), transparent)',
+                    animation: 'pulse 2s ease-in-out infinite'
+                  },
+                  '@keyframes pulse': {
+                    '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                    '50%': { opacity: 0.5, transform: 'scale(1.1)' }
+                  }
+                }}
+              >
+                <CheckCircleIcon sx={{ fontSize: 64, color: 'white' }} />
+              </Box>
+              
+              <Typography 
+                variant="h4" 
+                sx={{ 
+                  fontWeight: 800, 
+                  color: 'success.dark',
+                  mb: 2,
+                  letterSpacing: '-0.5px'
+                }}
+              >
+                ¡Excelente trabajo!
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                Todos los tickets han sido asignados correctamente
+              
+              <Typography 
+                variant="h6" 
+                color="text.primary"
+                sx={{ 
+                  fontWeight: 600,
+                  mb: 1
+                }}
+              >
+                No hay tickets pendientes de asignación
               </Typography>
+              
+              <Typography 
+                variant="body1" 
+                color="text.secondary" 
+                sx={{ 
+                  maxWidth: 500, 
+                  mx: 'auto',
+                  mb: 4,
+                  lineHeight: 1.6
+                }}
+              >
+                Todos los tickets han sido asignados correctamente a los técnicos especializados.
+                El sistema está funcionando de manera óptima.
+              </Typography>
+
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  gap: 4,
+                  flexWrap: 'wrap',
+                  mt: 4
+                }}
+              >
+                <Box sx={{ textAlign: 'center' }}>
+                  <Box
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 2,
+                      bgcolor: 'success.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 1,
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)'
+                    }}
+                  >
+                    <AssignmentIcon sx={{ fontSize: 32, color: 'white' }} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    Gestión efectiva
+                  </Typography>
+                </Box>
+
+                <Box sx={{ textAlign: 'center' }}>
+                  <Box
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 2,
+                      bgcolor: 'success.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 1,
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)'
+                    }}
+                  >
+                    <PeopleIcon sx={{ fontSize: 32, color: 'white' }} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    Equipo activo
+                  </Typography>
+                </Box>
+
+                <Box sx={{ textAlign: 'center' }}>
+                  <Box
+                    sx={{
+                      width: 60,
+                      height: 60,
+                      borderRadius: 2,
+                      bgcolor: 'success.main',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mx: 'auto',
+                      mb: 1,
+                      boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)'
+                    }}
+                  >
+                    <CheckCircleIcon sx={{ fontSize: 32, color: 'white' }} />
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+                    Todo asignado
+                  </Typography>
+                </Box>
+              </Box>
+
+              <Button
+                variant="outlined"
+                color="success"
+                size="large"
+                startIcon={<RefreshIcon />}
+                onClick={fetchData}
+                sx={{ 
+                  mt: 4,
+                  borderRadius: 2,
+                  px: 4,
+                  py: 1.5,
+                  fontWeight: 600,
+                  borderWidth: 2,
+                  '&:hover': {
+                    borderWidth: 2,
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.2)'
+                  }
+                }}
+              >
+                Actualizar estado
+              </Button>
             </CardContent>
           </Card>
         ) : vista === 'simple' ? (
@@ -1475,6 +1668,7 @@ export default function AsignacionManager() {
         onClose={() => {
           setShowSuccessOverlay(false);
           setAsignacionExitosa(null);
+          fetchData();
         }}
         actions={[
           { 
@@ -1482,6 +1676,7 @@ export default function AsignacionManager() {
             onClick: () => { 
               setShowSuccessOverlay(false); 
               setAsignacionExitosa(null);
+              fetchData();
             }, 
             variant: 'contained', 
             color: 'success' 
