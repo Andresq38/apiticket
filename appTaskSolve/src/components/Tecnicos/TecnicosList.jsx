@@ -431,36 +431,39 @@ export default function TecnicosList() {
                 onClick={() => { if (!deleteMode) navigate(`/tecnicos/${t.id_tecnico}`); }}
               >
                 <CardContent sx={{ p: 2.5 }}>
-                  {/* Indicador de Estado Animado */}
+                  {/* Indicador de Estado Animado - ahora arriba del avatar/nombre */}
                   <Box sx={{ 
-                    position: 'absolute',
-                    top: 16,
-                    right: 16,
                     display: 'flex',
+                    justifyContent: 'center',
                     alignItems: 'center',
-                    gap: 0.8,
-                    bgcolor: statusConfig.bg,
-                    px: 1.2,
-                    py: 0.4,
-                    borderRadius: 1.5,
-                    border: `2px solid ${statusConfig.border}`,
-                    boxShadow: `0 2px 6px ${statusConfig.color}15`,
-                    zIndex: 2
+                    mb: 1.1,
                   }}>
-                    <Box sx={{ 
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      bgcolor: statusConfig.color,
-                      animation: ticketsAbiertos > 0 ? 'pulse 2s infinite' : 'none'
-                    }} />
-                    <Typography variant="caption" sx={{ 
-                      fontWeight: 800, 
-                      color: statusConfig.color,
-                      fontSize: '0.65rem'
+                    <Box sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      bgcolor: statusConfig.bg,
+                      px: 1.2,
+                      py: 0.4,
+                      borderRadius: 1.5,
+                      border: `2px solid ${statusConfig.border}`,
+                      boxShadow: `0 2px 6px ${statusConfig.color}15`,
+                      gap: 0.8,
                     }}>
-                      {statusConfig.label}
-                    </Typography>
+                      <Box sx={{ 
+                        width: 8,
+                        height: 8,
+                        borderRadius: '50%',
+                        bgcolor: statusConfig.color,
+                        animation: ticketsAbiertos > 0 ? 'pulse 2s infinite' : 'none'
+                      }} />
+                      <Typography variant="caption" sx={{ 
+                        fontWeight: 800, 
+                        color: statusConfig.color,
+                        fontSize: '0.65rem'
+                      }}>
+                        {statusConfig.label}
+                      </Typography>
+                    </Box>
                   </Box>
 
                   {/* Botón Eliminar (modo delete) */}

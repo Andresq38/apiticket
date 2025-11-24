@@ -1247,37 +1247,41 @@ const Dashboard = () => {
                       <CardContent sx={{ p: 2.2 }}>
                         {/* Indicador de Estado Animado */}
                         <Box sx={{ 
-                          position: 'absolute',
-                          top: 14,
-                          right: 14,
                           display: 'flex',
+                          justifyContent: 'center',
                           alignItems: 'center',
-                          gap: 0.8,
-                          bgcolor: statusConfig.bg,
-                          px: 1.3,
-                          py: 0.4,
-                          borderRadius: 1.6,
-                          border: `2px solid ${statusConfig.border}`,
-                          boxShadow: `0 2px 6px ${statusConfig.color}20`
+                          mb: 1.2,
                         }}>
-                          <Box sx={{ 
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            bgcolor: statusConfig.color,
-                            animation: ticketsCount > 0 ? 'pulse 2s infinite' : 'none',
-                            '@keyframes pulse': {
-                              '0%, 100%': { opacity: 1, transform: 'scale(1)' },
-                              '50%': { opacity: 0.6, transform: 'scale(1.2)' }
-                            }
-                          }} />
-                          <Typography variant="caption" sx={{ 
-                            fontWeight: 800, 
-                            color: statusConfig.color,
-                            fontSize: '0.6rem'
+                          <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            bgcolor: statusConfig.bg,
+                            px: 1.3,
+                            py: 0.4,
+                            borderRadius: 1.6,
+                            border: `2px solid ${statusConfig.border}`,
+                            boxShadow: `0 2px 6px ${statusConfig.color}20`,
+                            gap: 0.8,
                           }}>
-                            {statusConfig.label}
-                          </Typography>
+                            <Box sx={{ 
+                              width: 8,
+                              height: 8,
+                              borderRadius: '50%',
+                              bgcolor: statusConfig.color,
+                              animation: ticketsCount > 0 ? 'pulse 2s infinite' : 'none',
+                              '@keyframes pulse': {
+                                '0%, 100%': { opacity: 1, transform: 'scale(1)' },
+                                '50%': { opacity: 0.6, transform: 'scale(1.2)' }
+                              }
+                            }} />
+                            <Typography variant="caption" sx={{ 
+                              fontWeight: 800, 
+                              color: statusConfig.color,
+                              fontSize: '0.6rem'
+                            }}>
+                              {statusConfig.label}
+                            </Typography>
+                          </Box>
                         </Box>
 
                         {/* Avatar y Nombre */}
