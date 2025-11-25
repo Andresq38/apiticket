@@ -120,40 +120,117 @@ const CategoriasList = () => {
     );
   }
 
+  // Función para obtener color distintivo por categoría
+  const getCategoriaColor = (idCategoria) => {
+    const colors = [
+      { gradient: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', bg: '#e3f2fd', text: '#1976d2', border: '#90caf9', bar: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)' }, // Azul
+      { gradient: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)', bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7', bar: 'linear-gradient(90deg, #2e7d32 0%, #4caf50 100%)' }, // Verde
+      { gradient: 'linear-gradient(135deg, #f57c00 0%, #ff9800 100%)', bg: '#fff3e0', text: '#f57c00', border: '#ffcc80', bar: 'linear-gradient(90deg, #f57c00 0%, #ff9800 100%)' }, // Naranja
+      { gradient: 'linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%)', bg: '#f3e5f5', text: '#7b1fa2', border: '#ce93d8', bar: 'linear-gradient(90deg, #7b1fa2 0%, #9c27b0 100%)' }, // Púrpura
+      { gradient: 'linear-gradient(135deg, #c62828 0%, #e53935 100%)', bg: '#ffebee', text: '#c62828', border: '#ef9a9a', bar: 'linear-gradient(90deg, #c62828 0%, #e53935 100%)' }, // Rojo
+      { gradient: 'linear-gradient(135deg, #0288d1 0%, #03a9f4 100%)', bg: '#e1f5fe', text: '#0288d1', border: '#81d4fa', bar: 'linear-gradient(90deg, #0288d1 0%, #03a9f4 100%)' }, // Cyan
+    ];
+    const index = (idCategoria - 1) % colors.length;
+    return colors[index];
+  };
+
   return (
     <Container sx={{ py: 4 }}>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 2 }}>
-        <Typography 
-          variant="h4" 
-          gutterBottom 
-          sx={{ 
-            mb: 1, 
-            fontWeight: 700, 
-            color: 'text.primary',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1
-          }}
-        >
-          <FolderSpecialIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-          Categorías de Tiquetes
-        </Typography>
-        <Typography variant="body1" color="text.secondary">
-          Gestiona y organiza los diferentes tipos de tiquetes del sistema
-        </Typography>
+      {/* Header Profesional - Estilo Panel Ejecutivo */}
+      <Box sx={{ 
+        background: 'linear-gradient(135deg, #1565c0 0%, #1976d2 55%, #0d47a1 100%)',
+        borderRadius: 3,
+        p: 2.2,
+        mb: 3,
+        boxShadow: '0 6px 22px rgba(25,118,210,0.25)',
+        position: 'relative',
+        overflow: 'hidden',
+        border: '2px solid rgba(255,255,255,0.14)',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 65%)',
+          pointerEvents: 'none'
+        },
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '3px',
+          background: 'linear-gradient(90deg, #2e7d32, #1976d2, #ed6c02, #d32f2f)',
+          backgroundSize: '300% 100%',
+          animation: 'rainbowShift 8s linear infinite'
+        },
+        '@keyframes rainbowShift': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '300% 50%' }
+        }
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative', zIndex: 1, flexWrap: 'wrap', gap: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{
+              bgcolor: 'rgba(255, 255, 255, 0.28)',
+              borderRadius: '50%',
+              p: 1.3,
+              display: 'flex',
+              border: '2px solid rgba(255, 255, 255, 0.42)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+            }}>
+              <FolderSpecialIcon sx={{ fontSize: 30, color: 'white' }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{ 
+                fontWeight: 800, 
+                color: 'white', 
+                mb: 0.3, 
+                letterSpacing: '-0.5px', 
+                textShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                fontSize: '1.55rem'
+              }}>
+                Categorías de Tiquetes
+              </Typography>
+              <Typography variant="body2" sx={{ 
+                color: 'rgba(255, 255, 255, 0.9)', 
+                fontWeight: 600, 
+                fontSize: '0.75rem'
+              }}>
+                Gestiona y organiza los diferentes tipos de tiquetes del sistema
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
       </Box>
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3, gap: 2 }}>
         <Button
-          variant={deleteMode ? 'outlined' : 'contained'}
-          color={deleteMode ? 'inherit' : 'error'}
+          variant="contained"
+          color="error"
           startIcon={deleteMode ? <CloseIcon /> : <DeleteOutlineIcon />}
           onClick={() => {
             setDeleteMode(d => !d);
             setTargetCategoria(null);
           }}
+          sx={{
+            fontWeight: 700,
+            px: 3,
+            py: 1,
+            borderRadius: 2,
+            textTransform: 'none',
+            boxShadow: deleteMode ? '0 4px 12px rgba(211,47,47,0.3)' : '0 2px 8px rgba(211,47,47,0.2)',
+            transition: 'all 0.3s',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 16px rgba(211,47,47,0.4)'
+            }
+          }}
         >
-          {deleteMode ? 'Cancelar eliminación' : 'Eliminar'}
+          {deleteMode ? 'Cancelar' : 'Eliminar'}
         </Button>
       </Box>
 
@@ -167,37 +244,53 @@ const CategoriasList = () => {
         <Alert severity="info">No hay categorías disponibles.</Alert>
       ) : (
         <Grid container spacing={3}>
-          {categorias.map((cat) => (
+          {categorias.map((cat) => {
+            const catColor = getCategoriaColor(cat.id_categoria);
+            return (
             <Grid item xs={12} sm={6} md={4} key={cat.id_categoria}>
               <Card 
-                elevation={2}
                 sx={{ 
                   height: '100%',
                   cursor: 'pointer',
                   position: 'relative',
                   overflow: 'visible',
-                  borderRadius: 2,
+                  borderRadius: 3,
                   transition: 'all 0.3s ease',
-                  border: '1px solid',
-                  borderColor: 'divider',
+                  border: '3px solid',
+                  borderColor: catColor.border,
+                  boxShadow: `0 4px 12px ${catColor.text}20`,
                   '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 12px 24px rgba(25, 118, 210, 0.15)',
-                    borderColor: 'primary.main',
+                    transform: 'translateY(-6px)',
+                    boxShadow: `0 12px 28px ${catColor.text}35`,
+                    borderColor: catColor.text,
                     '& .arrow-icon': {
-                      transform: 'translateX(4px)',
+                      transform: 'translateX(6px)',
                       opacity: 1
                     }
                   }
                 }}
                 onClick={() => !deleteMode && handleCategoriaClick(cat.id_categoria)}
               >
-                {/* Edición desde detalle: se removió botón de edición directo en el listado */}
-                {/* Barra superior de color */}
+                {/* Barra superior de color con gradiente único */}
                 <Box 
                   sx={{ 
-                    height: 6, 
-                    background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)'
+                    height: 8, 
+                    background: catColor.bar,
+                    position: 'relative',
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
+                      animation: 'shimmer 3s infinite'
+                    },
+                    '@keyframes shimmer': {
+                      '0%': { transform: 'translateX(-100%)' },
+                      '100%': { transform: 'translateX(100%)' }
+                    }
                   }} 
                 />
                 {deleteMode && (
@@ -225,19 +318,22 @@ const CategoriasList = () => {
                       label={`ID: ${cat.id_categoria}`} 
                       size="small" 
                       sx={{ 
-                        bgcolor: 'primary.main',
+                        bgcolor: catColor.text,
                         color: 'white',
-                        fontWeight: 700,
-                        fontSize: '0.75rem'
+                        fontWeight: 800,
+                        fontSize: '0.75rem',
+                        height: 26,
+                        border: '2px solid white',
+                        boxShadow: `0 2px 8px ${catColor.text}40`
                       }}
                     />
                     <ArrowForwardIcon 
                       className="arrow-icon"
                       sx={{ 
-                        color: 'primary.main', 
-                        fontSize: 24,
+                        color: catColor.text, 
+                        fontSize: 28,
                         transition: 'all 0.3s ease',
-                        opacity: 0.5
+                        opacity: 0.6
                       }} 
                     />
                   </Box>
@@ -264,22 +360,22 @@ const CategoriasList = () => {
                   <Paper 
                     elevation={0} 
                     sx={{ 
-                      p: 1.5, 
+                      p: 2, 
                       mb: 2,
-                      bgcolor: 'rgba(13, 71, 161, 0.05)',
-                      borderRadius: 1.5,
-                      border: '1px solid',
-                      borderColor: 'rgba(13, 71, 161, 0.1)'
+                      bgcolor: catColor.bg,
+                      borderRadius: 2,
+                      border: '2px solid',
+                      borderColor: catColor.border
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <AccessTimeIcon sx={{ color: 'primary.main', fontSize: 20 }} />
+                      <AccessTimeIcon sx={{ color: catColor.text, fontSize: 22 }} />
                       <Box sx={{ flex: 1 }}>
                         <Typography 
                           variant="caption" 
                           sx={{ 
-                            color: 'text.secondary',
-                            fontWeight: 600,
+                            color: '#64748b',
+                            fontWeight: 700,
                             textTransform: 'uppercase',
                             fontSize: '0.65rem',
                             letterSpacing: 0.5
@@ -290,9 +386,10 @@ const CategoriasList = () => {
                         <Typography 
                           variant="body2" 
                           sx={{ 
-                            color: 'primary.main',
-                            fontWeight: 600,
-                            mt: 0.25
+                            color: catColor.text,
+                            fontWeight: 700,
+                            mt: 0.25,
+                            fontSize: '0.9rem'
                           }}
                         >
                           {cat.sla_nombre}
@@ -307,20 +404,21 @@ const CategoriasList = () => {
                       display: 'flex', 
                       alignItems: 'center', 
                       justifyContent: 'space-between',
-                      p: 1.5,
-                      bgcolor: 'rgba(13, 71, 161, 0.05)',
-                      borderRadius: 1.5,
-                      border: '1px solid',
-                      borderColor: 'rgba(13, 71, 161, 0.1)'
+                      p: 2,
+                      bgcolor: catColor.bg,
+                      borderRadius: 2,
+                      border: '2px solid',
+                      borderColor: catColor.border
                     }}
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LocalOfferIcon sx={{ color: 'rgba(0,0,139,0.9)', fontSize: 20 }} />
+                      <LocalOfferIcon sx={{ color: catColor.text, fontSize: 22 }} />
                       <Typography 
                         variant="body2" 
                         sx={{ 
-                          color: 'text.secondary',
-                          fontWeight: 600
+                          color: catColor.text,
+                          fontWeight: 700,
+                          fontSize: '0.85rem'
                         }}
                       >
                         Etiquetas disponibles
@@ -330,18 +428,21 @@ const CategoriasList = () => {
                       label={cat.num_etiquetas}
                       size="small"
                       sx={{ 
-                        bgcolor: 'primary.main',
+                        bgcolor: catColor.text,
                         color: 'white',
-                        fontWeight: 700,
-                        minWidth: 32,
-                        height: 28
+                        fontWeight: 800,
+                        minWidth: 36,
+                        height: 28,
+                        fontSize: '0.85rem',
+                        border: '2px solid white',
+                        boxShadow: `0 2px 8px ${catColor.text}40`
                       }}
                     />
                   </Box>
                 </CardContent>
               </Card>
             </Grid>
-          ))}
+          )})}
         </Grid>
       )}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>

@@ -342,7 +342,7 @@ const Dashboard = () => {
             </Box>
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', mb: 0.3, letterSpacing: '-0.5px', textShadow: '0 2px 6px rgba(0,0,0,0.25)', fontSize: '1.8rem' }}>
-                📊 Panel Ejecutivo
+                Panel Ejecutivo
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 0.6 }}>
                 <SpeedIcon sx={{ fontSize: 18 }} />
@@ -1147,7 +1147,7 @@ const Dashboard = () => {
                   textShadow: '0 2px 6px rgba(0,0,0,0.25)',
                   fontSize: '1.55rem'
                 }}>
-                  👥 Equipo Técnico
+                  Equipo Técnico
                 </Typography>
                 <Typography variant="body2" sx={{ 
                   color: 'rgba(255, 255, 255, 0.9)', 
