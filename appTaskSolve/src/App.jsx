@@ -28,6 +28,7 @@ const AsignacionManager = lazy(() => import('./components/Asignaciones/Asignacio
 const MantenimientosHome = lazy(() => import('./components/Mantenimientos/MantenimientosHome'));
 const MantenimientosCategorias = lazy(() => import('./components/Mantenimientos/MantenimientosCategorias'));
 const NotificacionesPage = lazy(() => import('./components/common/NotificacionesPage'));
+const SlaMonitor = lazy(() => import('./components/SLA/SlaMonitor'));
 
 export default function App() {
   return (
@@ -62,6 +63,7 @@ export default function App() {
             <Route path="/categorias/editar/:id" element={<EditCategoria />} />
             <Route path="/mantenimientos" element={<MantenimientosHome />} />
             <Route path="/mantenimientos/categorias" element={<MantenimientosCategorias />} />
+            <Route path="/sla/monitor" element={<SlaMonitor />} />
             <Route path="/notificaciones" element={<NotificacionesPage />} />
             <Route path="*" element={<PageNotFound />} />
           </Routes>

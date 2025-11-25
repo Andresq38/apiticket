@@ -31,40 +31,36 @@ export default function TecnicosList() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const controller = new AbortController();
-    async function load() {
-      try {
-        setLoading(true);
-        setError('');
-        const apiBase = getApiBase();
-        
-        const res = await axios.get(`${apiBase}/apiticket/tecnico`, { 
-          signal: controller.signal 
-        });
-        
-        console.log('Datos de técnicos:', res.data); // Para debug
-        
-        // Manejar diferentes formatos de respuesta
-        const tecnicosData = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-        // Ordenar ascendente por id_tecnico para mostrar en lista
-        const sorted = (tecnicosData || []).slice().sort((a, b) => {
-          const ai = (a?.id_tecnico ?? a?.id) || 0;
-          const bi = (b?.id_tecnico ?? b?.id) || 0;
-          return Number(ai) - Number(bi);
-        });
-        setItems(sorted);
-      } catch (e) {
-        if (e.name !== 'AbortError' && e.code !== 'ERR_CANCELED') {
-          console.error('Error al cargar técnicos:', e);
-          setError(e.response?.data?.error || e.message || 'Error al cargar técnicos');
-        }
-      } finally {
-        setLoading(false);
-      }
+  // Función reutilizable para cargar técnicos
+  const fetchTecnicos = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      const apiBase = getApiBase();
+      
+      const res = await axios.get(`${apiBase}/apiticket/tecnico`);
+      
+      console.log('Datos de técnicos:', res.data); // Para debug
+      
+      // Manejar diferentes formatos de respuesta
+      const tecnicosData = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      // Ordenar ascendente por id_tecnico para mostrar en lista
+      const sorted = (tecnicosData || []).slice().sort((a, b) => {
+        const ai = (a?.id_tecnico ?? a?.id) || 0;
+        const bi = (b?.id_tecnico ?? b?.id) || 0;
+        return Number(ai) - Number(bi);
+      });
+      setItems(sorted);
+    } catch (e) {
+      console.error('Error al cargar técnicos:', e);
+      setError(e.response?.data?.error || e.message || 'Error al cargar técnicos');
+    } finally {
+      setLoading(false);
     }
-    load();
-    return () => controller.abort();
+  };
+
+  useEffect(() => {
+    fetchTecnicos();
   }, []);
 
   const requestDelete = (tecnico) => {
@@ -175,7 +171,7 @@ export default function TecnicosList() {
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
             <Tooltip title="Actualizar lista" arrow>
               <IconButton 
-                onClick={() => window.location.reload()}
+                onClick={fetchTecnicos}
                 sx={{ 
                   bgcolor: 'rgba(255, 255, 255, 0.25)',
                   color: 'white',

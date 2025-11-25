@@ -68,21 +68,21 @@ export default function CreateTicket() {
 
   const errors = {
     titulo: !form.titulo?.trim() 
-      ? 'El título es requerido' 
+      ? 'El título del tiquete es requerido' 
       : form.titulo.trim().length < 5 
-      ? 'El título debe tener al menos 5 caracteres' 
+      ? 'Título muy corto. Mínimo 5 caracteres. Ejemplo: "Error en sistema"' 
       : form.titulo.trim().length > 200 
-      ? 'El título no puede exceder 200 caracteres' 
+      ? `Título muy largo. Máximo 200 caracteres (actual: ${form.titulo.trim().length})` 
       : '',
     descripcion: !form.descripcion?.trim() 
-      ? 'La descripción es requerida' 
+      ? 'La descripción detallada del problema es requerida' 
       : form.descripcion.trim().length < 10 
-      ? 'La descripción debe tener al menos 10 caracteres' 
+      ? 'Descripción muy breve. Mínimo 10 caracteres para entender el problema' 
       : form.descripcion.trim().length > 1000 
-      ? 'La descripción no puede exceder 1000 caracteres' 
+      ? `Descripción muy larga. Máximo 1000 caracteres (actual: ${form.descripcion.trim().length})` 
       : '',
-    id_etiqueta: !form.id_etiqueta ? 'Debe seleccionar una etiqueta' : '',
-    id_usuario: !form.id_usuario ? 'Debe seleccionar un usuario solicitante' : '',
+    id_etiqueta: !form.id_etiqueta ? 'Debe seleccionar una etiqueta para clasificar el tiquete' : '',
+    id_usuario: !form.id_usuario ? 'Debe seleccionar el usuario que solicita el soporte' : '',
   };
   const isValid = !errors.titulo && !errors.descripcion && !errors.id_etiqueta && !errors.id_usuario;
 
@@ -180,7 +180,7 @@ export default function CreateTicket() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!isValid) {
-      setSnackbar({ open: true, message: 'Por favor complete todos los campos requeridos correctamente', severity: 'warning' });
+      setSnackbar({ open: true, message: 'Formulario incompleto. Revise los campos marcados con asterisco (*) y corrija los errores.', severity: 'warning' });
       setTouched({ titulo: true, descripcion: true, id_etiqueta: true, id_usuario: true });
       return;
     }

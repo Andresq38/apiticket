@@ -209,9 +209,35 @@ const Home = () => {
 
   return (
     <Container sx={{ py: 4 }}>
-      <Typography component="h1" variant="h2" align="center" gutterBottom>
-        Gestión de Tiquetes de Soporte
-      </Typography>
+      {/* Header con gradiente */}
+      <Box sx={{
+        mb: 4,
+        borderRadius: 8,
+        px: 4,
+        py: 3,
+        textAlign: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg,#0B5CC2 0%, #1569d4 40%, #1b74e5 100%)',
+        color: 'common.white',
+        boxShadow: '0 12px 28px -6px rgba(11,92,194,0.35)',
+        '&:after': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 6,
+          background: '#F5A000',
+          borderBottomLeftRadius: 8,
+          borderBottomRightRadius: 8
+        }
+      }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '.5px' }}>Gestión de Tiquetes de Soporte</Typography>
+        <Typography variant="body2" sx={{ mt: .5, fontWeight: 500, opacity: .9 }}>
+          Administra, prioriza y resuelve los tiquetes activos del sistema
+        </Typography>
+      </Box>
 
       {/* Toolbar: búsqueda, filtro y acciones */}
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 3, justifyContent: 'center' }}>
@@ -252,10 +278,6 @@ const Home = () => {
       <Typography variant="h5" align="center" color="text.secondary" mb={6}>
         Consulta el estado de los tiquetes de soporte activos y recientes.
       </Typography>
-
-      <Box textAlign="center" mb={2}>
-        <Typography variant="h5" color="primary">🎫️ Tiquetes</Typography>
-      </Box>
 
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 5 }}>

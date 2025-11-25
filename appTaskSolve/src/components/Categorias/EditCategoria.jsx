@@ -171,7 +171,7 @@ export default function EditCategoria() {
     if (!form.nombre.trim()) {
       setSnackbar({
         open: true,
-        message: "El nombre es requerido",
+        message: "El nombre de la categoría es requerido. Por favor, ingrese un nombre descriptivo.",
         severity: "warning",
       });
       return;
@@ -180,7 +180,7 @@ export default function EditCategoria() {
     if (form.nombre.trim().length < 3) {
       setSnackbar({
         open: true,
-        message: "El nombre debe tener al menos 3 caracteres",
+        message: "El nombre es muy corto. Debe tener al menos 3 caracteres. Ejemplo: 'Soporte Técnico'",
         severity: "warning",
       });
       return;
@@ -189,7 +189,7 @@ export default function EditCategoria() {
     if (form.nombre.trim().length > 100) {
       setSnackbar({
         open: true,
-        message: "El nombre no puede exceder 100 caracteres",
+        message: "El nombre es demasiado largo. Máximo 100 caracteres (actual: " + form.nombre.trim().length + ")",
         severity: "warning",
       });
       return;
@@ -198,7 +198,7 @@ export default function EditCategoria() {
     if (!form.id_sla) {
       setSnackbar({
         open: true,
-        message: "El SLA es requerido",
+        message: "Debe seleccionar un SLA (Acuerdo de Nivel de Servicio) para esta categoría. Define el tiempo de respuesta.",
         severity: "warning",
       });
       return;
@@ -342,12 +342,13 @@ export default function EditCategoria() {
             <Grid item xs={12} md={5}>
               <TextField
                 fullWidth
-                label="Nombre"
+                required
+                label={<span>Nombre <span style={{ color: '#d32f2f' }}>*</span></span>}
                 value={form.nombre}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, nombre: e.target.value }))
                 }
-                helperText="3-100 caracteres. Ejemplo: Soporte Técnico"
+                helperText="Requerido (3-100 caracteres). Ejemplo: Soporte Técnico, Infraestructura"
                 sx={{ minWidth: { md: 300 } }}
               />
             </Grid>
