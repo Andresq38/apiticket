@@ -534,31 +534,18 @@ export default function DetalleTicket() {
         <Typography><strong>ID Categoría:</strong> {ticket.categoria?.id_categoria || 'N/A'}</Typography>
       </Paper>
 
-      {/* Etiquetas */}
+      {/* Etiqueta */}
       <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" color="primary" gutterBottom>Etiquetas Asociadas</Typography>
-        {ticket.etiquetas?.length > 0 ? (
-          <Grid container direction="column" spacing={1} sx={{ mt: 1 }}>
-            {ticket.etiquetas
-              .slice()
-              .sort((a, b) => (a?.id_etiqueta ?? a?.id ?? 0) - (b?.id_etiqueta ?? b?.id ?? 0))
-              .map((et) => {
-              const id = et?.id_etiqueta ?? et?.id ?? '';
-              const descripcion = et?.etiqueta ?? et?.nombre ?? et?.label ?? 'Descripción no disponible';
-              const key = id || descripcion;
-              return (
-                <Grid item xs={12} key={key}>
-                  <Paper sx={{ bgcolor: 'white', color: '#000000ff', p: 2 }} elevation={2}>
-                    <Typography variant="subtitle2">ID etiqueta: {id}</Typography>
-                    <Typography variant="body2">Descripción: {descripcion}</Typography>
-                  </Paper>
-                </Grid>
-              );
-            })}
-          </Grid>
-        ) : (
-          <Typography>No hay etiquetas asociadas</Typography>
-        )}
+        <Typography variant="h6" color="primary" gutterBottom>Etiqueta</Typography>
+        <Typography><strong>Descripción:</strong> {ticket.etiqueta?.nombre ?? ticket.etiqueta?.etiqueta ?? 'N/A'}</Typography>
+        <Typography><strong>ID Etiqueta:</strong> {ticket.etiqueta?.id_etiqueta ?? ticket.etiqueta?.id ?? 'N/A'}</Typography>
+      </Paper>
+
+      {/* Especialidad */}
+      <Paper sx={{ p: 3, mb: 4 }}>
+        <Typography variant="h6" color="primary" gutterBottom>Especialidad</Typography>
+        <Typography><strong>Descripción:</strong> {ticket.especialidad?.nombre ?? ticket.especialidad?.especialidad ?? 'N/A'}</Typography>
+        <Typography><strong>ID Especialidad:</strong> {ticket.especialidad?.id_especialidad ?? ticket.especialidad?.id ?? 'N/A'}</Typography>
       </Paper>
 
       {/* Historial de Estados Completo */}

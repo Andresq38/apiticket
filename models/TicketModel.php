@@ -16,6 +16,8 @@ class TicketModel
                         t.titulo AS 'Título',
                         c.nombre AS 'Categoría',
                         e.nombre AS 'Estado actual',
+                        COALESCE(et.nombre, '') AS 'Etiqueta',
+                        COALESCE(es.nombre, '') AS 'Especialidad',
                         CONCAT(
                             FLOOR((s.tiempo_resolucion_max - TIMESTAMPDIFF(MINUTE, 
                                 CONVERT_TZ(t.fecha_creacion, '+00:00', '-06:00'), 
@@ -34,6 +36,10 @@ class TicketModel
                         categoria_ticket c ON t.id_categoria = c.id_categoria
                     JOIN 
                         estado e ON t.id_estado = e.id_estado
+                    LEFT JOIN
+                        etiqueta et ON et.id_etiqueta = t.id_etiqueta
+                    LEFT JOIN
+                        especialidad es ON es.id_especialidad = t.id_especialidad
                     JOIN 
                         sla s ON c.id_sla = s.id_sla
                     ORDER BY 
@@ -57,6 +63,8 @@ class TicketModel
                         t.titulo AS 'Título',
                         c.nombre AS 'Categoría',
                         e.nombre AS 'Estado actual',
+                        COALESCE(et.nombre, '') AS 'Etiqueta',
+                        COALESCE(es.nombre, '') AS 'Especialidad',
                         CONCAT(
                         FLOOR((s.tiempo_resolucion_max - TIMESTAMPDIFF(MINUTE, t.fecha_creacion, NOW())) / 60), 
                          'h ',
@@ -69,6 +77,10 @@ class TicketModel
                             categoria_ticket c ON t.id_categoria = c.id_categoria
                         JOIN 
                             estado e ON t.id_estado = e.id_estado
+                        LEFT JOIN
+                            etiqueta et ON et.id_etiqueta = t.id_etiqueta
+                        LEFT JOIN
+                            especialidad es ON es.id_especialidad = t.id_especialidad
                         JOIN 
                             sla s ON c.id_sla = s.id_sla
                         WHERE 
@@ -94,6 +106,8 @@ class TicketModel
                         t.titulo AS 'Título',
                         c.nombre AS 'Categoría',
                         e.nombre AS 'Estado actual',
+                        COALESCE(et.nombre, '') AS 'Etiqueta',
+                        COALESCE(es.nombre, '') AS 'Especialidad',
                         CONCAT(
                             FLOOR((s.tiempo_resolucion_max - TIMESTAMPDIFF(MINUTE, 
                                 CONVERT_TZ(t.fecha_creacion, '+00:00', '-06:00'), 
@@ -112,6 +126,10 @@ class TicketModel
                         categoria_ticket c ON t.id_categoria = c.id_categoria
                     JOIN 
                         estado e ON t.id_estado = e.id_estado
+                    LEFT JOIN
+                        etiqueta et ON et.id_etiqueta = t.id_etiqueta
+                    LEFT JOIN
+                        especialidad es ON es.id_especialidad = t.id_especialidad
                     JOIN 
                         sla s ON c.id_sla = s.id_sla
                     WHERE 
@@ -315,6 +333,7 @@ class TicketModel
             $slaM = new SlaModel();
             $estadoM = new EstadoModel();
             $etiquetaM = new EtiquetaModel();
+            $especialidadM = new EspecialidadModel();
 
             // Traer el ticket principal (solo datos básicos y IDs relacionados)
             $sql = "SELECT * FROM ticket WHERE id_ticket = ?";
@@ -338,12 +357,11 @@ class TicketModel
             }
             $ticket->estado = $estadoM->get($ticket->id_estado) ?? null;
 
-            // Obtener etiquetas asociadas a la categoria usando el método adecuado
-            if ($ticket->categoria && method_exists($categoriaM, 'getEtiquetasByCategoria')) {
-                $ticket->etiquetas = $categoriaM->getEtiquetasByCategoria($ticket->categoria->id_categoria);
-            } else {
-                $ticket->etiquetas = [];
-            }
+            // Obtener la etiqueta seleccionada directamente desde el ticket (ya existe id_etiqueta en tabla ticket)
+            $ticket->etiqueta = isset($ticket->id_etiqueta) && $ticket->id_etiqueta ? ($etiquetaM->get($ticket->id_etiqueta) ?? null) : null;
+
+            // Obtener la especialidad seleccionada directamente desde el ticket
+            $ticket->especialidad = isset($ticket->id_especialidad) && $ticket->id_especialidad ? ($especialidadM->get($ticket->id_especialidad) ?? null) : null;
 
             // Calcular tiempo restante SLA y fechas de SLA (si existe SLA)
             if ($ticket->sla && isset($ticket->sla->tiempo_resolucion_max) && is_numeric($ticket->sla->tiempo_resolucion_max)) {
@@ -464,6 +482,7 @@ class TicketModel
             $slaM = new SlaModel();
             $estadoM = new EstadoModel();
             $etiquetaM = new EtiquetaModel();
+            $especialidadM = new EspecialidadModel();
 
             // Traer todos los tickets
             $sql = "SELECT * FROM ticket";
@@ -492,12 +511,9 @@ class TicketModel
                 // Obtener estado
                 $ticket->estado = $estadoM->get($ticket->id_estado) ?? null;
 
-                // Obtener etiquetas asociadas a la categoría
-                if ($ticket->categoria && method_exists($categoriaM, 'getEtiquetasByCategoria')) {
-                    $ticket->etiquetas = $categoriaM->getEtiquetasByCategoria($ticket->categoria->id_categoria);
-                } else {
-                    $ticket->etiquetas = [];
-                }
+                // Obtener etiqueta y especialidad seleccionadas en el ticket
+                $ticket->etiqueta = isset($ticket->id_etiqueta) && $ticket->id_etiqueta ? ($etiquetaM->get($ticket->id_etiqueta) ?? null) : null;
+                $ticket->especialidad = isset($ticket->id_especialidad) && $ticket->id_especialidad ? ($especialidadM->get($ticket->id_especialidad) ?? null) : null;
 
                 // Calcular tiempo restante del SLA y fechas SLA (si aplica)
                 if ($ticket->sla && isset($ticket->sla->tiempo_resolucion_max) && is_numeric($ticket->sla->tiempo_resolucion_max)) {
@@ -546,66 +562,82 @@ class TicketModel
             handleException($e);
         }
     }
-    	public function create($objeto) {
-        try {
-            // Validaciones y saneo de entrada
-            $titulo = isset($objeto->titulo) ? trim((string)$objeto->titulo) : '';
-            $descripcion = isset($objeto->descripcion) ? trim((string)$objeto->descripcion) : '';
-            $prioridad = isset($objeto->prioridad) ? (string)$objeto->prioridad : 'Media';
-            $idUsuario = isset($objeto->id_usuario) ? (string)$objeto->id_usuario : null;
-            $idCategoria = isset($objeto->id_categoria) ? (int)$objeto->id_categoria : null;
-            $idEtiqueta = isset($objeto->id_etiqueta) ? (int)$objeto->id_etiqueta : null;
+        public function create($objeto) {
+            try {
+                // Validaciones y saneo de entrada
+                $titulo = isset($objeto->titulo) ? trim((string)$objeto->titulo) : '';
+                $descripcion = isset($objeto->descripcion) ? trim((string)$objeto->descripcion) : '';
+                $prioridad = isset($objeto->prioridad) ? (string)$objeto->prioridad : 'Media';
+                $idUsuario = isset($objeto->id_usuario) ? (string)$objeto->id_usuario : null;
+                $idCategoria = isset($objeto->id_categoria) ? (int)$objeto->id_categoria : null;
+                $idEtiqueta = isset($objeto->id_etiqueta) ? (int)$objeto->id_etiqueta : null;
+                $idEspecialidad = isset($objeto->id_especialidad) ? (int)$objeto->id_especialidad : null;
 
-            if ($titulo === '' || $descripcion === '' || !$idUsuario) {
-                throw new Exception('Faltan campos requeridos: titulo, descripcion, id_usuario');
-            }
-            // Longitudes y reglas básicas
-            if (mb_strlen($titulo) < 5 || mb_strlen($titulo) > 120) {
-                throw new Exception('El título debe tener entre 5 y 120 caracteres');
-            }
-            if (mb_strlen($descripcion) < 10 || mb_strlen($descripcion) > 2000) {
-                throw new Exception('La descripción debe tener entre 10 y 2000 caracteres');
-            }
-            // Normalizar prioridad a ENUM permitido
-            $validP = ['Baja','Media','Alta'];
-            if (!in_array($prioridad, $validP, true)) { $prioridad = 'Media'; }
-
-            // Derivar categoría a partir de etiqueta si no fue enviada
-            if (!$idCategoria && $idEtiqueta) {
-                // Verificar existencia de etiqueta
-                $chkEt = $this->enlace->executePrepared("SELECT id_etiqueta FROM etiqueta WHERE id_etiqueta = ?", 'i', [ (int)$idEtiqueta ], 'asoc');
-                if (empty($chkEt)) {
-                    throw new Exception('La etiqueta seleccionada no existe');
+                if ($titulo === '' || $descripcion === '' || !$idUsuario) {
+                    throw new Exception('Faltan campos requeridos: titulo, descripcion, id_usuario');
                 }
-                $sqlCat = "SELECT id_categoria_ticket FROM categoria_etiqueta WHERE id_etiqueta = ? LIMIT 1";
-                $cat = $this->enlace->executePrepared($sqlCat, 'i', [ (int)$idEtiqueta ], 'asoc');
-                if (!empty($cat) && isset($cat[0]['id_categoria_ticket'])) {
-                    $idCategoria = (int)$cat[0]['id_categoria_ticket'];
-                } else {
-                    throw new Exception('No se pudo derivar la categoría desde la etiqueta proporcionada');
+                // Longitudes y reglas básicas
+                if (mb_strlen($titulo) < 5 || mb_strlen($titulo) > 120) {
+                    throw new Exception('El título debe tener entre 5 y 120 caracteres');
                 }
+                if (mb_strlen($descripcion) < 10 || mb_strlen($descripcion) > 2000) {
+                    throw new Exception('La descripción debe tener entre 10 y 2000 caracteres');
+                }
+                // Normalizar prioridad a ENUM permitido
+                $validP = ['Baja','Media','Alta'];
+                if (!in_array($prioridad, $validP, true)) { $prioridad = 'Media'; }
+
+                // Derivar categoría a partir de etiqueta si no fue enviada
+                if (!$idCategoria && $idEtiqueta) {
+                    // Verificar existencia de etiqueta
+                    $chkEt = $this->enlace->executePrepared("SELECT id_etiqueta FROM etiqueta WHERE id_etiqueta = ?", 'i', [ (int)$idEtiqueta ], 'asoc');
+                    if (empty($chkEt)) {
+                        throw new Exception('La etiqueta seleccionada no existe');
+                    }
+                    $sqlCat = "SELECT id_categoria_ticket FROM categoria_etiqueta WHERE id_etiqueta = ? LIMIT 1";
+                    $cat = $this->enlace->executePrepared($sqlCat, 'i', [ (int)$idEtiqueta ], 'asoc');
+                    if (!empty($cat) && isset($cat[0]['id_categoria_ticket'])) {
+                        $idCategoria = (int)$cat[0]['id_categoria_ticket'];
+                    } else {
+                        throw new Exception('No se pudo derivar la categoría desde la etiqueta proporcionada');
+                    }
+                }
+                if (!$idCategoria) {
+                    throw new Exception('Falta id_categoria o id_etiqueta para determinar la categoría');
+                }
+
+                // Si se proporcionó especialidad, validar que exista y que pertenezca a la categoría
+                if ($idEspecialidad) {
+                    $chkEsp = $this->enlace->executePrepared("SELECT id_especialidad, id_categoria FROM especialidad WHERE id_especialidad = ?", 'i', [ (int)$idEspecialidad ], 'asoc');
+                    if (empty($chkEsp)) {
+                        throw new Exception('La especialidad seleccionada no existe');
+                    }
+                    $espRow = $chkEsp[0];
+                    if (isset($espRow['id_categoria']) && (int)$espRow['id_categoria'] !== (int)$idCategoria) {
+                        throw new Exception('La especialidad seleccionada no pertenece a la categoría del ticket');
+                    }
+                }
+
+                // Insert seguro con NOW() y estado inicial "Pendiente". Incluye id_etiqueta e id_especialidad (permiten NULL)
+                $sql = "INSERT INTO ticket (titulo, descripcion, fecha_creacion, prioridad, id_estado, id_usuario, id_categoria, id_etiqueta, id_especialidad)
+                        VALUES (?, ?, NOW(), ?, (SELECT id_estado FROM estado WHERE nombre='Pendiente' LIMIT 1), ?, ?, ?, ?)";
+
+                $idTicket = $this->enlace->executePrepared_DML_last($sql, 'ssssiii', [
+                    $titulo,
+                    $descripcion,
+                    $prioridad,
+                    (string)$idUsuario,
+                    (int)$idCategoria,
+                    $idEtiqueta ? (int)$idEtiqueta : null,
+                    $idEspecialidad ? (int)$idEspecialidad : null
+                ]);
+
+                // Devolver el ticket completo (incluye etiqueta y especialidad)
+                return $this->getTicketCompletoById($idTicket);
+            } catch (Exception $e) {
+                handleException($e);
             }
-            if (!$idCategoria) {
-                throw new Exception('Falta id_categoria o id_etiqueta para determinar la categoría');
-            }
-
-            // Insert seguro con NOW() y estado inicial "Pendiente"
-            $sql = "INSERT INTO ticket (titulo, descripcion, fecha_creacion, prioridad, id_estado, id_usuario, id_categoria)
-                    VALUES (?, ?, NOW(), ?, (SELECT id_estado FROM estado WHERE nombre='Pendiente' LIMIT 1), ?, ?)";
-
-            $idTicket = $this->enlace->executePrepared_DML_last($sql, 'ssssi', [
-                $titulo,
-                $descripcion,
-                $prioridad,
-                (string)$idUsuario,
-                (int)$idCategoria
-            ]);
-
-            return $this->get($idTicket);
-        } catch (Exception $e) {
-            handleException($e);
         }
-    }
 
     public function update($objeto)
     {
@@ -613,6 +645,10 @@ class TicketModel
             if (!isset($objeto->id_ticket)) {
                 throw new Exception('El ID del ticket es obligatorio para actualizar.');
             }
+
+            // Obtener ticket actual para referencias (categoria actual si es necesario)
+            $ticketActual = $this->get($objeto->id_ticket);
+            $categoriaActual = $ticketActual->id_categoria ?? null;
 
             $sets = [];
             $types = '';
@@ -651,10 +687,11 @@ class TicketModel
                 $params[] = (int)$objeto->id_tecnico;
             }
             
-            // Si se proporciona id_etiqueta, derivar y actualizar id_categoria
+            // Si se proporciona id_etiqueta, derivar y actualizar id_categoria y asignar id_etiqueta
+            $idCategoria = null;
             if (isset($objeto->id_etiqueta)) {
                 $idEtiqueta = (int)$objeto->id_etiqueta;
-                
+
                 // Verificar que la etiqueta existe
                 $chkEt = $this->enlace->executePrepared(
                     "SELECT id_etiqueta FROM etiqueta WHERE id_etiqueta = ?", 
@@ -665,19 +702,44 @@ class TicketModel
                 if (empty($chkEt)) {
                     throw new Exception('La etiqueta seleccionada no existe');
                 }
-                
+
                 // Obtener la categoría asociada a esta etiqueta
                 $sqlCat = "SELECT id_categoria_ticket FROM categoria_etiqueta WHERE id_etiqueta = ? LIMIT 1";
                 $cat = $this->enlace->executePrepared($sqlCat, 'i', [$idEtiqueta], 'asoc');
-                
+
                 if (!empty($cat) && isset($cat[0]['id_categoria_ticket'])) {
                     $idCategoria = (int)$cat[0]['id_categoria_ticket'];
                     $sets[] = 'id_categoria = ?';
                     $types .= 'i';
                     $params[] = $idCategoria;
+
+                    // también actualizar el id_etiqueta
+                    $sets[] = 'id_etiqueta = ?';
+                    $types .= 'i';
+                    $params[] = $idEtiqueta;
                 } else {
                     throw new Exception('No se pudo derivar la categoría desde la etiqueta proporcionada');
                 }
+            }
+
+            // Si se proporciona id_especialidad, validar existencia y pertenencia a la categoría final
+            if (isset($objeto->id_especialidad)) {
+                $idEspecialidad = (int)$objeto->id_especialidad;
+                // Determinar la categoría final a validar: la derivada por etiqueta si existe, o la actual
+                $categoriaFinal = $idCategoria ?? $categoriaActual;
+
+                $chkEsp = $this->enlace->executePrepared("SELECT id_especialidad, id_categoria FROM especialidad WHERE id_especialidad = ?", 'i', [ $idEspecialidad ], 'asoc');
+                if (empty($chkEsp)) {
+                    throw new Exception('La especialidad seleccionada no existe');
+                }
+                $espRow = $chkEsp[0];
+                if ($categoriaFinal && isset($espRow['id_categoria']) && (int)$espRow['id_categoria'] !== (int)$categoriaFinal) {
+                    throw new Exception('La especialidad no pertenece a la categoría vigente del ticket');
+                }
+
+                $sets[] = 'id_especialidad = ?';
+                $types .= 'i';
+                $params[] = $idEspecialidad;
             }
 
             if (empty($sets)) {

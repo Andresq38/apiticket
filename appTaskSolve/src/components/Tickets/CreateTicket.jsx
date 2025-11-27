@@ -51,13 +51,15 @@ export default function CreateTicket() {
   const [allRoles, setAllRoles] = useState([]);
   const [clienteRolId, setClienteRolId] = useState(null);
   const [categoriaPreview, setCategoriaPreview] = useState(null);
+  const [especialidades, setEspecialidades] = useState([]);
 
   const [form, setForm] = useState({
     titulo: '',
     descripcion: '',
     prioridad: 'Media',
     id_usuario: '',
-    id_etiqueta: ''
+    id_etiqueta: '',
+    id_especialidad: ''
   });
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
   const [usuarioInfo, setUsuarioInfo] = useState(null);
@@ -151,9 +153,18 @@ export default function CreateTicket() {
       try {
         const res = await axios.get(`${apiBase}/categoria_ticket/getCategoriaByEtiqueta/${form.id_etiqueta}`, { signal: controller.signal });
         const cat = res?.data || null;
-        if (cat?.id_categoria) {
-          setCategoriaPreview({ id_categoria: cat.id_categoria, nombre: cat.nombre });
-        }
+          if (cat?.id_categoria) {
+            setCategoriaPreview({ id_categoria: cat.id_categoria, nombre: cat.nombre });
+            // cargar especialidades relacionadas y ordenarlas ascendente por id
+            try {
+              const espRes = await axios.get(`${apiBase}/categoria_ticket/getEspecialidades/${cat.id_categoria}`, { signal: controller.signal });
+              const list = Array.isArray(espRes.data) ? espRes.data : (espRes.data?.data || []);
+              list.sort((a, b) => (Number(a.id_especialidad ?? a.id ?? 0) - Number(b.id_especialidad ?? b.id ?? 0)));
+              setEspecialidades(list);
+            } catch (e) {
+              setEspecialidades([]);
+            }
+          }
       } catch (e) {
         // silencioso
       }
@@ -193,7 +204,8 @@ export default function CreateTicket() {
         descripcion: form.descripcion,
         prioridad: form.prioridad,
         id_usuario: form.id_usuario,
-        id_etiqueta: form.id_etiqueta ? Number(form.id_etiqueta) : undefined
+        id_etiqueta: form.id_etiqueta ? Number(form.id_etiqueta) : undefined,
+        id_especialidad: form.id_especialidad ? Number(form.id_especialidad) : undefined
       });
       const created = res?.data;
       const idTicket = created?.id_ticket;
@@ -420,6 +432,33 @@ export default function CreateTicket() {
               </Tooltip>
             </Grid>
 
+            <Grid item xs={12} md={6}>
+              <Autocomplete
+                options={especialidades}
+                getOptionLabel={(opt) => {
+                  if (!opt) return '';
+                  const obj = typeof opt === 'object' ? opt : especialidades.find((e) => String(e.id_especialidad) === String(opt)) || {};
+                  const id = obj.id_especialidad ?? obj.id ?? '';
+                  const name = obj.nombre ?? obj.especialidad ?? '';
+                  return name ? `${id} - ${name}` : String(id ?? '');
+                }}
+                onChange={(_, val) => setForm((f) => ({ ...f, id_especialidad: val?.id_especialidad || '' }))}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Especialidad (opcional)"
+                    helperText={categoriaPreview ? 'Seleccione la especialidad relacionada a la categoría' : 'Se mostrará al elegir una etiqueta/categoría'}
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: <PersonOutlineIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    }}
+                  />
+                )}
+                value={especialidades.find((e) => String(e.id_especialidad) === String(form.id_especialidad)) || null}
+                isOptionEqualToValue={(o, v) => String(o.id_especialidad) === String(v.id_especialidad)}
+              />
+            </Grid>
+
             <Grid item xs={12}>
               <Autocomplete
                 options={usuarios}
@@ -573,6 +612,7 @@ export default function CreateTicket() {
           prioridad: form.prioridad,
           categoria: categoriaPreview?.nombre,
           etiqueta: etiquetas.find(e => String(e.id_etiqueta) === String(form.id_etiqueta))?.nombre,
+          especialidad: especialidades.find(es => String(es.id_especialidad) === String(form.id_especialidad))?.nombre,
           extra: [
             usuarioInfo ? { label: 'Solicitante', value: usuarioInfo.nombre } : null,
             usuarioInfo ? { label: 'Correo', value: usuarioInfo.correo } : null,

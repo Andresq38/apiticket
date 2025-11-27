@@ -59,6 +59,7 @@ export default function EditTicket() {
   const [etiquetas, setEtiquetas] = useState([]);
   const [estados, setEstados] = useState([]);
   const [categoriaPreview, setCategoriaPreview] = useState(null);
+  const [especialidades, setEspecialidades] = useState([]);
 
   const [form, setForm] = useState({
     titulo: '',
@@ -66,6 +67,7 @@ export default function EditTicket() {
     prioridad: 'Media',
     id_usuario: '',
     id_etiqueta: '',
+    id_especialidad: '',
     id_estado: '',
     estado: ''
   });
@@ -148,7 +150,8 @@ export default function EditTicket() {
             descripcion: ticketData.descripcion || '',
             prioridad: ticketData.prioridad || 'Media',
             id_usuario: ticketData.id_usuario || '',
-            id_etiqueta: ticketData.etiquetas?.[0]?.id_etiqueta || ticketData.id_etiqueta || '',
+            id_etiqueta: ticketData.etiqueta?.id_etiqueta || ticketData.id_etiqueta || '',
+            id_especialidad: ticketData.especialidad?.id_especialidad || ticketData.id_especialidad || '',
             id_estado: ticketData.id_estado || '',
             estado: ticketData.estado?.nombre || ticketData.nombre_estado || 'Pendiente'
           });
@@ -202,6 +205,15 @@ export default function EditTicket() {
         const cat = res?.data || null;
         if (cat?.id_categoria) {
           setCategoriaPreview({ id_categoria: cat.id_categoria, nombre: cat.nombre });
+          // Cargar especialidades para la categoría
+            try {
+            const espRes = await axios.get(`${apiBase}/categoria_ticket/getEspecialidades/${cat.id_categoria}`, { signal: controller.signal });
+            const espList = Array.isArray(espRes.data) ? espRes.data : (espRes.data?.data || []);
+            espList.sort((a, b) => (Number(a.id_especialidad) || 0) - (Number(b.id_especialidad) || 0));
+            setEspecialidades(espList);
+          } catch (e) {
+            setEspecialidades([]);
+          }
         }
       } catch (e) {
         // silencioso
@@ -284,6 +296,7 @@ export default function EditTicket() {
         descripcion: form.descripcion,
         prioridad: form.prioridad,
         id_etiqueta: form.id_etiqueta ? Number(form.id_etiqueta) : undefined,
+        id_especialidad: form.id_especialidad ? Number(form.id_especialidad) : undefined,
         id_estado: form.id_estado ? Number(form.id_estado) : undefined
       });
 
@@ -577,6 +590,33 @@ export default function EditTicket() {
                   placeholder="Se mostrará al elegir una etiqueta"
                 />
               </Tooltip>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Autocomplete
+                options={especialidades}
+                getOptionLabel={(opt) => {
+                  if (!opt) return '';
+                  const obj = typeof opt === 'object' ? opt : especialidades.find((e) => String(e.id_especialidad) === String(opt)) || {};
+                  const id = obj.id_especialidad ?? obj.id ?? '';
+                  const name = obj.nombre ?? obj.especialidad ?? '';
+                  return name ? `${id} - ${name}` : String(id ?? '');
+                }}
+                onChange={(_, val) => setForm((f) => ({ ...f, id_especialidad: val?.id_especialidad || '' }))}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Especialidad (opcional)"
+                    helperText={categoriaPreview ? 'Seleccione la especialidad relacionada a la categoría' : 'Se mostrará al elegir una etiqueta/categoría'}
+                    InputProps={{
+                      ...params.InputProps,
+                      startAdornment: <PersonOutlineIcon sx={{ mr: 1, color: 'primary.main' }} />
+                    }}
+                  />
+                )}
+                value={especialidades.find((e) => String(e.id_especialidad) === String(form.id_especialidad)) || null}
+                isOptionEqualToValue={(o, v) => String(o.id_especialidad) === String(v.id_especialidad)}
+              />
             </Grid>
 
             <Grid item xs={12} md={6}>
