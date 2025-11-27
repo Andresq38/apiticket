@@ -61,23 +61,39 @@ class Historial_EstadoModel
     public function getByTicket($idTicket)
     {
         try {
-            $vSql = "SELECT he.id_historial,
-                            he.id_ticket,
-                            he.id_estado_actual AS id_estado,
-                            he.id_estado_anterior,
-                            he.estado_actual_nombre AS estado_nombre,
-                            he.estado_anterior_nombre AS estado_anterior_nombre,
-                            he.fecha_cambio,
-                            he.observaciones,
-                            he.id_usuario,
-                            u.nombre AS usuario_nombre,
-                            u.correo AS usuario_correo
-                     FROM historial_estados_ext he
-                     LEFT JOIN usuario u ON he.id_usuario = u.id_usuario
-                     WHERE he.id_ticket = ?
-                     ORDER BY he.fecha_cambio ASC";
-            
-            $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idTicket]);
+            // Verificar existencia de la vista extendida y hacer fallback si no existe
+            $checkViewSql = "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'historial_estados_ext' LIMIT 1";
+            $viewExists = $this->enlace->executePrepared($checkViewSql, 's', [Config::get('DB_DBNAME')], 'asoc');
+
+            if (is_array($viewExists) && count($viewExists) > 0) {
+                $vSql = "SELECT he.id_historial,
+                                he.id_ticket,
+                                he.id_estado_actual AS id_estado,
+                                he.id_estado_anterior,
+                                he.estado_actual_nombre AS estado_nombre,
+                                he.estado_anterior_nombre AS estado_anterior_nombre,
+                                he.fecha_cambio,
+                                he.observaciones
+                         FROM historial_estados_ext he
+                         WHERE he.id_ticket = ?
+                         ORDER BY he.fecha_cambio ASC";
+                $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idTicket]);
+            } else {
+                // Fallback a tabla base historial_estados
+                $vSql = "SELECT he.id_historial,
+                                he.id_ticket,
+                                he.id_estado AS id_estado,
+                                NULL AS id_estado_anterior,
+                                e.nombre AS estado_nombre,
+                                NULL AS estado_anterior_nombre,
+                                he.fecha_cambio,
+                                he.observaciones
+                         FROM historial_estados he
+                         LEFT JOIN estado e ON e.id_estado = he.id_estado
+                         WHERE he.id_ticket = ?
+                         ORDER BY he.fecha_cambio ASC";
+                $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idTicket]);
+            }
             
             // Verificar que $vResultado no sea null antes de iterar
             if ($vResultado === null || !is_array($vResultado)) {
@@ -140,23 +156,46 @@ class Historial_EstadoModel
     public function getUltimoByTicket($idTicket)
     {
         try {
-            $vSql = "SELECT he.id_historial,
-                            he.id_ticket,
-                            he.id_estado_actual AS id_estado,
-                            he.id_estado_anterior,
-                            he.estado_actual_nombre AS estado_nombre,
-                            he.estado_anterior_nombre AS estado_anterior_nombre,
-                            he.fecha_cambio,
-                            he.observaciones,
-                            he.id_usuario,
-                            u.nombre AS usuario_nombre
-                     FROM historial_estados_ext he
-                     LEFT JOIN usuario u ON he.id_usuario = u.id_usuario
-                     WHERE he.id_ticket = ?
-                     ORDER BY he.fecha_cambio DESC
-                     LIMIT 1";
-            
-            $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idTicket]);
+            // Verificar existencia de la vista extendida y hacer fallback si no existe
+            $checkViewSql = "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'historial_estados_ext' LIMIT 1";
+            $viewExists = $this->enlace->executePrepared($checkViewSql, 's', [Config::get('DB_DBNAME')], 'asoc');
+
+            if (is_array($viewExists) && count($viewExists) > 0) {
+                $vSql = "SELECT he.id_historial,
+                                he.id_ticket,
+                                he.id_estado_actual AS id_estado,
+                                he.id_estado_anterior,
+                                he.estado_actual_nombre AS estado_nombre,
+                                he.estado_anterior_nombre AS estado_anterior_nombre,
+                                he.fecha_cambio,
+                                he.observaciones,
+                                NULL AS id_usuario,
+                                u.nombre AS usuario_nombre
+                         FROM historial_estados_ext he
+                         LEFT JOIN usuario u ON he.id_usuario = u.id_usuario
+                         WHERE he.id_ticket = ?
+                         ORDER BY he.fecha_cambio DESC
+                         LIMIT 1";
+                $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idTicket]);
+            } else {
+                $vSql = "SELECT he.id_historial,
+                                he.id_ticket,
+                                he.id_estado AS id_estado,
+                                NULL AS id_estado_anterior,
+                                e.nombre AS estado_nombre,
+                                NULL AS estado_anterior_nombre,
+                                he.fecha_cambio,
+                                he.observaciones,
+                                NULL AS id_usuario,
+                                u.nombre AS usuario_nombre
+                         FROM historial_estados he
+                         LEFT JOIN estado e ON e.id_estado = he.id_estado
+                         LEFT JOIN usuario u ON he.id_usuario = u.id_usuario
+                         WHERE he.id_ticket = ?
+                         ORDER BY he.fecha_cambio DESC
+                         LIMIT 1";
+                $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idTicket]);
+            }
             return !empty($vResultado) ? $vResultado[0] : null;
         } catch (Exception $e) {
             handleException($e);

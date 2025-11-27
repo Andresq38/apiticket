@@ -32,6 +32,7 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ErrorIcon from '@mui/icons-material/Error';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
@@ -43,6 +44,7 @@ import { getApiOrigin } from '../../utils/apiBase';
 const TICKET_DATA_HOME = [];
 
 const Home = () => {
+  const { t } = useTranslation();
   const [tickets, setTickets] = useState(TICKET_DATA_HOME);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -233,9 +235,9 @@ const Home = () => {
           borderBottomRightRadius: 8
         }
       }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '.5px' }}>Gestión de Tiquetes de Soporte</Typography>
+        <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '.5px' }}>{t('home.title')}</Typography>
         <Typography variant="body2" sx={{ mt: .5, fontWeight: 500, opacity: .9 }}>
-          Administra, prioriza y resuelve los tiquetes activos del sistema
+          {t('home.subtitle')}
         </Typography>
       </Box>
 
@@ -243,27 +245,27 @@ const Home = () => {
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 3, justifyContent: 'center' }}>
         <TextField
           size="small"
-          label="Buscar"
-          placeholder="Tiquete, título o estado"
+          label={t('home.searchLabel')}
+          placeholder={t('home.searchPlaceholder')}
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(0); }}
         />
         <FormControl size="small" sx={{ minWidth: 180 }}>
-          <InputLabel id="estado-filter-label">Estado</InputLabel>
+          <InputLabel id="estado-filter-label">{t('home.status')}</InputLabel>
           <Select
             labelId="estado-filter-label"
             value={estadoFilter}
-            label="Estado"
+            label={t('home.status')}
             onChange={(e) => { setEstadoFilter(e.target.value); setPage(0); }}
           >
-            <MenuItem value=""><em>Todos</em></MenuItem>
-            <MenuItem value="Asignado">Asignado</MenuItem>
-            <MenuItem value="En Proceso">En Proceso</MenuItem>
-            <MenuItem value="Resuelto">Resuelto</MenuItem>
-            <MenuItem value="Cerrado">Cerrado</MenuItem>
+            <MenuItem value=""><em>{t('home.all')}</em></MenuItem>
+            <MenuItem value="Asignado">{t('home.assigned')}</MenuItem>
+            <MenuItem value="En Proceso">{t('home.inProgress')}</MenuItem>
+            <MenuItem value="Resuelto">{t('home.resolved')}</MenuItem>
+            <MenuItem value="Cerrado">{t('home.closed')}</MenuItem>
           </Select>
         </FormControl>
-        <Button size="small" variant="outlined" onClick={fetchTickets} disabled={loading}>Recargar</Button>
+        <Button size="small" variant="outlined" onClick={fetchTickets} disabled={loading}>{t('home.reload')}</Button>
         <Button
           size="small"
           variant={deleteMode ? 'contained' : 'outlined'}
@@ -271,12 +273,12 @@ const Home = () => {
           startIcon={<DeleteForeverIcon />}
           onClick={() => setDeleteMode((v) => !v)}
         >
-          {deleteMode ? 'Cancelar eliminación' : 'Eliminar'}
+          {deleteMode ? t('home.cancelDelete') : t('home.delete')}
         </Button>
       </Box>
 
       <Typography variant="h5" align="center" color="text.secondary" mb={6}>
-        Consulta el estado de los tiquetes de soporte activos y recientes.
+        {t('home.description')}
       </Typography>
 
       {loading && (
@@ -290,7 +292,7 @@ const Home = () => {
 
       {!loading && !error && (
         <TableContainer sx={{ maxWidth: 1200, mx: 'auto' }}>
-          <Table size="small" aria-label="Tabla de tickets">
+          <Table size="small" aria-label={t('home.table.aria')}>
             <TableHead>
               <TableRow>
                 <TableCell sortDirection={orderBy === 'id_ticket' ? order : false}>
@@ -299,7 +301,7 @@ const Home = () => {
                     direction={orderBy === 'id_ticket' ? order : 'asc'}
                     onClick={() => handleRequestSort('id_ticket')}
                   >
-                    Tiquete
+                    {t('home.table.ticket')}
                   </TableSortLabel>
                 </TableCell>
                 <TableCell sortDirection={orderBy === 'titulo' ? order : false} sx={{ minWidth: 260 }}>
@@ -308,7 +310,7 @@ const Home = () => {
                     direction={orderBy === 'titulo' ? order : 'asc'}
                     onClick={() => handleRequestSort('titulo')}
                   >
-                    Título
+                    {t('home.table.title')}
                   </TableSortLabel>
                 </TableCell>
                 <TableCell sortDirection={orderBy === 'estado' ? order : false}>
@@ -317,7 +319,7 @@ const Home = () => {
                     direction={orderBy === 'estado' ? order : 'asc'}
                     onClick={() => handleRequestSort('estado')}
                   >
-                    Estado
+                    {t('home.table.status')}
                   </TableSortLabel>
                 </TableCell>
                 <TableCell sortDirection={orderBy === 'fecha_creacion' ? order : false}>
@@ -326,40 +328,40 @@ const Home = () => {
                     direction={orderBy === 'fecha_creacion' ? order : 'asc'}
                     onClick={() => handleRequestSort('fecha_creacion')}
                   >
-                    Creado
+                    {t('home.table.created')}
                   </TableSortLabel>
                 </TableCell>
                 <TableCell>
-                  SLA
+                  {t('home.table.sla')}
                 </TableCell>
-                <TableCell align="right">Acciones</TableCell>
+                <TableCell align="right">{t('home.table.actions')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {paginated.map((t) => {
-                const urgency = getSlaUrgency(t.sla);
+              {paginated.map((ticket) => {
+                const urgency = getSlaUrgency(ticket.sla);
                 return (
                   <TableRow
-                    key={t.id_ticket}
+                    key={ticket.id_ticket}
                     hover
                     sx={{ cursor: deleteMode ? 'default' : 'pointer' }}
-                    onClick={() => { if (!deleteMode) navigate(`/tickets/${t.id_ticket}`); }}
+                    onClick={() => { if (!deleteMode) navigate(`/tickets/${ticket.id_ticket}`); }}
                   >
-                    <TableCell width={90}>#{t.id_ticket}</TableCell>
-                    <TableCell>{t.titulo}</TableCell>
+                    <TableCell width={90}>#{ticket.id_ticket}</TableCell>
+                    <TableCell>{ticket.titulo}</TableCell>
                     <TableCell width={160}>
-                      <Chip size="small" label={t.estado} sx={{ bgcolor: getStatusColor(t.estado), color: '#fff', fontWeight: 600 }} />
+                      <Chip size="small" label={ticket.estado} sx={{ bgcolor: getStatusColor(ticket.estado), color: '#fff', fontWeight: 600 }} />
                     </TableCell>
-                    <TableCell width={160}>{t.fecha_creacion || ''}</TableCell>
+                    <TableCell width={160}>{ticket.fecha_creacion || ''}</TableCell>
                     <TableCell width={220}>
-                      {t.sla ? (
+                      {ticket.sla ? (
                         urgency ? (
                           <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, p: 0.5, px: 1, bgcolor: urgency.bgColor, borderRadius: 1, borderLeft: `4px solid ${urgency.color}` }}>
                             <Typography variant="caption" sx={{ color: urgency.color, fontWeight: 700 }}>{urgency.label}</Typography>
-                            <Typography variant="caption" color="text.secondary">{t.sla}</Typography>
+                            <Typography variant="caption" color="text.secondary">{ticket.sla}</Typography>
                           </Box>
                         ) : (
-                          <Chip size="small" variant="outlined" label={t.sla} />
+                          <Chip size="small" variant="outlined" label={ticket.sla} />
                         )
                       ) : (
                         <Typography variant="caption" color="text.secondary">N/A</Typography>
@@ -367,13 +369,13 @@ const Home = () => {
                     </TableCell>
                     <TableCell align="right">
                       {deleteMode ? (
-                        <Tooltip title={`Eliminar #${t.id_ticket}`}>
-                          <IconButton color="error" onClick={(e) => { e.stopPropagation(); requestDelete(t); }}>
+                        <Tooltip title={t('home.deleteTicket', { id: ticket.id_ticket })}>
+                          <IconButton color="error" onClick={(e) => { e.stopPropagation(); requestDelete(ticket); }}>
                             <DeleteForeverIcon />
                           </IconButton>
                         </Tooltip>
                       ) : (
-                        <Button size="small" variant="outlined" onClick={(e) => { e.stopPropagation(); navigate(`/tickets/${t.id_ticket}`); }}>Ver</Button>
+                        <Button size="small" variant="outlined" onClick={(e) => { e.stopPropagation(); navigate(`/tickets/${ticket.id_ticket}`); }}>{t('home.view')}</Button>
                       )}
                     </TableCell>
                   </TableRow>
@@ -382,7 +384,7 @@ const Home = () => {
               {paginated.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={6} align="center">
-                    <Typography variant="body2" color="text.secondary">Sin resultados</Typography>
+                    <Typography variant="body2" color="text.secondary">{t('home.noResults')}</Typography>
                   </TableCell>
                 </TableRow>
               )}
@@ -396,20 +398,20 @@ const Home = () => {
             rowsPerPage={rowsPerPage}
             onRowsPerPageChange={(e) => { setRowsPerPage(parseInt(e.target.value, 10)); setPage(0); }}
             rowsPerPageOptions={[5, 10, 25, 50]}
-            labelRowsPerPage="Filas por página"
+            labelRowsPerPage={t('home.rowsPerPage')}
           />
         </TableContainer>
       )}
 
       {/* Diálogo de confirmación */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogTitle>{t('home.confirmDeleteTitle')}</DialogTitle>
         <DialogContent>
-          ¿Seguro que deseas eliminar el tiquete #{targetTicket?.id_ticket}? Esta acción es permanente.
+          {t('home.confirmDeleteBody', { id: targetTicket?.id_ticket })}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
-          <Button color="error" variant="contained" onClick={confirmDelete}>Eliminar</Button>
+          <Button onClick={() => setConfirmOpen(false)}>{t('home.cancel')}</Button>
+          <Button color="error" variant="contained" onClick={confirmDelete}>{t('home.delete')}</Button>
         </DialogActions>
       </Dialog>
 
@@ -424,16 +426,16 @@ const Home = () => {
       <SuccessOverlay
         open={showDeleteSuccess}
         mode="delete"
-        entity="Tiquete"
-        subtitle={`El tiquete #${deletedTicketInfo?.id_ticket} ha sido eliminado correctamente.`}
+        entity={t('home.ticketEntity')}
+        subtitle={t('home.deleteSuccessSubtitle', { id: deletedTicketInfo?.id_ticket })}
         onClose={() => { setShowDeleteSuccess(false); setDeletedTicketInfo(null); }}
         actions={[{
-          label: 'Cerrar',
+          label: t('home.close'),
           onClick: () => { setShowDeleteSuccess(false); setDeletedTicketInfo(null); },
           variant: 'contained',
           color: 'error'
         }, {
-          label: 'Crear Tiquete',
+          label: t('home.createTicket'),
           onClick: () => { setShowDeleteSuccess(false); navigate('/tickets/crear'); },
           variant: 'outlined',
           color: 'error'

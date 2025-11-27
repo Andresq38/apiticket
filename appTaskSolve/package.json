@@ -23,6 +23,7 @@
     "@mui/styled-engine-sc": "^7.3.3",
     "axios": "^1.12.2",
     "date-fns": "^4.1.0",
+    "i18next": "^25.6.3",
     "jwt-decode": "^4.0.0",
     "nodemon": "^3.1.10",
     "prop-types": "^15.8.1",
@@ -32,6 +33,7 @@
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.65.0",
     "react-hot-toast": "^2.6.0",
+    "react-i18next": "^16.3.5",
     "recharts": "^3.4.1",
     "styled-components": "^6.1.19",
     "yup": "^1.7.1"

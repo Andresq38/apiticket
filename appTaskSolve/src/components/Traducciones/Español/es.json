@@ -12,5 +12,41 @@
             "technician": "Técnico"
         },
         "navigationNotImplemented": "Navegación a {{role}} aún no implementada."
+    },
+    "home": {
+        "title": "Gestión de Tiquetes de Soporte",
+        "subtitle": "Administra, prioriza y resuelve los tiquetes activos del sistema",
+        "searchLabel": "Buscar",
+        "searchPlaceholder": "Tiquete, título o estado",
+        "status": "Estado",
+        "all": "Todos",
+        "assigned": "Asignado",
+        "inProgress": "En Proceso",
+        "resolved": "Resuelto",
+        "closed": "Cerrado",
+        "reload": "Recargar",
+        "delete": "Eliminar",
+        "cancelDelete": "Cancelar eliminación",
+        "description": "Consulta el estado de los tiquetes de soporte activos y recientes.",
+        "table": {
+            "aria": "Tabla de tickets",
+            "ticket": "Tiquete",
+            "title": "Título",
+            "status": "Estado",
+            "created": "Creado",
+            "sla": "SLA",
+            "actions": "Acciones"
+        },
+        "view": "Ver",
+        "noResults": "Sin resultados",
+        "rowsPerPage": "Filas por página",
+        "confirmDeleteTitle": "Confirmar eliminación",
+        "confirmDeleteBody": "¿Seguro que deseas eliminar el tiquete #{{id}}? Esta acción es permanente.",
+        "cancel": "Cancelar",
+        "ticketEntity": "Tiquete",
+        "deleteSuccessSubtitle": "El tiquete #{{id}} ha sido eliminado correctamente.",
+        "close": "Cerrar",
+        "createTicket": "Crear Tiquete",
+        "deleteTicket": "Eliminar #{{id}}"
     }
 }

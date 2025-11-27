@@ -1,0 +1,44 @@
+[27-11-2025 01:22:11] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 01:22:11] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 01:22:14] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 01:22:14] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 03:50:57] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 03:51:01] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 03:51:01] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:00:37] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:00:37] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:05:58] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:05:58] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:06:06] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:06:06] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:08:35] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:11:54] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:16:28] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:16:28] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:18:11] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:18:11] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:22:36] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:22:36] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Table 'ticket_system.historial_estados_ext' doesn't exist
+ [27-11-2025 06:28:24] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'field list'
+ [27-11-2025 06:28:38] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'field list'
+ [27-11-2025 06:28:38] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'field list'
+ [27-11-2025 06:34:01] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:34:01] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:34:38] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:34:38] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:40:28] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:40:28] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:43:00] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:43:00] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:43:27] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:43:27] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:57:55] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 06:57:55] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 07:00:12] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 07:00:12] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 07:02:29] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 07:10:25] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 07:10:25] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 07:10:30] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [27-11-2025 07:10:30] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ 

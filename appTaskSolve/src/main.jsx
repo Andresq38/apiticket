@@ -11,6 +11,27 @@ import '@fontsource/roboto/700.css';
 import './themes/index.css';
 import { UserProvider } from './context/UserContext';
 import theme from './theme/theme';
+import i18n from "i18next";
+import { initReactI18next } from 'react-i18next';
+import enTranslations from './components/Traducciones/Inglés/en.json';
+import esTranslations from './components/Traducciones/Español/es.json';
+
+
+i18n.use(initReactI18next).init({
+  lng: 'en',
+  interpolation: {
+    escapeValue: false,  
+  },
+  resources: {
+    es: {
+      translation: esTranslations,
+    },
+    en: {
+      translation: enTranslations,
+    },
+  },
+});
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -22,3 +43,4 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     </ThemeProvider>
   </React.StrictMode>
 );
+export default i18n;

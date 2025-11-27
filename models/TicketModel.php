@@ -405,19 +405,41 @@ class TicketModel
 
             // Historial de estados (extendido con estado anterior)
             try {
-                $sqlHist = "SELECT he.id_historial,
-                                    he.id_ticket,
-                                    he.id_estado_actual AS id_estado,
-                                    he.estado_actual_nombre AS estado,
-                                    he.id_estado_anterior,
-                                    he.estado_anterior_nombre,
-                                    he.fecha_cambio,
-                                    he.observaciones
-                             FROM historial_estados_ext he
-                             WHERE he.id_ticket = ?
-                             ORDER BY he.fecha_cambio ASC";
-                $hist = $this->enlace->executePrepared($sqlHist, 'i', [(int)$idTicket]);
-                $ticket->historial_estados = is_array($hist) ? $hist : [];
+                // Verificar si la vista extendida existe antes de consultarla para evitar 500
+                $checkViewSql = "SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'historial_estados_ext' LIMIT 1";
+                $viewExists = $this->enlace->executePrepared($checkViewSql, 's', [Config::get('DB_DBNAME')], 'asoc');
+                if (is_array($viewExists) && count($viewExists) > 0) {
+                    $sqlHist = "SELECT he.id_historial,
+                                        he.id_ticket,
+                                        he.id_estado_actual AS id_estado,
+                                        he.estado_actual_nombre AS estado,
+                                        he.id_estado_anterior,
+                                        he.estado_anterior_nombre,
+                                        he.fecha_cambio,
+                                        he.observaciones
+                                 FROM historial_estados_ext he
+                                 WHERE he.id_ticket = ?
+                                 ORDER BY he.fecha_cambio ASC";
+                    $hist = $this->enlace->executePrepared($sqlHist, 'i', [(int)$idTicket]);
+                    $ticket->historial_estados = is_array($hist) ? $hist : [];
+                } else {
+                    // Fallback a tabla básica historial_estados cuando la vista no existe
+                    $sqlHistFallback = "SELECT 
+                            he.id_historial,
+                            he.id_ticket,
+                            he.id_estado AS id_estado,
+                            e.nombre AS estado,
+                            NULL AS id_estado_anterior,
+                            NULL AS estado_anterior_nombre,
+                            he.fecha_cambio,
+                            he.observaciones
+                        FROM historial_estados he
+                        LEFT JOIN estado e ON e.id_estado = he.id_estado
+                        WHERE he.id_ticket = ?
+                        ORDER BY he.fecha_cambio ASC";
+                    $hist = $this->enlace->executePrepared($sqlHistFallback, 'i', [(int)$idTicket]);
+                    $ticket->historial_estados = is_array($hist) ? $hist : [];
+                }
             } catch (Exception $e) {
                 $ticket->historial_estados = [];
             }

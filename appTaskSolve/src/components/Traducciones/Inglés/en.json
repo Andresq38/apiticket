@@ -12,5 +12,41 @@
             "technician": "Technician"
         },
         "navigationNotImplemented": "Navigation to {{role}} not yet implemented."
+    },
+    "home": {
+        "title": "Support Ticket Management",
+        "subtitle": "Manage, prioritize and resolve the system's active tickets",
+        "searchLabel": "Search",
+        "searchPlaceholder": "Ticket, title or status",
+        "status": "Status",
+        "all": "All",
+        "assigned": "Assigned",
+        "inProgress": "In Progress",
+        "resolved": "Resolved",
+        "closed": "Closed",
+        "reload": "Reload",
+        "delete": "Delete",
+        "cancelDelete": "Cancel deletion",
+        "description": "Check the status of active and recent support tickets.",
+        "table": {
+            "aria": "Tickets table",
+            "ticket": "Ticket",
+            "title": "Title",
+            "status": "Status",
+            "created": "Created",
+            "sla": "SLA",
+            "actions": "Actions"
+        },
+        "view": "View",
+        "noResults": "No results",
+        "rowsPerPage": "Rows per page",
+        "confirmDeleteTitle": "Confirm deletion",
+        "confirmDeleteBody": "Are you sure you want to delete ticket #{{id}}? This action is permanent.",
+        "cancel": "Cancel",
+        "ticketEntity": "Ticket",
+        "deleteSuccessSubtitle": "Ticket #{{id}} has been deleted successfully.",
+        "close": "Close",
+        "createTicket": "Create Ticket",
+        "deleteTicket": "Delete #{{id}}"
     }
 }
