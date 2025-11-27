@@ -1,0 +1,16 @@
+{
+    "header": {
+        "home": "Inicio",
+        "tickets": "Tiquetes",
+        "dashboard": "Panel Ejecutivo",
+        "technicians": "Equipo Técnico",
+        "categories": "Catálogo",
+        "maintenance": "Mantenimientos",
+        "ticketMenu": {
+            "administrator": "Administrador",
+            "client": "Cliente",
+            "technician": "Técnico"
+        },
+        "navigationNotImplemented": "Navegación a {{role}} aún no implementada."
+    }
+}
