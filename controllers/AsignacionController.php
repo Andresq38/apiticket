@@ -68,7 +68,14 @@ class Asignacion
         try {
             $request = new Request();
             $response = new Response();
+            
+            // Intentar obtener datos como JSON primero
             $body = $request->getJSON();
+            
+            // Si no hay JSON, intentar desde $_POST (form-urlencoded)
+            if (empty($body)) {
+                $body = (object)$_POST;
+            }
             
             if (!isset($body->id_ticket) || !isset($body->id_tecnico)) {
                 $response->toJSON([
@@ -82,8 +89,7 @@ class Asignacion
             $result = $asignacion->asignarManual(
                 $body->id_ticket,
                 $body->id_tecnico,
-                $body->justificacion ?? null,
-                $body->id_usuario_asigna ?? null
+                $body->justificacion ?? null
             );
             $response->toJSON($result);
         } catch (Exception $e) {

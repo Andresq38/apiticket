@@ -216,10 +216,10 @@ export default function AsignacionManager() {
         console.error('Error al obtener usuario:', e);
       }
       
-      // Usar AsignacionService en lugar de axios directo
+      // Usar AsignacionService con datos limpios
       const result = await AsignacionService.asignarManual({
-        id_ticket: selectedTicket.id_ticket,
-        id_tecnico: parseInt(selectedTecnico),
+        id_ticket: Number(selectedTicket.id_ticket),
+        id_tecnico: Number(selectedTecnico),
         justificacion: justificacion.trim(),
         id_usuario_asigna: idUsuarioAsigna
       });
@@ -230,9 +230,11 @@ export default function AsignacionManager() {
         console.log('✅ Asignación exitosa');
         
         // Obtener información del técnico seleccionado
-        const tecnicoAsignado = tecnicos.find(t => t.id_tecnico === parseInt(selectedTecnico));
+        const tecnicoAsignado = tecnicos.find(t => Number(t.id_tecnico) === Number(selectedTecnico));
         const nombreTecnico = tecnicoAsignado?.nombre || 'técnico';
         const correoTecnico = tecnicoAsignado?.correo || '';
+        
+        console.log('🔍 Búsqueda técnico:', { selectedTecnico, tecnicosCount: tecnicos.length, tecnicoAsignado });
         
         // Guardar datos de la asignación exitosa
         setAsignacionExitosa({
@@ -1447,7 +1449,7 @@ export default function AsignacionManager() {
                 <FormControl fullWidth>
                   <Select
                     value={selectedTecnico}
-                    onChange={(e) => setSelectedTecnico(e.target.value)}
+                    onChange={(e) => setSelectedTecnico(Number(e.target.value) || '')}
                     displayEmpty
                     sx={{ 
                       '& .MuiSelect-select': { 

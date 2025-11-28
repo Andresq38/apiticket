@@ -59,33 +59,38 @@ export default function HistorialTimeline({ historial }) {
     const configs = {
       'Pendiente': {
         icon: <HourglassEmptyIcon />,
-        color: 'warning',
+        color: 'primary',
         bgcolor: '#fff3e0',
-        borderColor: '#ff9800'
+        borderColor: '#ff9800',
+        dotColor: '#ff9800'
       },
       'Asignado': {
         icon: <AssignmentIcon />,
-        color: 'info',
+        color: 'primary',
         bgcolor: '#e3f2fd',
-        borderColor: '#2196f3'
+        borderColor: '#2196f3',
+        dotColor: '#2196f3'
       },
       'En Proceso': {
         icon: <BuildIcon />,
         color: 'primary',
         bgcolor: '#e8eaf6',
-        borderColor: '#3f51b5'
+        borderColor: '#3f51b5',
+        dotColor: '#3f51b5'
       },
       'Resuelto': {
         icon: <CheckCircleIcon />,
         color: 'success',
         bgcolor: '#e8f5e9',
-        borderColor: '#4caf50'
+        borderColor: '#4caf50',
+        dotColor: '#4caf50'
       },
       'Cerrado': {
         icon: <CloseIcon />,
         color: 'default',
         bgcolor: '#f5f5f5',
-        borderColor: '#9e9e9e'
+        borderColor: '#9e9e9e',
+        dotColor: '#9e9e9e'
       }
     };
     return configs[estadoNombre] || configs['Pendiente'];
@@ -145,14 +150,15 @@ export default function HistorialTimeline({ historial }) {
 
               <TimelineSeparator>
                 <TimelineDot 
-                  color={config.color}
                   sx={{ 
+                    backgroundColor: config.dotColor,
                     boxShadow: 3,
                     width: 48,
                     height: 48,
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    color: 'white'
                   }}
                 >
                   {config.icon}

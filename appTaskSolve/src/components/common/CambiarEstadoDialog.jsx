@@ -16,7 +16,8 @@ import {
   Chip,
   IconButton,
   LinearProgress,
-  Paper
+  Paper,
+  CircularProgress
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -100,32 +101,20 @@ export default function CambiarEstadoDialog({
       return;
     }
 
-    if (imagenes.length === 0) {
-      setError('Debes adjuntar al menos UNA imagen para cambiar el estado');
-      return;
-    }
-
     try {
       setLoading(true);
       setError('');
 
-      // Modo estricto: un solo request con imágenes y cambio de estado
-      const formData = new FormData();
-      formData.append('id_ticket', ticket.id_ticket);
-      formData.append('id_estado', parseInt(nuevoEstado));
-      formData.append('observaciones', observaciones.trim());
-      formData.append('id_usuario_remitente', user.id);
-      imagenes.forEach((file, idx) => {
-        formData.append('files[]', file);
-      });
-
-      setUploading(true);
-      const cambioResponse = await axios.post(`${apiBase}/apiticket/ticket/cambiarEstadoConImagen`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+      // Cambiar estado sin imágenes (endpoint simple)
+      const cambioResponse = await axios.post(`${apiBase}/apiticket/ticket/cambiarEstado`, {
+        id_ticket: parseInt(ticket.id_ticket),
+        id_estado: parseInt(nuevoEstado),
+        observaciones: observaciones.trim(),
+        id_usuario_remitente: user.id
       });
 
       if (!cambioResponse.data.success) {
-        throw new Error(cambioResponse.data.message || 'Error al cambiar el estado con imágenes');
+        throw new Error(cambioResponse.data.message || 'Error al cambiar el estado');
       }
 
       onSuccess && onSuccess();
@@ -216,13 +205,13 @@ export default function CambiarEstadoDialog({
           helperText="Las observaciones son obligatorias"
         />
 
-        {/* Sección de imágenes */}
-        <Box sx={{ mb: 2 }}>
+        {/* Sección de imágenes - OPCIONAL */}
+        <Box sx={{ mb: 2, p: 2, bgcolor: 'grey.100', borderRadius: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-            Adjuntar Imágenes * (Obligatorio: mínimo 1 imagen)
+            📎 Adjuntar Imágenes (Opcional)
           </Typography>
           <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
-            Formatos: JPG, PNG, GIF, PDF | Tamaño máximo: 5MB por archivo
+            Puedes agregar imágenes si lo deseas. Formatos: JPG, PNG, GIF, PDF | Máx: 5MB
           </Typography>
 
           <Button
@@ -281,12 +270,6 @@ export default function CambiarEstadoDialog({
               ))}
             </Paper>
           )}
-
-          {imagenes.length === 0 && (
-            <Alert severity="warning">
-              ⚠️ Debes adjuntar al menos una imagen para documentar el cambio de estado
-            </Alert>
-          )}
         </Box>
 
         {uploading && (
@@ -303,7 +286,7 @@ export default function CambiarEstadoDialog({
         <Button
           variant="contained"
           onClick={handleSubmit}
-          disabled={loading || !nuevoEstado || !observaciones.trim() || imagenes.length === 0}
+          disabled={loading || !nuevoEstado || !observaciones.trim()}
           startIcon={loading ? <CircularProgress size={20} /> : <CheckCircleIcon />}
         >
           {loading ? 'Procesando...' : 'Confirmar Cambio'}

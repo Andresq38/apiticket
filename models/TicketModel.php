@@ -230,9 +230,13 @@ class TicketModel
             $sqlUpdate = "UPDATE ticket SET id_estado = ? WHERE id_ticket = ?";
             $this->enlace->executePrepared_DML($sqlUpdate, 'ii', [$nuevoEstado, (int)$idTicket]);
 
-            // 7. Insertar en historial_estados CON ID_USUARIO para trazabilidad
-            $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones, id_usuario) VALUES (?, ?, ?, ?)";
-            $this->enlace->executePrepared_DML($sqlHistorial, 'iiss', [ (int)$idTicket, $nuevoEstado, $observaciones, $idUsuarioRemitente ]);
+            // 7. Insertar en historial_estados
+            $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones) VALUES (?, ?, ?)";
+            $this->enlace->executePrepared_DML($sqlHistorial, 'iis', [ 
+                (int)$idTicket, 
+                $nuevoEstado, 
+                $observaciones
+            ]);
             // Obtener id_historial recién creado (para validaciones posteriores si se requiere)
             $idHistorialRow = $this->enlace->ExecuteSQL("SELECT LAST_INSERT_ID() AS id_historial");
             $idHistorial = isset($idHistorialRow[0]) ? (int)$idHistorialRow[0]->id_historial : null;
@@ -241,21 +245,6 @@ class TicketModel
             if ($nuevoEstado === 5) {
                 $sqlCierre = "UPDATE ticket SET fecha_cierre = NOW() WHERE id_ticket = ?";
                 $this->enlace->executePrepared_DML($sqlCierre, 'i', [(int)$idTicket]);
-            }
-
-            // VALIDACIÓN CRÍTICA DE IMÁGENES: Para avanzar a cualquier estado (excepto Pendiente→Asignado)
-            // se exige que el historial recién creado tenga al menos una imagen asociada.
-            // NOTA: Esta validación se aplica DESPUÉS de crear el historial pero ANTES de confirmar.
-            // El endpoint cambiarEstadoConImagen debe usarse para garantizar esto.
-            if ($estadoActual !== 1 || $nuevoEstado !== 2) {
-                // Para cualquier transición que NO sea Pendiente→Asignado, validar imágenes
-                $sqlCountImgs = "SELECT COUNT(*) AS total FROM historial_imagen hi
-                                 WHERE hi.id_historial_estado = ?";
-                $resImg = $this->enlace->executePrepared($sqlCountImgs, 'i', [ (int)$idHistorial ]);
-                $totalImgs = isset($resImg[0]) ? (int)$resImg[0]->total : 0;
-                if ($totalImgs === 0) {
-                    throw new Exception('ADVERTENCIA: Debe usar el endpoint /cambiarEstadoConImagen para adjuntar evidencia obligatoria. No se permiten cambios de estado sin imágenes documentales (excepto asignación automática).');
-                }
             }
 
             // 9. GENERAR NOTIFICACIONES
@@ -631,6 +620,11 @@ class TicketModel
                     $idEtiqueta ? (int)$idEtiqueta : null,
                     $idEspecialidad ? (int)$idEspecialidad : null
                 ]);
+
+                // Insertar registro inicial en historial_estados (Pendiente)
+                $sqlHistorial = "INSERT INTO historial_estados (id_ticket, id_estado, observaciones) 
+                                 VALUES (?, (SELECT id_estado FROM estado WHERE nombre='Pendiente' LIMIT 1), 'Ticket creado')";
+                $this->enlace->executePrepared_DML($sqlHistorial, 'i', [(int)$idTicket]);
 
                 // Devolver el ticket completo (incluye etiqueta y especialidad)
                 return $this->getTicketCompletoById($idTicket);

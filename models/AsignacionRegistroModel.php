@@ -23,7 +23,7 @@ class AsignacionRegistroModel
      * @param string|null $idUsuarioAsigna ID del usuario que asigna (solo para manuales)
      * @return array Resultado de la operación
      */
-    public function registrar($idTicket, $idTecnico, $metodo, $justificacion, $puntajeCalculado = null, $idUsuarioAsigna = null)
+    public function registrar($idTicket, $idTecnico, $metodo, $justificacion, $puntajeCalculado = null)
     {
         try {
             if (!in_array($metodo, ['Automatica', 'Manual'])) {
@@ -31,7 +31,7 @@ class AsignacionRegistroModel
             }
 
             $sql = "INSERT INTO asignacion 
-                    (id_ticket, id_tecnico, fecha_asignacion, metodo, justificacion, puntaje_calculado, id_usuario_asigna)
+                    (id_ticket, id_tecnico, fecha_asignacion, metodo, justificacion, puntaje_calculado)
                     VALUES (?, ?, NOW(), ?, ?, ?, ?)";
             
             $idAsignacion = $this->enlace->executePrepared_DML_last($sql, 'iissis', [
@@ -39,8 +39,7 @@ class AsignacionRegistroModel
                 (int)$idTecnico,
                 $metodo,
                 $justificacion,
-                $puntajeCalculado,
-                $idUsuarioAsigna
+                $puntajeCalculado
             ]);
 
             return [

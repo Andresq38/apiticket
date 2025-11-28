@@ -4,6 +4,17 @@ import { getApiOrigin } from '../utils/apiBase';
 const apiBase = getApiOrigin();
 const BASE_URL = `${apiBase}/apiticket/asignacion`;
 
+// Crear una instancia de axios con configuración específica
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  transformRequest: [function(data) {
+    return JSON.stringify(data);
+  }]
+});
+
 /**
  * AsignacionService - Servicio centralizado para asignación de tickets
  * 
@@ -43,9 +54,12 @@ class AsignacionService {
    */
   async asignarManual(asignacionData) {
     try {
-      const response = await axios.post(`${BASE_URL}/manual`, asignacionData);
+      console.log('🔵 AsignacionService.asignarManual - Enviando:', asignacionData);
+      const response = await axiosInstance.post('/manual', asignacionData);
+      console.log('🔵 AsignacionService.asignarManual - Respuesta:', response.data);
       return response.data;
     } catch (error) {
+      console.error('🔴 AsignacionService.asignarManual - Error:', error);
       // Si el backend devuelve un error con mensaje, extraerlo
       if (error.response?.data) {
         return error.response.data;

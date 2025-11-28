@@ -4,6 +4,8 @@ class Request
     public $params;
     public $reqMethod;
     public $contentType;
+    private static $cachedInput = null;
+    private static $inputRead = false;
 
     public function __construct($params = [])
     {
@@ -49,8 +51,13 @@ class Request
 
     public function getJSON()
     {
-
-        $content = trim(file_get_contents("php://input"));
+        // Cachear el input porque php://input solo se puede leer una vez
+        if (!self::$inputRead) {
+            self::$cachedInput = trim(file_get_contents("php://input"));
+            self::$inputRead = true;
+        }
+        
+        $content = self::$cachedInput;
         $decoded = json_decode($content);
 
         return $decoded;

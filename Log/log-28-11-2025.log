@@ -1,0 +1,25 @@
+[28-11-2025 06:12:20] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 06:34:14] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 06:38:53] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 06:40:45] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 06:51:59] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Column count doesn't match value count at row 1
+ [28-11-2025 07:18:42] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Column count doesn't match value count at row 1
+ [28-11-2025 07:19:57] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 07:20:40] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 07:22:01] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Column count doesn't match value count at row 1
+ [28-11-2025 07:24:35] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Column count doesn't match value count at row 1
+ [28-11-2025 07:26:51] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 154 - Message: Table 'ticket_system.asignacion' doesn't exist
+ [28-11-2025 07:31:10] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 154 - Message: Column count doesn't match value count at row 1
+ [28-11-2025 07:32:20] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 154 - Message: Column count doesn't match value count at row 1
+ [28-11-2025 07:36:18] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 154 - Message: Column count doesn't match value count at row 1
+ [28-11-2025 07:41:32] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 154 - Message: Column count doesn't match value count at row 1
+ [28-11-2025 07:47:38] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 07:51:21] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 07:55:54] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 08:01:00] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 08:02:11] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 130 - Message: Unknown column 'id_usuario' in 'field list'
+ [28-11-2025 08:19:41] [PC] error: File: C:\xampp\htdocs\apiticket\models\AsignacionModel.php - line: 150 - Message: foreach() argument must be of type array|object, null given
+ [28-11-2025 08:19:53] [PC] error: File: C:\xampp\htdocs\apiticket\models\AsignacionModel.php - line: 150 - Message: foreach() argument must be of type array|object, null given
+ [28-11-2025 08:21:13] [PC] error: File: C:\xampp\htdocs\apiticket\models\AsignacionModel.php - line: 150 - Message: foreach() argument must be of type array|object, null given
+ [28-11-2025 08:30:41] [PC] error: File: C:\xampp\htdocs\apiticket\models\AsignacionModel.php - line: 154 - Message: foreach() argument must be of type array|object, null given
+ 
