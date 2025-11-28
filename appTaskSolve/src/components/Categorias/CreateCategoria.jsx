@@ -289,7 +289,7 @@ export default function CreateCategoria({
                   />
                     <LabelIcon fontSize="small" sx={{ mr: 1, color: 'success.main' }} />
                     <Box sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                      {`${option.id_etiqueta} - ${option.nombre}`}
+                      {option.nombre || ''}
                     </Box>
                 </li>
               )}
@@ -353,7 +353,7 @@ export default function CreateCategoria({
                   />
                     <WorkIcon fontSize="small" sx={{ mr: 1, color: 'info.main' }} />
                     <Box sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                      {`${option.id_especialidad} - ${option.nombre}`}
+                      {option.nombre || ''}
                     </Box>
                 </li>
               )}
@@ -442,7 +442,7 @@ export default function CreateCategoria({
                           <Chip
                             key={etq.id_etiqueta}
                             icon={<LabelIcon />}
-                            label={`${etq.id_etiqueta} - ${etq.nombre || etq.etiqueta || 'Sin nombre'}`}
+                            label={`${etq.nombre || etq.etiqueta || 'Sin nombre'}`}
                             onDelete={() => setForm(f => ({ ...f, etiquetas: f.etiquetas.filter(e => e.id_etiqueta !== etq.id_etiqueta) }))}
                             color="success"
                             variant="outlined"
@@ -515,7 +515,7 @@ export default function CreateCategoria({
                           <Chip
                             key={esp.id_especialidad}
                             icon={<WorkIcon />}
-                            label={`${esp.id_especialidad} - ${esp.nombre || esp.especialidad || 'Sin nombre'}`}
+                            label={`${esp.nombre || esp.especialidad || 'Sin nombre'}`}
                             onDelete={() => setForm(f => ({ ...f, especialidades: f.especialidades.filter(e => e.id_especialidad !== esp.id_especialidad) }))}
                             color="info"
                             variant="outlined"

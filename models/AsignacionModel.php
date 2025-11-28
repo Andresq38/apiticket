@@ -377,6 +377,26 @@ class AsignacionModel
             $sqlCarga = "UPDATE tecnico SET carga_trabajo = carga_trabajo + 1 WHERE id_tecnico = ?";
             $this->enlace->executePrepared_DML($sqlCarga, 'i', [(int)$idTecnico]);
 
+            // Registrar auditoría de asignación en tabla 'asignacion'
+            $sqlAuditoria = "INSERT INTO asignacion (id_ticket, id_tecnico, metodo, justificacion, puntaje_calculado, id_usuario_asigna)
+                             VALUES (?, ?, ?, ?, ?, ?)";
+            // Para asignación automática, el usuario asigna es el sistema (ID '1-ADMIN' si existe) o null
+            $idUsuarioAsigna = ($metodo === 'Automatica') ? null : (isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : null);
+            $this->enlace->executePrepared_DML($sqlAuditoria, 'iissis', [
+                (int)$idTicket,
+                (int)$idTecnico,
+                $metodo,
+                $justificacion,
+                $puntajeCalculado !== null ? (int)$puntajeCalculado : null,
+                $idUsuarioAsigna
+            ]);
+            // CRÍTICO: Generar notificaciones al técnico Y al cliente
+            // Sistema automático como remitente (usuario ID 1 - Administrador por defecto)
+            require_once 'NotificacionModel.php';
+            $notifModel = new NotificacionModel();
+            $notifModel->notificarCambioEstado($idTicket, 1, 'Asignado', $justificacion);
+
+
             return [
                 'success' => true,
                 'id_ticket' => $idTicket,

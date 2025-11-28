@@ -41,7 +41,7 @@ export function TicketUploadImage() {
   });
 
   const [error, setError] = useState("");
-  const onError = (errors, e) => console.log(errors, e);
+  const onError = (errors, e) => { /* Validación fallida */ };
   
   // Lista de tickets
   const [dataTicket, setDataTicket] = useState({});
@@ -50,13 +50,11 @@ export function TicketUploadImage() {
   useEffect(() => {
     TicketService.getTickets()
       .then((response) => {
-        console.log(response);
         setDataTicket(response.data);
         setLoadedTicket(true);
       })
       .catch((error) => {
         if (error instanceof SyntaxError) {
-          console.log(error);
           setError(error);
           setLoadedTicket(false);
           throw new Error("Respuesta no válida del servidor");
@@ -78,9 +76,6 @@ export function TicketUploadImage() {
 
   // Acción submit
   const onSubmit = (DataForm) => {
-    console.log("Formulario:");
-    console.log(DataForm);
-
     try {
       if (ticketSchema.isValid()) {
         // Creamos un FormData para enviar el archivo
@@ -90,7 +85,6 @@ export function TicketUploadImage() {
         // Subir imagen para ticket
         ImageService.createImage(formData)
           .then((response) => {
-            console.log(response);
             setError(response.error);
             
             // Respuesta al usuario de creación
@@ -105,7 +99,6 @@ export function TicketUploadImage() {
           })
           .catch((error) => {
             if (error instanceof SyntaxError) {
-              console.log(error);
               setError(error);
               throw new Error("Respuesta no válida del servidor");
             }
@@ -116,7 +109,7 @@ export function TicketUploadImage() {
     }
   };
 
-  if (error) return <p>Error: {error.message}</p>;
+  if (error) return <p>Error al cargar: {error.message}</p>;
   
   return (
     <>

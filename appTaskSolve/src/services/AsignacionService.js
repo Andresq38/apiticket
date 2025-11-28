@@ -54,9 +54,7 @@ class AsignacionService {
    */
   async asignarManual(asignacionData) {
     try {
-      console.log('🔵 AsignacionService.asignarManual - Enviando:', asignacionData);
       const response = await axiosInstance.post('/manual', asignacionData);
-      console.log('🔵 AsignacionService.asignarManual - Respuesta:', response.data);
       return response.data;
     } catch (error) {
       console.error('🔴 AsignacionService.asignarManual - Error:', error);

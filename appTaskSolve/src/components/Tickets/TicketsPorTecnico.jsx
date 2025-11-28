@@ -109,10 +109,6 @@ const TicketsPorTecnico = () => {
   });
   const filteredEvents = events.filter(Boolean);
 
-  if (process.env.NODE_ENV !== 'production') {
-    console.debug('TicketsPorTecnico - events for calendar:', filteredEvents);
-  }
-
   const eventStyleGetter = (event) => ({
     style: {
       backgroundColor: '#d32f2f', // change this color to adjust calendar event color for técnicos
@@ -306,8 +302,8 @@ const TicketsPorTecnico = () => {
                 style={{ height: '100%' }}
                 date={calendarDate}
                 toolbar={true}
-                onNavigate={(date, view) => { console.debug('TicketsPorTecnico Calendar navigate:', date, view); setCalendarDate(date); }}
-                onView={(view) => console.debug('TicketsPorTecnico Calendar view:', view)}
+                onNavigate={(date, view) => { setCalendarDate(date); }}
+                onView={(view) => { /* view changed */ }}
                 defaultView="month"
                 views={["month", "week", "day"]}
                 eventPropGetter={eventStyleGetter}

@@ -438,7 +438,7 @@ export default function CreateTecnico() {
                         />
                         <WorkIcon fontSize="small" sx={{ mr: 1, color: 'info.main' }} />
                         <Box sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                          {`${option.id_especialidad} - ${option.nombre}`}
+                          {option.nombre || ''}
                         </Box>
                       </li>
                     )}
@@ -524,7 +524,7 @@ export default function CreateTecnico() {
                           <Chip
                             key={esp.id_especialidad}
                             icon={<WorkIcon />}
-                            label={`${esp.id_especialidad} - ${esp.nombre}`}
+                            label={esp.nombre || ''}
                             onDelete={() => {
                               const updated = (watch('especialidades') || []).filter(e => e.id_especialidad !== esp.id_especialidad);
                               const formVals = watch();

@@ -87,16 +87,11 @@ export default function AsignacionManager() {
       setLoading(true);
       setError(null);
       
-      console.log('🔄 Recargando datos de asignaciones...');
-      
       // Usar AsignacionService en lugar de axios directo
       const [tickets, tecnicos] = await Promise.all([
         AsignacionService.getTicketsPendientes(),
         AsignacionService.getTecnicosDisponibles()
       ]);
-
-      console.log('📋 Tickets recibidos:', tickets?.length || 0);
-      console.log('👥 Técnicos recibidos:', tecnicos?.length || 0);
 
       // Validar que las respuestas sean arrays válidos
       const ticketsArray = Array.isArray(tickets) ? tickets : [];
@@ -104,13 +99,6 @@ export default function AsignacionManager() {
       
       setTicketsPendientes(ticketsArray);
       setTecnicos(tecnicosArray);
-      
-      // No mostrar error si simplemente no hay datos
-      if (ticketsArray.length === 0 && tecnicosArray.length === 0) {
-        console.log('⚠️ No hay tickets pendientes ni técnicos disponibles en este momento');
-      }
-      
-      console.log('✅ Datos actualizados correctamente');
     } catch (err) {
       console.error('❌ Error al cargar datos:', err);
       // Solo mostrar error si es un problema de conexión real, no si simplemente no hay datos
@@ -223,18 +211,12 @@ export default function AsignacionManager() {
         justificacion: justificacion.trim(),
         id_usuario_asigna: idUsuarioAsigna
       });
-
-      console.log('📤 Resultado de asignación:', result);
       
       if (result.success) {
-        console.log('✅ Asignación exitosa');
-        
         // Obtener información del técnico seleccionado
         const tecnicoAsignado = tecnicos.find(t => Number(t.id_tecnico) === Number(selectedTecnico));
         const nombreTecnico = tecnicoAsignado?.nombre || 'técnico';
         const correoTecnico = tecnicoAsignado?.correo || '';
-        
-        console.log('🔍 Búsqueda técnico:', { selectedTecnico, tecnicosCount: tecnicos.length, tecnicoAsignado });
         
         // Guardar datos de la asignación exitosa
         setAsignacionExitosa({
@@ -255,7 +237,6 @@ export default function AsignacionManager() {
         
         // La recarga se hará cuando el usuario cierre el modal de éxito
       } else {
-        console.log('❌ Error en asignación:', result.message);
         // Mostrar el mensaje específico del backend
         setSnackbar({
           open: true,
@@ -267,7 +248,6 @@ export default function AsignacionManager() {
           result.message.includes('estado Pendiente') || 
           result.message.includes('ya tiene un técnico')
         )) {
-          console.log('🔄 Ticket ya no disponible, cerrando modal y recargando...');
           setOpenManual(false);
           setTimeout(() => fetchData(), 300);
         }
@@ -291,27 +271,17 @@ export default function AsignacionManager() {
   };
 
   const getTecnicosConEspecialidad = (idCategoria) => {
-    console.log('=== DEBUG ASIGNACIÓN TÉCNICOS ===');
-    console.log('ID Categoría buscada:', idCategoria);
-    console.log('Total técnicos disponibles:', tecnicos.length);
-    
     const filtered = tecnicos.filter(tec => {
       const tieneEspecialidad = tec.especialidades?.some(esp => {
         // La especialidad solo tiene id_categoria (según schema y backend)
         const match = parseInt(esp.id_categoria) === parseInt(idCategoria);
         return match;
       });
-      if (tec.especialidades?.length > 0) {
-        console.log(`Técnico ${tec.nombre}: ${tec.especialidades.length} especialidades, match: ${tieneEspecialidad}`);
-      }
       return tieneEspecialidad;
     });
     
-    console.log('Técnicos con especialidad requerida:', filtered.length);
-    
     // Fallback: si no hay técnicos con la especialidad, mostrar todos los disponibles
     if (filtered.length === 0) {
-      console.warn('⚠️ No hay técnicos con la especialidad. Mostrando todos los disponibles.');
       return tecnicos.filter(t => t.disponibilidad);
     }
     

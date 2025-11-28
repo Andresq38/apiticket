@@ -40,11 +40,8 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-    console.log('🔐 Intentando login con:', email);
     try {
       const user = await login(email, password);
-      console.log('✅ Login exitoso, usuario:', user);
-      console.log('📍 Navegando a:', getFrom(location.state));
       navigate(getFrom(location.state), { replace: true });
     } catch (err) {
       console.error('❌ Error en login:', err);

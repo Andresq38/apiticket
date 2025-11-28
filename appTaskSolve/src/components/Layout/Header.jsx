@@ -110,7 +110,6 @@ const Header = () => {
       navigate("/tickets/cliente");
     } else {
       const msg = t("header.navigationNotImplemented", { role });
-      console.log(msg);
       setMessage(msg);
       setTimeout(() => setMessage(""), 3000);
     }

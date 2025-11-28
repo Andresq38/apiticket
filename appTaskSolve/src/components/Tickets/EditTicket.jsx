@@ -519,16 +519,15 @@ export default function EditTicket() {
                 getOptionLabel={(opt) => {
                   if (!opt) return '';
                   const obj = typeof opt === 'object' ? opt : etiquetas.find((e) => String(e.id_etiqueta) === String(opt)) || {};
-                  const id = obj.id_etiqueta ?? obj.id ?? '';
                   const name = obj.nombre ?? obj.label ?? obj.etiqueta ?? '';
-                  return name ? `${id} - ${name}` : String(id ?? '');
+                  return String(name || '');
                 }}
                 renderOption={(props, option) => (
                   <li {...props} key={option.id_etiqueta ?? option.id} style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, py: 1 }}>
                       <LabelOutlinedIcon sx={{ color: 'primary.main', flexShrink: 0, mt: 0.5 }} />
                       <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                        {`${option.id_etiqueta ?? option.id} - ${option.nombre ?? option.label ?? ''}`}
+                        {option.nombre ?? option.label ?? ''}
                       </Typography>
                     </Box>
                   </li>
@@ -553,9 +552,7 @@ export default function EditTicket() {
                 onChange={(_, val) => setForm((f) => ({ ...f, id_etiqueta: val?.id_etiqueta || '' }))}
                 renderInput={(params) => {
                   const selectedEtiqueta = etiquetas.find((e) => String(e.id_etiqueta) === String(form.id_etiqueta));
-                  const displayText = selectedEtiqueta 
-                    ? `${selectedEtiqueta.id_etiqueta} - ${selectedEtiqueta.nombre || ''}`
-                    : '';
+                  const displayText = selectedEtiqueta ? `${selectedEtiqueta.nombre || ''}` : '';
                   
                   return (
                     <TextField
@@ -582,7 +579,7 @@ export default function EditTicket() {
                 <TextField
                   fullWidth
                   label="Categoría (derivada)"
-                  value={categoriaPreview ? `${categoriaPreview.id_categoria} - ${categoriaPreview.nombre}` : ''}
+                  value={categoriaPreview ? `${categoriaPreview.nombre}` : ''}
                   InputProps={{
                     readOnly: true,
                     startAdornment: <CategoryOutlinedIcon sx={{ mr: 1, color: categoriaPreview ? 'success.main' : 'text.disabled' }} />
@@ -598,9 +595,8 @@ export default function EditTicket() {
                 getOptionLabel={(opt) => {
                   if (!opt) return '';
                   const obj = typeof opt === 'object' ? opt : especialidades.find((e) => String(e.id_especialidad) === String(opt)) || {};
-                  const id = obj.id_especialidad ?? obj.id ?? '';
                   const name = obj.nombre ?? obj.especialidad ?? '';
-                  return name ? `${id} - ${name}` : String(id ?? '');
+                  return String(name || '');
                 }}
                 onChange={(_, val) => setForm((f) => ({ ...f, id_especialidad: val?.id_especialidad || '' }))}
                 renderInput={(params) => (

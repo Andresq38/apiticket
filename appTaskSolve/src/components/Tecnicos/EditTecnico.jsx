@@ -110,16 +110,11 @@ export default function EditTecnico() {
         const especialidadesData = await espRes.json();
         const rolesData = await rolesRes.json();
         
-        // Debug: Ver qué devuelve la API
-        console.log('Respuesta completa de la API:', tecnicoRes.data);
-        
         // La respuesta de axios viene en tecnicoRes.data
         // Verificar si la respuesta es un array o un objeto directo
         const tecnicoData = Array.isArray(tecnicoRes.data) 
           ? (tecnicoRes.data.length > 0 ? tecnicoRes.data[0] : null)
           : tecnicoRes.data;
-
-        console.log('Datos del técnico procesados:', tecnicoData);
 
         if (!isMounted) return;
 
@@ -180,7 +175,6 @@ export default function EditTecnico() {
 
   const onSubmit = async (v) => {
     try {
-      console.log('Datos del formulario antes de enviar:', v);
       const payload = {
         id_tecnico: parseInt(id),
         id_usuario: v.id_usuario,
@@ -189,7 +183,6 @@ export default function EditTecnico() {
         disponibilidad: v.disponibilidad ? 1 : 0,
         especialidades: (v.especialidades || []).map(e => e.id_especialidad),
       };
-      console.log('Payload a enviar:', payload);
 
       // Solo incluir password si se proporcionó
       if (v.password && v.password.trim()) {

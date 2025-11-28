@@ -40,8 +40,6 @@ export default function TecnicosList() {
       
       const res = await axios.get(`${apiBase}/apiticket/tecnico`);
       
-      console.log('Datos de técnicos:', res.data); // Para debug
-      
       // Manejar diferentes formatos de respuesta
       const tecnicosData = Array.isArray(res.data) ? res.data : (res.data?.data || []);
       // Ordenar ascendente por id_tecnico para mostrar en lista
@@ -531,19 +529,13 @@ export default function TecnicosList() {
                       >
                         {t.nombre}
                       </Typography>
-                      <Chip 
-                        label={`ID: ${t.id_tecnico}`} 
-                        size="small" 
-                        sx={{ 
-                          height: 20,
-                          fontSize: '0.65rem',
-                          fontWeight: 700,
-                          bgcolor: statusConfig.bg,
-                          color: statusConfig.color,
-                          border: `1px solid ${statusConfig.border}`,
-                          '& .MuiChip-label': { px: 0.8 }
-                        }}
-                      />
+                      {/* Ocultar ID crudo para UX más limpia */}
+                      <Box sx={{ display: 'inline-block', visibility: 'hidden' }}>
+                        <Chip 
+                          label={`ID: ${t.id_tecnico}`} 
+                          size="small" 
+                        />
+                      </Box>
                     </Box>
                   </Box>
 

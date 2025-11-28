@@ -70,7 +70,6 @@ export default function NotificacionesBadge({ userId }) {
 
         // Evento: conexión establecida
         eventSource.onopen = () => {
-          console.log('✅ SSE conectado - notificaciones en tiempo real activas');
           setConnectionStatus('connected');
           reconnectAttempts = 0; // Reset contador de reintentos
         };
@@ -79,7 +78,6 @@ export default function NotificacionesBadge({ userId }) {
         eventSource.addEventListener('notification', (event) => {
           try {
             const data = JSON.parse(event.data);
-            console.log('🔔 Nueva notificación recibida:', data);
             
             setCountNoLeidas(data.count || 0);
             
@@ -96,7 +94,7 @@ export default function NotificacionesBadge({ userId }) {
         eventSource.addEventListener('heartbeat', (event) => {
           try {
             const data = JSON.parse(event.data);
-            console.log('💓 Heartbeat SSE:', data.timestamp);
+            // Heartbeat recibido correctamente
           } catch (error) {
             console.error('Error al procesar heartbeat:', error);
           }
@@ -106,7 +104,7 @@ export default function NotificacionesBadge({ userId }) {
         eventSource.addEventListener('error', (event) => {
           try {
             const data = JSON.parse(event.data);
-            console.warn('⚠️ Error SSE del servidor:', data.message);
+            // Error SSE del servidor registrado
           } catch (error) {
             // Silenciar errores de parsing
           }
@@ -121,10 +119,8 @@ export default function NotificacionesBadge({ userId }) {
           // Intentar reconexión automática
           if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
             reconnectAttempts++;
-            console.log(`🔄 Reintentando conexión SSE (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
             reconnectTimeout = setTimeout(connectSSE, RECONNECT_INTERVAL);
           } else {
-            console.warn('⚠️ Máximo de reintentos SSE alcanzado. Usando fallback polling.');
             setConnectionStatus('disconnected');
             // Fallback: polling cada 30 segundos
             reconnectTimeout = setInterval(fetchNotificaciones, 30000);
@@ -146,7 +142,6 @@ export default function NotificacionesBadge({ userId }) {
     // Cleanup al desmontar
     return () => {
       if (eventSourceRef.current) {
-        console.log('🔌 Cerrando conexión SSE');
         eventSourceRef.current.close();
         eventSourceRef.current = null;
       }

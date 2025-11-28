@@ -112,11 +112,6 @@ const TicketsPorCliente = () => {
     };
   }).filter(Boolean);
 
-  // Debug: log events so we can confirm dates and objects
-  if (process.env.NODE_ENV !== 'production') {
-    console.debug('TicketsPorCliente - events for calendar:', events);
-  }
-
   const eventStyleGetter = (event) => ({
     style: {
       backgroundColor: '#1976d2', // change this color to adjust calendar event color
@@ -318,8 +313,8 @@ const TicketsPorCliente = () => {
                   style={{ height: '100%' }}
                 date={calendarDate}
                 toolbar={true}
-                onNavigate={(date, view) => { console.debug('TicketsPorCliente Calendar navigate:', date, view); setCalendarDate(date); }}
-                onView={(view) => console.debug('TicketsPorCliente Calendar view:', view)}
+                onNavigate={(date, view) => { setCalendarDate(date); }}
+                onView={(view) => { /* view changed */ }}
                 defaultView="month"
                 views={["month", "week", "day"]}
                 eventPropGetter={eventStyleGetter}

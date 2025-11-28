@@ -175,10 +175,20 @@ export default function TicketsList() {
                 onClick={() => navigate(`/tickets/${t['Identificador del Ticket']}`)}
               >
                 <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Tiquete #{t['Identificador del Ticket']}
-                    </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                    <Chip 
+                      label={`Tiquete #${t['Identificador del Ticket']}`}
+                      size="small"
+                      sx={{
+                        bgcolor: '#1976d2',
+                        color: 'white',
+                        fontWeight: 800,
+                        fontSize: '0.8rem',
+                        height: 28,
+                        border: '2px solid white',
+                        boxShadow: '0 2px 8px #1976d240'
+                      }}
+                    />
                     {urgency?.pulse && (
                       <Chip 
                         size="small" 
@@ -187,16 +197,24 @@ export default function TicketsList() {
                           bgcolor: urgency.color,
                           color: 'white',
                           fontWeight: 700,
-                          fontSize: '0.65rem'
+                          fontSize: '0.75rem',
+                          height: 28,
+                          border: '2px solid white',
+                          boxShadow: `0 2px 8px ${urgency.color}40`
                         }}
                       />
                     )}
                   </Box>
 
-                  <Typography variant="h6" sx={{ mb: 1.5 }}>{t['Categoría']}</Typography>
+                  <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 700 }}>{t['Categoría']}</Typography>
 
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1 }}>
-                    <Chip size="small" label={t['Estado actual']} color={statusColor(t['Estado actual'])} />
+                    <Chip 
+                      size="small" 
+                      label={t['Estado actual']} 
+                      color={statusColor(t['Estado actual'])}
+                      sx={{ fontWeight: 700, fontSize: '0.85rem', height: 26 }}
+                    />
                   </Box>
 
                   {urgency && (

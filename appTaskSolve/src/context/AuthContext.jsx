@@ -13,7 +13,6 @@ axios.defaults.baseURL = API_BASE;
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => {
     const storedToken = localStorage.getItem('authToken');
-    console.log('🔐 Token inicial desde localStorage:', storedToken ? 'EXISTE' : 'NO EXISTE');
     return storedToken;
   });
   const [user, setUser] = useState(() => {
@@ -23,8 +22,6 @@ export function AuthProvider({ children }) {
 
   // Interceptores: ya no añadimos Authorization (usamos cookies), solo reaccionamos a 401
   useEffect(() => {
-    console.log('🌐 axios.baseURL =', axios.defaults.baseURL);
-
     const reqId = axios.interceptors.request.use((config) => {
       // Leer de estado o, si faltara por timing, desde localStorage
       const currentToken = token || localStorage.getItem('authToken');
@@ -61,19 +58,12 @@ export function AuthProvider({ children }) {
 
   // Hacer login: backend devuelve token JWT y user
   const login = async (email, password) => {
-    console.log('🔑 AuthContext.login() llamado con email:', email);
     const { data } = await axios.post('/auth/login', { email, password });
-    console.log('📦 Respuesta del backend:', data);
-    console.log('🎫 Token recibido:', data.token ? 'SÍ' : 'NO');
-    console.log('👤 Usuario recibido:', data.user);
     
     setToken(data.token);
     setUser(data.user);
     localStorage.setItem('authToken', data.token);
     localStorage.setItem('authUser', JSON.stringify(data.user));
-    
-    console.log('💾 Token guardado en localStorage');
-    console.log('💾 Usuario guardado en localStorage');
     
     return data.user;
   };
