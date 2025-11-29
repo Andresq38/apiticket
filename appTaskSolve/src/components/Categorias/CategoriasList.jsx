@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import {
   Container,
@@ -33,6 +34,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 // Vista de catálogo: solo listado, sin formulario de creación
 
 const CategoriasList = () => {
+  const { t } = useTranslation();
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -103,7 +105,7 @@ const CategoriasList = () => {
         <Box sx={{ textAlign: 'center' }}>
           <CircularProgress size={60} />
           <Typography variant="body1" sx={{ mt: 2, color: 'text.secondary' }}>
-            Cargando categorías...
+            {t('categories.loading')}
           </Typography>
         </Box>
       </Container>
@@ -193,14 +195,14 @@ const CategoriasList = () => {
                 textShadow: '0 2px 6px rgba(0,0,0,0.25)',
                 fontSize: '1.55rem'
               }}>
-                Categorías de Tiquetes
+                {t('categories.title')}
               </Typography>
               <Typography variant="body2" sx={{ 
                 color: 'rgba(255, 255, 255, 0.9)', 
                 fontWeight: 600, 
                 fontSize: '0.75rem'
               }}>
-                Gestiona y organiza los diferentes tipos de tiquetes del sistema
+                {t('categories.subtitle')}
               </Typography>
             </Box>
           </Box>
@@ -230,7 +232,7 @@ const CategoriasList = () => {
             }
           }}
         >
-          {deleteMode ? 'Cancelar' : 'Eliminar'}
+          {deleteMode ? t('categories.cancel') : t('categories.delete')}
         </Button>
       </Box>
 
@@ -241,7 +243,7 @@ const CategoriasList = () => {
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : categorias.length === 0 ? (
-        <Alert severity="info">No hay categorías disponibles.</Alert>
+        <Alert severity="info">{t('categories.noCategories')}</Alert>
       ) : (
         <Grid container spacing={3}>
           {categorias.map((cat) => {
@@ -294,7 +296,7 @@ const CategoriasList = () => {
                   }} 
                 />
                 {deleteMode && (
-                  <Tooltip title={`Eliminar categoría #${cat.id_categoria}`}>
+                  <Tooltip title={t('categories.deleteTooltip', { id: cat.id_categoria })}>
                     <Button
                       size="small"
                       color="error"
@@ -381,7 +383,7 @@ const CategoriasList = () => {
                             letterSpacing: 0.5
                           }}
                         >
-                          Acuerdo de Servicio
+                          {t('categories.slaTitle')}
                         </Typography>
                         <Typography 
                           variant="body2" 
@@ -421,7 +423,7 @@ const CategoriasList = () => {
                           fontSize: '0.85rem'
                         }}
                       >
-                        Etiquetas disponibles
+                        {t('categories.availableTags')}
                       </Typography>
                     </Box>
                     <Chip 
@@ -446,14 +448,14 @@ const CategoriasList = () => {
         </Grid>
       )}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogTitle>{t('categories.confirmDeleteTitle')}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            ¿Seguro que deseas eliminar la categoría "{targetCategoria?.nombre}" (ID {targetCategoria?.id_categoria})? Esta acción no se puede deshacer.
+            {t('categories.confirmDeleteBody', { name: targetCategoria?.nombre, id: targetCategoria?.id_categoria })}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
+          <Button onClick={() => setConfirmOpen(false)}>{t('categories.cancel')}</Button>
           <Button
             color="error"
             variant="contained"
@@ -467,24 +469,24 @@ const CategoriasList = () => {
                 setDeletedInfo({ id: idDel, nombre: targetCategoria.nombre });
                 setShowDeleteSuccess(true);
               } catch (err) {
-                setSnackbar({ open: true, message: err?.response?.data?.error || err.message || 'Error al eliminar', severity: 'error' });
+                setSnackbar({ open: true, message: err?.response?.data?.error || err.message || t('categories.deleteError'), severity: 'error' });
               } finally {
                 setConfirmOpen(false);
                 setTargetCategoria(null);
               }
             }}
-          >Eliminar</Button>
+          >{t('categories.delete')}</Button>
         </DialogActions>
       </Dialog>
       <SuccessOverlay
         open={showDeleteSuccess}
         mode="delete"
-        entity="Categoría"
-        subtitle={deletedInfo ? `Se eliminó "${deletedInfo.nombre}" (ID ${deletedInfo.id}).` : undefined}
+        entity={t('categories.entity')}
+        subtitle={deletedInfo ? t('categories.deleteSuccessSubtitle', { name: deletedInfo.nombre, id: deletedInfo.id }) : undefined}
         onClose={() => setShowDeleteSuccess(false)}
         actions={[
-          { label: 'Cerrar', onClick: () => setShowDeleteSuccess(false), variant: 'contained', color: 'error' },
-          { label: 'Crear nueva', onClick: () => { setShowDeleteSuccess(false); navigate('/categorias/crear'); }, variant: 'outlined', color: 'error' }
+          { label: t('categories.close'), onClick: () => setShowDeleteSuccess(false), variant: 'contained', color: 'error' },
+          { label: t('categories.createNew'), onClick: () => { setShowDeleteSuccess(false); navigate('/categorias/crear'); }, variant: 'outlined', color: 'error' }
         ]}
       />
       <Snackbar

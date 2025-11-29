@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Container,
@@ -27,12 +28,13 @@ const rainbowShift = keyframes`
 
 export default function MantenimientosHome() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const modules = [
     {
       key: 'tecnicos',
-      title: 'Usuarios',
-      description: 'Crear usuarios (Administrador, Cliente y Técnico).',
+      title: t('maintenance.modules.tecnicos.title'),
+      description: t('maintenance.modules.tecnicos.description'),
       primary: '/tecnicos/listado',
       create: '/tecnicos/crear',
       color: 'info',
@@ -40,8 +42,8 @@ export default function MantenimientosHome() {
     },
     {
       key: 'categorias',
-      title: 'Categorías',
-      description: 'Gestionar categorías y asociar etiquetas.',
+      title: t('maintenance.modules.categorias.title'),
+      description: t('maintenance.modules.categorias.description'),
       // Abrir módulo ahora lleva al catálogo (listado)
       primary: '/categorias',
       // Crear nuevo abre la vista de mantenimiento con el formulario
@@ -51,8 +53,8 @@ export default function MantenimientosHome() {
     },
     {
       key: 'tickets',
-      title: 'Tiquetes',
-      description: 'Crear Tiquetes.',
+      title: t('maintenance.modules.tickets.title'),
+      description: t('maintenance.modules.tickets.description'),
       // Panel ahora apunta al inicio (home) solicitado
       primary: '/',
       create: '/tickets/crear',
@@ -116,14 +118,14 @@ export default function MantenimientosHome() {
                 textShadow: '0 2px 6px rgba(0,0,0,0.25)',
                 fontSize: '1.55rem'
               }}>
-                Mantenimientos
+                {t('maintenance.title')}
               </Typography>
               <Typography variant="body2" sx={{ 
                 color: 'rgba(255, 255, 255, 0.9)', 
                 fontWeight: 600, 
                 fontSize: '0.75rem'
               }}>
-                Centro de configuración: administra los bloques base del sistema antes de operar en producción.
+                {t('maintenance.subtitle')}
               </Typography>
             </Box>
           </Box>
@@ -199,7 +201,7 @@ export default function MantenimientosHome() {
                       onClick={() => navigate(m.primary)}
                       sx={{ fontWeight:700, px:2.2 }}
                     >
-                      Abrir módulo
+                      {t('maintenance.actions.openModule')}
                     </Button>
                     <Button
                       size="small"
@@ -209,7 +211,7 @@ export default function MantenimientosHome() {
                       onClick={() => navigate(m.create)}
                       sx={{ fontWeight:700, px:2 }}
                     >
-                      Crear nuevo
+                      {t('maintenance.actions.createNew')}
                     </Button>
                   </Stack>
                 </Card>
@@ -274,11 +276,11 @@ export default function MantenimientosHome() {
                     <Typography variant="h6" sx={{ fontWeight: 700, mb: .75 }}>{m.title}</Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 700, lineHeight:1.5 }}>{m.description}</Typography>
                     <Stack direction="row" spacing={1.5} sx={{ mt: 2, flexWrap:'wrap' }}>
-                      <Tooltip title="Ver panel de tickets">
-                        <Button size="small" color={m.color} variant="contained" startIcon={<OpenInNewIcon />} onClick={() => navigate(m.primary)} sx={{ fontWeight:700 }}>Panel</Button>
+                      <Tooltip title={t('maintenance.tooltips.viewPanel')}>
+                        <Button size="small" color={m.color} variant="contained" startIcon={<OpenInNewIcon />} onClick={() => navigate(m.primary)} sx={{ fontWeight:700 }}>{t('maintenance.actions.panel')}</Button>
                       </Tooltip>
-                      <Tooltip title="Crear tiquete de prueba">
-                        <Button size="small" color={m.color} variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={() => navigate(m.create)} sx={{ fontWeight:700 }}>Nuevo Tiquete</Button>
+                      <Tooltip title={t('maintenance.tooltips.createTestTicket')}>
+                        <Button size="small" color={m.color} variant="outlined" startIcon={<AddCircleOutlineIcon />} onClick={() => navigate(m.create)} sx={{ fontWeight:700 }}>{t('maintenance.actions.newTicket')}</Button>
                       </Tooltip>
                     </Stack>
                   </Box>
@@ -288,7 +290,10 @@ export default function MantenimientosHome() {
           </Grid>
         </Grid>
         <Typography variant="caption" sx={{ color: 'text.disabled', display:'block', textAlign:'center', mt: 6 }}>
-          © 2025 Sistema de Tiquetes. Desarrollado por Joseph Segura, Andres Quesada y Andres Castillo
+          {t('footer.copy', { year: new Date().getFullYear() })}
+        </Typography>
+        <Typography variant="caption" sx={{ color: 'text.disabled', display:'block', textAlign:'center' }}>
+          {t('footer.developedBy')}
         </Typography>
       </Container>
     </Box>

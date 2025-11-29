@@ -46,7 +46,277 @@
         "ticketEntity": "Ticket",
         "deleteSuccessSubtitle": "Ticket #{{id}} has been deleted successfully.",
         "close": "Close",
+        "backToHome": "Back to Home",
         "createTicket": "Create Ticket",
         "deleteTicket": "Delete #{{id}}"
+    }
+    ,
+    "createTicketForm": {
+        "titleRequired": "Ticket title is required",
+        "shortTitle": "Title too short. Minimum 5 characters. Example: \"System error\"",
+        "longTitle": "Title too long. Maximum 200 characters",
+        "descriptionRequired": "Detailed description is required",
+        "shortDescription": "Description too short. Minimum 10 characters",
+        "longDescription": "Description too long. Maximum 1000 characters",
+        "selectTag": "Please select a tag to classify the ticket",
+        "selectUser": "Please select the user requesting support",
+        "formIncomplete": "Incomplete form. Please review required fields marked with * and fix errors."
+    },
+    "tickets": {
+        "forClientTitle": "Client Tickets",
+        "adminTitle": "Tickets",
+        "ticketLabel": "Ticket",
+        "noTicketsToShow": "No tickets to show.",
+        "noTicketsForSelectedClient": "No tickets for the selected client.",
+        "selectClient": "Select Client",
+        "selectClientPlaceholder": "Select a client...",
+        "assignedPerTechnician": "Tickets assigned per technician",
+        "selectTechnician": "Select Technician",
+        "selectTechnicianPlaceholder": "Select a technician...",
+        "errors": {
+            "loadTechnicians": "Could not load technicians list",
+            "loadTicketsForTechnician": "Could not load tickets for the selected technician"
+        },
+        "observationsRequired": "Observations are required to change the ticket status",
+        "mostRecent": "Most recent",
+        "history": {
+            "title": "Full status change history",
+            "loadError": "Could not load history"
+        },
+        "loadError": "Could not load ticket information",
+        "notFound": "Ticket not found",
+        "detailsTitle": "Ticket Details #{{id}}",
+        "edit": "Edit Ticket",
+        "changeState": "Change State",
+        "changeStateError": "Error changing ticket state",
+        "stateUpdatedWithImages": "State updated with attached images",
+        "sla": {
+            "overdueTitle": "⚠️ SLA OVERDUE",
+            "overdueMessage": "This ticket has exceeded its SLA by {{hours}} hours. Immediate attention required.",
+            "criticalTitle": "🚨 SLA CRITICAL",
+            "criticalMessage": "Only {{hours}} hours left to meet the SLA. Urgent action required.",
+            "urgentTitle": "⚡ SLA URGENT",
+            "urgentMessage": "{{hours}} hours remaining until SLA expiry. High priority.",
+            "nextTitle": "⏰ SLA NEAR DUE",
+            "nextMessage": "SLA expires in {{hours}} hours. Monitor closely.",
+            "timeRemaining": "Time remaining",
+            "label": "SLA",
+            "metricsTitle": "SLA & Compliance Metrics",
+            "level": "SLA Level",
+            "response": "SLA Response",
+            "resolution": "SLA Resolution",
+            "timeRemainingTitle": "SLA Time Remaining",
+            "responseLimit": "Response Limit",
+            "resolutionLimit": "Resolution Limit",
+            "noInfo": "No SLA information available for this ticket"
+        },
+        "priority": "Priority",
+        "info": {
+            "title": "General Information"
+        },
+        "fields": {
+            "title": "Title",
+            "ticket": "Ticket",
+            "description": "Description",
+            "priority": "Priority",
+            "status": "Status",
+            "createdAt": "Created at",
+            "closedAt": "Closed at"
+        },
+        "validation": {
+            "selectTicket": "Please select a ticket",
+            "ticketRequired": "Ticket is required"
+        }
+        ,
+        "notClosed": "Not closed",
+        "closed": "Closed",
+        "inProgress": "In progress",
+        "metrics": {
+            "daysToResolve": "Days to resolution"
+        },
+        "images": {
+            "title": "Ticket Images",
+            "none": "No images associated with this ticket"
+        },
+        "clientComment": {
+            "title": "Client comment:",
+            "none": "No comments associated with this ticket."
+        }
+    ,
+        "dialog": {
+            "summaryTitle": "Ticket summary",
+            "id": "ID",
+            "title": "Title",
+            "description": "Description",
+            "noDescription": "No description",
+            "priority": "Priority",
+            "category": "Category",
+            "technician": "Technician",
+            "client": "Client",
+            "na": "N/A",
+            "notAssigned": "Not assigned"
+        }
+        ,
+        "calendarTitle": "Tickets calendar (by creation date)",
+        "calendarHint": "Events are generated from the ticket creation date. If you don't see correct dates, check the date field in the API response.",
+        "hover": {
+            "clickForSummary": "Click to view a detailed summary of this ticket."
+        }
+    },
+    "calendar": {
+        "title": "Tickets calendar (by assignment date)",
+        "description": "Events are generated from the ticket assignment date (fecha_asignacion). Only events with an explicit assignment date are shown.",
+        "today": "Today",
+        "prev": "Prev",
+        "next": "Next",
+        "months": ["January","February","March","April","May","June","July","August","September","October","November","December"]
+    },
+    "actions": {
+        "errorLoadStates": "Error loading available states",
+        "selectStatePlease": "Please select a state",
+        "save": "Save",
+        "viewDetail": "View details",
+        "stateUpdated": "State updated successfully",
+        "errorUpdateState": "Error updating state",
+        "notFound": "Ticket not found"
+    },
+    "footer": {
+        "copy": "© {{year}} Support Ticket System. All rights reserved.",
+        "developedBy": "Developed by Joseph Segura • Andres Quesada • Andres Castillo"
+    }
+    ,
+    "status": {
+        "assigned": "Assigned",
+        "pending": "Pending",
+        "inProgress": "In Progress",
+        "resolved": "Resolved",
+        "closed": "Closed",
+        "notFound": "Ticket not found"
+    },
+    "sla": {
+        "vencido": "Overdue",
+        "critico": "Critical",
+        "urgente": "Urgent",
+        "proximo": "Next",
+        "normal": "Normal"
+    }
+,
+    "dashboard": {
+        "loading": "Loading dashboard...",
+        "title": "Executive Panel",
+        "subtitle": "Real-time monitoring of the ticket system",
+        "refresh": "Refresh data",
+        "manageAssignments": "Manage Assignments",
+        "kpi": {
+            "resolved": "Tickets Resolved",
+            "open": "Open Tickets",
+            "inProgress": "In Progress",
+            "total": "Total Tickets"
+        },
+        "distribution": {
+            "title": "Distribution by Status",
+            "subtitle": "Current status of all tickets in the system"
+        },
+        "topCategories": {
+            "title": "Top 5 Categories",
+            "subtitle": "Categories with the highest ticket counts",
+            "tickets": "tickets"
+        },
+        "trends": {
+            "title": "Annual Trend",
+            "subtitle": "Monthly resolution comparison"
+        },
+        "team": {
+            "title": "Technical Team",
+            "subtitle": "Availability and load in real time",
+            "noAssignments": "No assignments",
+            "active": "active",
+            "activePlural": "active",
+            "status": {
+                "highLoad": "High Load",
+                "working": "Working",
+                "busy": "Busy",
+                "available": "Available"
+            },
+            "loadTitle": "Current Load",
+            "specialties": "Specialties",
+            "noTechnicians": "No technicians available",
+            "noTechniciansSubtitle": "No technicians were found in the system"
+        }
+    }
+
+    ,
+    "maintenance": {
+        "title": "Maintenance",
+        "subtitle": "Configuration center: manage base blocks before operating in production.",
+        "modules": {
+            "tecnicos": {
+                "title": "Users",
+                "description": "Create users (Administrator, Client and Technician)."
+            },
+            "categorias": {
+                "title": "Categories",
+                "description": "Manage categories and associate tags."
+            },
+            "tickets": {
+                "title": "Tickets",
+                "description": "Create tickets and manage test tickets."
+            }
+        },
+        "actions": {
+            "openModule": "Open module",
+            "createNew": "Create new",
+            "panel": "Panel",
+            "newTicket": "New Ticket"
+        },
+        "tooltips": {
+            "viewPanel": "View tickets panel",
+            "createTestTicket": "Create a test ticket"
+        }
+    },
+    "technicians": {
+        "title": "Technical Team",
+        "subtitle": "Manage and monitor the specialized team",
+        "refresh": "Refresh list",
+        "new": "New",
+        "loading": "Loading technicians...",
+        "noRegistered": "No technicians registered",
+        "startByAdding": "Start by adding technicians to the system to manage assignments",
+        "createFirst": "Create First Technician",
+        "idPrefix": "ID:",
+        "noEmail": "No email",
+        "ticketsActive": "Active Tickets",
+        "noAssignments": "No assignments",
+        "oneTicket": "1 ticket",
+        "multipleTickets": "{{count}} tickets",
+        "deleteTechnicianTitle": "Delete technician #{{id}}",
+        "confirmDeleteBody": "Are you sure you want to delete technician #{{id}}? This action is permanent.",
+        "entity": "Technician",
+        "deleteSuccessSubtitle": "Technician #{{id}} has been deleted successfully.",
+        "createTechnician": "Create Technician",
+        "status": {
+            "saturated": "Saturated",
+            "busy": "Busy",
+            "working": "Working",
+            "available": "Available"
+        }
+    },
+    "categories": {
+        "title": "Categories",
+        "subtitle": "Manage and organize the different ticket types in the system",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "loading": "Loading categories...",
+        "noCategories": "No categories available.",
+        "deleteTooltip": "Delete category #{{id}}",
+        "slaTitle": "Service Level Agreement",
+        "availableTags": "Available tags",
+        "confirmDeleteTitle": "Confirm deletion",
+        "confirmDeleteBody": "Are you sure you want to delete category \"{{name}}\" (ID {{id}})? This action cannot be undone.",
+        "deleteError": "Error deleting category",
+        "entity": "Category",
+        "deleteSuccessSubtitle": "Category \"{{name}}\" (ID {{id}}) has been deleted.",
+        "close": "Close",
+        "createNew": "Create new"
     }
 }

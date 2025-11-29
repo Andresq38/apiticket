@@ -1,7 +1,7 @@
 {
     "header": {
         "home": "Inicio",
-        "tickets": "Tiquetes",
+        "tickets": "Tickets",
         "dashboard": "Panel Ejecutivo",
         "technicians": "Equipo Técnico",
         "categories": "Catálogo",
@@ -14,10 +14,10 @@
         "navigationNotImplemented": "Navegación a {{role}} aún no implementada."
     },
     "home": {
-        "title": "Gestión de Tiquetes de Soporte",
-        "subtitle": "Administra, prioriza y resuelve los tiquetes activos del sistema",
+        "title": "Gestión de Tickets de Soporte",
+        "subtitle": "Administra, prioriza y resuelve los tickets activos del sistema",
         "searchLabel": "Buscar",
-        "searchPlaceholder": "Tiquete, título o estado",
+        "searchPlaceholder": "Ticket, título o estado",
         "status": "Estado",
         "all": "Todos",
         "assigned": "Asignado",
@@ -27,10 +27,10 @@
         "reload": "Recargar",
         "delete": "Eliminar",
         "cancelDelete": "Cancelar eliminación",
-        "description": "Consulta el estado de los tiquetes de soporte activos y recientes.",
+        "description": "Consulta el estado de los tickets de soporte activos y recientes.",
         "table": {
             "aria": "Tabla de tickets",
-            "ticket": "Tiquete",
+            "ticket": "Ticket",
             "title": "Título",
             "status": "Estado",
             "created": "Creado",
@@ -41,12 +41,285 @@
         "noResults": "Sin resultados",
         "rowsPerPage": "Filas por página",
         "confirmDeleteTitle": "Confirmar eliminación",
-        "confirmDeleteBody": "¿Seguro que deseas eliminar el tiquete #{{id}}? Esta acción es permanente.",
+        "confirmDeleteBody": "¿Seguro que deseas eliminar el ticket #{{id}}? Esta acción es permanente.",
         "cancel": "Cancelar",
-        "ticketEntity": "Tiquete",
-        "deleteSuccessSubtitle": "El tiquete #{{id}} ha sido eliminado correctamente.",
+        "ticketEntity": "Ticket",
+        "deleteSuccessSubtitle": "El ticket #{{id}} ha sido eliminado correctamente.",
         "close": "Cerrar",
-        "createTicket": "Crear Tiquete",
+        "backToHome": "Volver al inicio",
+        "createTicket": "Crear Ticket",
         "deleteTicket": "Eliminar #{{id}}"
+    }
+    ,
+    "createTicketForm": {
+        "titleRequired": "El título del ticket es requerido",
+        "shortTitle": "Título muy corto. Mínimo 5 caracteres. Ejemplo: \"Error en sistema\"",
+        "longTitle": "Título muy largo. Máximo 200 caracteres",
+        "descriptionRequired": "La descripción detallada del problema es requerida",
+        "shortDescription": "Descripción muy breve. Mínimo 10 caracteres",
+        "longDescription": "Descripción muy larga. Máximo 1000 caracteres",
+        "selectTag": "Debe seleccionar una etiqueta para clasificar el ticket",
+        "selectUser": "Debe seleccionar el usuario que solicita el soporte",
+        "formIncomplete": "Formulario incompleto. Revise los campos requeridos marcados con * y corrija los errores."
+    },
+    "tickets": {
+        "forClientTitle": "Tiquetes por Cliente",
+        "selectClient": "Seleccionar Cliente",
+        "selectClientPlaceholder": "Seleccione un cliente...",
+        "assignedPerTechnician": "Tiquetes asignados por técnico",
+        "selectTechnician": "Seleccionar Técnico",
+        "selectTechnicianPlaceholder": "Seleccione un técnico...",
+        "errors": {
+            "loadTechnicians": "No se pudo cargar la lista de técnicos",
+            "loadTicketsForTechnician": "No se pudieron cargar los tiquetes del técnico seleccionado"
+        },
+        "observationsRequired": "Las observaciones son obligatorias para cambiar el estado del ticket",
+        "mostRecent": "Más reciente",
+        "history": {
+            "title": "Historial completo de cambios de estado",
+            "loadError": "No se pudo cargar el historial"
+        },
+        "loadError": "No se pudo cargar la información del ticket",
+        "notFound": "Ticket no encontrado",
+        "detailsTitle": "Detalles del Ticket #{{id}}",
+        "edit": "Editar Ticket",
+        "changeState": "Cambiar Estado",
+        "changeStateError": "Error al cambiar el estado del ticket",
+        "stateUpdatedWithImages": "Estado actualizado correctamente con imágenes adjuntas",
+        "sla": {
+            "overdueTitle": "⚠️ SLA VENCIDO",
+            "overdueMessage": "Este ticket ha excedido su SLA por {{hours}} horas. Requiere atención inmediata.",
+            "criticalTitle": "🚨 SLA CRÍTICO",
+            "criticalMessage": "Solo quedan {{hours}} horas para cumplir con el SLA. Acción urgente requerida.",
+            "urgentTitle": "⚡ SLA URGENTE",
+            "urgentMessage": "Quedan {{hours}} horas para el vencimiento del SLA. Prioridad alta.",
+            "nextTitle": "⏰ SLA PRÓXIMO A VENCER",
+            "nextMessage": "El SLA vence en {{hours}} horas. Mantener seguimiento.",
+            "timeRemaining": "Tiempo restante",
+            "label": "SLA",
+            "metricsTitle": "Métricas de SLA y Cumplimiento",
+            "level": "Nivel de SLA",
+            "response": "SLA Respuesta",
+            "resolution": "SLA Resolución",
+            "timeRemainingTitle": "Tiempo Restante SLA",
+            "responseLimit": "Límite de Respuesta",
+            "resolutionLimit": "Límite de Resolución",
+            "noInfo": "No hay información de SLA disponible para este ticket"
+        },
+        "priority": "Prioridad",
+        "info": {
+            "title": "Información General"
+        },
+        "fields": {
+            "title": "Título",
+            "ticket": "Tiquete",
+            "description": "Descripción",
+            "priority": "Prioridad",
+            "status": "Estado",
+            "createdAt": "Fecha creación",
+            "closedAt": "Fecha cierre"
+        },
+        "validation": {
+            "selectTicket": "Por favor seleccione un ticket",
+            "ticketRequired": "El ticket es requerido"
+        },
+        "notClosed": "No cerrado",
+        "closed": "Cerrado",
+        "inProgress": "En curso",
+        "metrics": {
+            "daysToResolve": "Días de resolución"
+        },
+        "images": {
+            "title": "Imágenes del Ticket",
+            "none": "No hay imágenes asociadas a este ticket"
+        },
+        "clientComment": {
+            "title": "Comentario del cliente:",
+            "none": "No hay comentarios asociados a este ticket."
+        }
+    ,
+        "dialog": {
+            "summaryTitle": "Resumen del ticket",
+            "id": "ID",
+            "title": "Título",
+            "description": "Descripción",
+            "noDescription": "Sin descripción",
+            "priority": "Prioridad",
+            "category": "Categoría",
+            "technician": "Técnico",
+            "client": "Cliente",
+            "na": "N/A",
+            "notAssigned": "No asignado"
+        },
+        "calendarTitle": "Calendario de tiquetes (por fecha de creación)",
+        "calendarHint": "Los eventos se generan desde la fecha de creación del ticket. Si no ve fechas correctas, revise el campo de fecha en la respuesta del API.",
+        "hover": {
+            "clickForSummary": "Haga clic para ver un resumen detallado de este ticket."
+        },
+        "noAssignedToTechnician": "No hay tiquetes asignados para el técnico seleccionado.",
+        "adminTitle": "Tiquetes",
+        "ticketLabel": "Tiquete",
+        "noTicketsToShow": "No hay tiquetes para mostrar.",
+        "noTicketsForSelectedClient": "No hay tickets para el cliente seleccionado."
+    }
+    ,
+    "calendar": {
+        "title": "Calendario de tiquetes (por fecha de asignación)",
+        "description": "Los eventos se generan desde la fecha de asignación del ticket (fecha_asignacion). Solo se muestran eventos con fecha de asignación explícita.",
+        "today": "Hoy",
+        "prev": "Atrás",
+        "next": "Siguiente",
+        "months": ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"]
+    }
+    ,
+    "actions": {
+        "errorLoadStates": "Error al cargar estados disponibles",
+        "selectStatePlease": "Por favor selecciona un estado",
+        "save": "Guardar",
+        "viewDetail": "Ver detalle",
+        "stateUpdated": "Estado actualizado correctamente",
+        "errorUpdateState": "Error al actualizar estado",
+        "notFound": "Ticket no encontrado"
+    }
+
+    ,
+    "footer": {
+        "copy": "© {{year}} Sistema de Tickets. Todos los derechos reservados.",
+        "developedBy": "Desarrollado por Joseph Segura • Andres Quesada • Andres Castillo"
+    }
+    ,
+    "status": {
+        "assigned": "Asignado",
+        "pending": "Pendiente",
+        "inProgress": "En Proceso",
+        "resolved": "Resuelto",
+        "closed": "Cerrado",
+        "notFound": "Ticket no encontrado"
+    },
+    "sla": {
+        "vencido": "Vencido",
+        "critico": "CRÍTICO",
+        "urgente": "URGENTE",
+        "proximo": "PRÓXIMO",
+        "normal": "NORMAL"
+    }
+,
+    "dashboard": {
+        "loading": "Cargando dashboard...",
+        "title": "Panel Ejecutivo",
+        "subtitle": "Monitoreo en tiempo real del sistema de tickets",
+        "refresh": "Actualizar datos",
+        "manageAssignments": "Gestionar Asignaciones",
+        "kpi": {
+            "resolved": "Tickets Resueltos",
+            "open": "Tickets Abiertos",
+            "inProgress": "En Proceso",
+            "total": "Total de Tickets"
+        },
+        "distribution": {
+            "title": "Distribución por Estado",
+            "subtitle": "Estado actual de todos los tickets del sistema"
+        },
+        "topCategories": {
+            "title": "Top 5 Categorías",
+            "subtitle": "Categorías con mayor cantidad de tickets",
+            "tickets": "tickets"
+        },
+        "trends": {
+            "title": "Tendencia Anual",
+            "subtitle": "Comparativa de resolución mensual"
+        },
+        "team": {
+            "title": "Equipo Técnico",
+            "subtitle": "Disponibilidad y carga en tiempo real",
+            "noAssignments": "Sin asignaciones",
+            "active": "activo",
+            "activePlural": "activos",
+            "status": {
+                "highLoad": "Alta Carga",
+                "working": "Trabajando",
+                "busy": "Ocupado",
+                "available": "Disponible"
+            },
+            "loadTitle": "Carga Actual",
+            "specialties": "Especialidades",
+            "noTechnicians": "No hay técnicos disponibles",
+            "noTechniciansSubtitle": "No se encontraron técnicos registrados en el sistema"
+        }
+    }
+
+    ,
+    "maintenance": {
+        "title": "Mantenimientos",
+        "subtitle": "Centro de configuración: administra los bloques base del sistema antes de operar en producción.",
+        "modules": {
+            "tecnicos": {
+                "title": "Usuarios",
+                "description": "Crear usuarios (Administrador, Cliente y Técnico)."
+            },
+            "categorias": {
+                "title": "Categorías",
+                "description": "Gestionar categorías y asociar etiquetas."
+            },
+            "tickets": {
+                "title": "Tiquetes",
+                "description": "Crear tiquetes y gestionar tiquetes de prueba."
+            }
+        },
+        "actions": {
+            "openModule": "Abrir módulo",
+            "createNew": "Crear nuevo",
+            "panel": "Panel",
+            "newTicket": "Nuevo Ticket"
+        },
+        "tooltips": {
+            "viewPanel": "Ver panel de tickets",
+            "createTestTicket": "Crear un ticket de prueba"
+        }
+    },
+    "technicians": {
+        "title": "Equipo Técnico",
+        "subtitle": "Gestión y monitoreo del equipo especializado",
+        "refresh": "Actualizar lista",
+        "new": "Nuevo",
+        "loading": "Cargando técnicos...",
+        "noRegistered": "No hay técnicos registrados",
+        "startByAdding": "Comienza agregando técnicos al sistema para gestionar las asignaciones",
+        "createFirst": "Crear Primer Técnico",
+        "idPrefix": "ID:",
+        "noEmail": "Sin correo",
+        "ticketsActive": "Tickets Activos",
+        "noAssignments": "Sin asignaciones",
+        "oneTicket": "1 ticket",
+        "multipleTickets": "{{count}} tickets",
+        "deleteTechnicianTitle": "Eliminar técnico #{{id}}",
+        "confirmDeleteBody": "¿Seguro que deseas eliminar el técnico #{{id}}? Esta acción es permanente.",
+        "entity": "Técnico",
+        "deleteSuccessSubtitle": "El técnico #{{id}} ha sido eliminado correctamente.",
+        "createTechnician": "Crear Técnico",
+        "status": {
+            "saturated": "Saturado",
+            "busy": "Ocupado",
+            "working": "Trabajando",
+            "available": "Disponible"
+        }
+    },
+    "categories": {
+        "title": "Categorías",
+        "subtitle": "Gestiona y organiza los diferentes tipos de tiquetes del sistema",
+        "cancel": "Cancelar",
+        "delete": "Eliminar",
+        "loading": "Cargando categorías...",
+        "noCategories": "No hay categorías disponibles.",
+        "deleteTooltip": "Eliminar categoría #{{id}}",
+        "slaTitle": "Acuerdo de Servicio",
+        "availableTags": "Etiquetas disponibles",
+        "confirmDeleteTitle": "Confirmar eliminación",
+        "confirmDeleteBody": "¿Seguro que deseas eliminar la categoría \"{{name}}\" (ID {{id}})? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la categoría",
+        "entity": "Categoría",
+        "deleteSuccessSubtitle": "Se eliminó \"{{name}}\" (ID {{id}}).",
+        "close": "Cerrar",
+        "createNew": "Crear nueva"
     }
 }

@@ -17,7 +17,8 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [userId, setUserId] = useState(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const [lang, setLang] = useState(i18n.language || 'en');
 
   // Obtener userId del localStorage
   useEffect(() => {
@@ -33,6 +34,13 @@ const Header = () => {
   }, []);
 
   const getUserId = () => userId;
+
+  const toggleLang = () => {
+    const next = (i18n.language === 'es') ? 'en' : 'es';
+    i18n.changeLanguage(next);
+    try { localStorage.setItem('lang', next); } catch (e) {}
+    setLang(next);
+  };
 
   // Función para verificar si una ruta está activa
   const isActive = (path) => {
@@ -283,6 +291,11 @@ const Header = () => {
 
         {/* Badge de Notificaciones */}
         <NotificacionesBadge userId={getUserId()} />
+
+        {/* Language switcher */}
+        <Button color="inherit" onClick={toggleLang} sx={{ ml: 1 }} aria-label="Change language">
+          { (lang || i18n.language || 'en').toUpperCase() }
+        </Button>
 
         <Menu
           anchorEl={anchorEl}

@@ -4,6 +4,7 @@ import {
   Select, MenuItem, Grid, Card, CardContent, Box, CircularProgress, Alert, Chip, useTheme, Button,
   Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 // Calendar
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import format from 'date-fns/format';
@@ -14,6 +15,7 @@ import es from 'date-fns/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import axios from 'axios';
 import { getApiOrigin } from '../../utils/apiBase';
+import { useTranslation } from 'react-i18next';
 
 const TicketsPorCliente = () => {
   const apiBase = getApiOrigin();
@@ -23,6 +25,8 @@ const TicketsPorCliente = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const theme = useTheme();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
   const locales = { 'es': es };
   const localizer = dateFnsLocalizer({ format, parse, startOfWeek, getDay, locales });
@@ -35,6 +39,17 @@ const TicketsPorCliente = () => {
     if (e.includes('cerrado')) return theme.palette.grey[500];
     return theme.palette.grey[700];
   };
+
+  const translateEstadoLabel = (estadoNombre) => {
+      if (!estadoNombre) return '';
+      const n = String(estadoNombre).toLowerCase();
+      if (n.includes('pend')) return t('status.pending');
+      if (n.includes('asign')) return t('status.assigned');
+      if (n.includes('proceso') || n.includes('en proceso')) return t('status.inProgress');
+      if (n.includes('resuel') || n.includes('resuelto')) return t('status.resolved');
+      if (n.includes('cerr')) return t('status.closed');
+      return estadoNombre;
+    };
 
   // Cargar todos los usuarios (clientes)
   useEffect(() => {
@@ -151,7 +166,7 @@ const TicketsPorCliente = () => {
         const left = Math.min(x + 12, window.innerWidth - 320);
         const top = Math.min(y + 12, window.innerHeight - 120);
         setHoverPos({ left, top });
-        setHoveredTicket({ title: event.title, msg: 'Haga clic para ver un resumen detallado de este ticket.' });
+        setHoveredTicket({ title: event.title, msg: t('tickets.hover.clickForSummary') });
         // auto-hide after 2.5s in case mouseleave didn't fire
         hoverTimeoutRef.current = setTimeout(() => { setHoveredTicket(null); setHoverPos(null); hoverTimeoutRef.current = null; }, 2500);
       }}
@@ -187,7 +202,7 @@ const TicketsPorCliente = () => {
   const CustomToolbar = (toolbarProps) => {
     const years = Array.from({ length: 9 }, (_, i) => 2020 + i); // 2020..2028
     const months = [
-      'Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+      t('calendar.months.0'),t('calendar.months.1'),t('calendar.months.2'),t('calendar.months.3'),t('calendar.months.4'),t('calendar.months.5'),t('calendar.months.6'),t('calendar.months.7'),t('calendar.months.8'),t('calendar.months.9'),t('calendar.months.10'),t('calendar.months.11')
     ];
 
     const currentDate = toolbarProps.date || new Date();
@@ -210,9 +225,9 @@ const TicketsPorCliente = () => {
     return (
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ marginLeft: 16 }}>
-          <button onClick={() => toolbarProps.onNavigate('TODAY')}>Hoy</button>
-          <button onClick={() => toolbarProps.onNavigate('PREV')}>Atrás</button>
-          <button onClick={() => toolbarProps.onNavigate('NEXT')}>Siguiente</button>
+          <button onClick={() => toolbarProps.onNavigate('TODAY')}>{t('calendar.today')}</button>
+          <button onClick={() => toolbarProps.onNavigate('PREV')}>{t('calendar.prev')}</button>
+          <button onClick={() => toolbarProps.onNavigate('NEXT')}>{t('calendar.next')}</button>
         </div>
         <div style={{ fontWeight: 600 }}>{toolbarProps.label}</div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -232,28 +247,28 @@ const TicketsPorCliente = () => {
     return null;
   };
 
-  return (
-    <Container sx={{ py: 4 }}>
+    return (
+      <Container sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom sx={{ mb: 3, color: 'primary.main', fontWeight: 700 }}>
-        Tiquetes por Cliente
+        {t('tickets.forClientTitle')}
       </Typography>
 
       <FormControl fullWidth variant="outlined" sx={{ mb: 4 }}>
-        <InputLabel id="select-usuario-label" shrink>Seleccionar Cliente</InputLabel>
+        <InputLabel id="select-usuario-label" shrink>{t('tickets.selectClient')}</InputLabel>
         <Select
           labelId="select-usuario-label"
           value={usuarioSeleccionado}
-          label="Seleccionar Cliente"
+          label={t('tickets.selectClient')}
           onChange={(e) => setUsuarioSeleccionado(e.target.value)}
           displayEmpty
           renderValue={(selected) => {
-            if (!selected) return 'Seleccione un cliente...';
+            if (!selected) return t('tickets.selectClientPlaceholder');
             const found = usuarios.find(u => String(u.id_usuario) === String(selected));
             return found ? found.nombre : selected;
           }}
         >
           <MenuItem value="" disabled>
-            Seleccione un cliente...
+            {t('tickets.selectClientPlaceholder')}
           </MenuItem>
           {usuarios.map((u) => (
             <MenuItem key={u.id_usuario} value={u.id_usuario}>{u.nombre}</MenuItem>
@@ -287,10 +302,10 @@ const TicketsPorCliente = () => {
                 >
                   <CardContent>
                     <Typography variant="h6">#{ticket.id_ticket} - {ticket.titulo}</Typography>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 1 }}>
-                      <Chip size="small" label={ticket.estado} sx={{ bgcolor: getStatusColor(ticket.estado), color: '#fff' }} />
-                      {ticket.sla && <Chip size="small" variant="outlined" label={`SLA: ${ticket.sla}`} />}
-                    </Box>
+                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mt: 1 }}>
+                                      <Chip size="small" label={translateEstadoLabel(ticket.estado)} sx={{ bgcolor: getStatusColor(ticket.estado), color: '#fff' }} />
+                                      {ticket.sla && <Chip size="small" variant="outlined" label={`${t('tickets.sla.label')}: ${ticket.sla}`} />}
+                                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
@@ -298,7 +313,7 @@ const TicketsPorCliente = () => {
         ) : (
           !loading && usuarioSeleccionado ? (
             <Grid item xs={12}>
-              <Typography color="text.secondary">No hay tickets para el cliente seleccionado.</Typography>
+              <Typography color="text.secondary">{t('tickets.noTicketsForSelectedClient')}</Typography>
             </Grid>
           ) : null
         )}
@@ -306,7 +321,7 @@ const TicketsPorCliente = () => {
 
       {/* Calendar view below the tickets list */}
       <Box sx={{ mt: 2 }}>
-        <Typography variant="h5" sx={{ mb: 2 }}>Calendario de tiquetes (por fecha de creación)</Typography>
+        <Typography variant="h5" sx={{ mb: 2 }}>{t('tickets.calendarTitle')}</Typography>
         <Card>
           <CardContent sx={{ p: 0 }}>
               <div style={{ height: 640, paddingTop: 8, paddingRight: 8, overflow: 'hidden' }}>
@@ -332,42 +347,42 @@ const TicketsPorCliente = () => {
           </CardContent>
         </Card>
         <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-          Los eventos se generan desde la fecha de creación del ticket. Si no ve fechas correctas, revise el campo de fecha en la respuesta del API.
+          {t('tickets.calendarHint')}
         </Typography>
       </Box>
       {/* Dialog summary (opens on click) */}
       <Dialog open={!!selectedTicket} onClose={() => setSelectedTicket(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Resumen del ticket</DialogTitle>
+        <DialogTitle>{t('tickets.dialog.summaryTitle')}</DialogTitle>
         <DialogContent dividers>
           {selectedTicket ? (
             <Box sx={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: 1 }}>
-              <Typography variant="subtitle2" color="text.secondary">ID</Typography>
+              <Typography variant="subtitle2" color="text.secondary">{t('tickets.dialog.id')}</Typography>
               <Typography variant="body1">{selectedTicket.id_ticket ?? selectedTicket.id}</Typography>
 
-              <Typography variant="subtitle2" color="text.secondary">Título</Typography>
+              <Typography variant="subtitle2" color="text.secondary">{t('tickets.dialog.title')}</Typography>
               <Typography variant="body1">{selectedTicket.titulo ?? selectedTicket.Título}</Typography>
 
-              <Typography variant="subtitle2" color="text.secondary">Descripción</Typography>
-              <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>{selectedTicket.descripcion ?? selectedTicket.Descripción ?? 'Sin descripción'}</Typography>
+              <Typography variant="subtitle2" color="text.secondary">{t('tickets.dialog.description')}</Typography>
+              <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>{selectedTicket.descripcion ?? selectedTicket.Descripción ?? t('tickets.dialog.noDescription')}</Typography>
 
-              <Typography variant="subtitle2" color="text.secondary">Prioridad</Typography>
-              <Typography variant="body1">{selectedTicket.prioridad ?? selectedTicket.priority ?? 'N/A'}</Typography>
+              <Typography variant="subtitle2" color="text.secondary">{t('tickets.dialog.priority')}</Typography>
+              <Typography variant="body1">{selectedTicket.prioridad ?? selectedTicket.priority ?? t('tickets.dialog.na')}</Typography>
 
-              <Typography variant="subtitle2" color="text.secondary">Categoría</Typography>
-              <Typography variant="body1">{(selectedTicket.categoria && (selectedTicket.categoria.nombre ?? selectedTicket.categoria)) || selectedTicket.categoria_descripcion || 'N/A'}</Typography>
+              <Typography variant="subtitle2" color="text.secondary">{t('tickets.dialog.category')}</Typography>
+              <Typography variant="body1">{(selectedTicket.categoria && (selectedTicket.categoria.nombre ?? selectedTicket.categoria)) || selectedTicket.categoria_descripcion || t('tickets.dialog.na')}</Typography>
 
-              <Typography variant="subtitle2" color="text.secondary">Técnico</Typography>
-              <Typography variant="body1">{(selectedTicket.tecnico && (selectedTicket.tecnico.nombre ?? selectedTicket.tecnico.nombre_usuario ?? selectedTicket.tecnico)) || 'No asignado'}</Typography>
+              <Typography variant="subtitle2" color="text.secondary">{t('tickets.dialog.technician')}</Typography>
+              <Typography variant="body1">{(selectedTicket.tecnico && (selectedTicket.tecnico.nombre ?? selectedTicket.tecnico.nombre_usuario ?? selectedTicket.tecnico)) || t('tickets.dialog.notAssigned')}</Typography>
 
-              <Typography variant="subtitle2" color="text.secondary">Cliente</Typography>
-              <Typography variant="body1">{(selectedTicket.usuario && (selectedTicket.usuario.nombre ?? selectedTicket.usuario)) || selectedTicket.id_usuario || 'N/A'}</Typography>
+              <Typography variant="subtitle2" color="text.secondary">{t('tickets.dialog.client')}</Typography>
+              <Typography variant="body1">{(selectedTicket.usuario && (selectedTicket.usuario.nombre ?? selectedTicket.usuario)) || selectedTicket.id_usuario || t('tickets.dialog.na')}</Typography>
             </Box>
           ) : null}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setSelectedTicket(null)}>Cerrar</Button>
+          <Button onClick={() => setSelectedTicket(null)}>{t('home.close')}</Button>
           {selectedTicket && (
-            <Button variant="contained" onClick={() => navigate(`/tickets/${selectedTicket.id_ticket ?? selectedTicket.id}`)}>Ver detalle</Button>
+            <Button variant="contained" onClick={() => navigate(`/tickets/${selectedTicket.id_ticket ?? selectedTicket.id}`)}>{t('actions.viewDetail')}</Button>
           )}
         </DialogActions>
       </Dialog>

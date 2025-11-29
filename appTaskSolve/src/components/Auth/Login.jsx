@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Button,
@@ -27,6 +28,7 @@ const getFrom = (state) => state?.from?.pathname || '/home';
 
 export default function Login() {
   const { login } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -293,7 +295,10 @@ export default function Login() {
             color="text.secondary"
             sx={{ display: 'block', textAlign: 'center', mt: 3 }}
           >
-            © 2025 Sistema de Tiquetes. Desarrollado por Joseph Segura, Andres Quesada y Andres Castillo
+            {t('footer.copy', { year: new Date().getFullYear() })}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
+            {t('footer.developedBy')}
           </Typography>
         </Paper>
       </Fade>

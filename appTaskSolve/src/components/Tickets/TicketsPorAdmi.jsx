@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 
 const API_BASE = "http://localhost:81/apiticket";
 
@@ -25,6 +26,7 @@ const statusColor = (estado) => {
 };
 
 export default function TicketsPorAdmi() {
+  const { t } = useTranslation();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,6 +41,17 @@ export default function TicketsPorAdmi() {
     if (e.includes("resuelto") || e.includes("resuel")) return "#2e7d32";
     if (e.includes("cerrado")) return "#9e9e9e";
     return "#616161";
+  };
+
+  const translateEstadoLabel = (estadoNombre) => {
+    if (!estadoNombre) return '';
+    const n = String(estadoNombre).toLowerCase();
+    if (n.includes('pend')) return t('status.pending');
+    if (n.includes('asign')) return t('status.assigned');
+    if (n.includes('proceso') || n.includes('en proceso')) return t('status.inProgress');
+    if (n.includes('resuel') || n.includes('resuelto')) return t('status.resolved');
+    if (n.includes('cerr')) return t('status.closed');
+    return estadoNombre;
   };
 
   useEffect(() => {
@@ -86,19 +99,19 @@ export default function TicketsPorAdmi() {
 
         setTickets(mapped);
       } catch (e) {
-        if (e.name !== "AbortError") setError(e.message || "Error al cargar");
+        if (e.name !== "AbortError") setError(e.message || t('tickets.loadError'));
       } finally {
         setLoading(false);
       }
     }
     load();
     return () => controller.abort();
-  }, []);
+  }, [t]);
 
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h2" gutterBottom sx={{ mb: 2 }}>
-        Tiquetes
+        {t('tickets.adminTitle')}
       </Typography>
 
       {loading && (
@@ -110,7 +123,7 @@ export default function TicketsPorAdmi() {
       {!!error && <Alert severity="error">{error}</Alert>}
 
       {!loading && !error && tickets.length === 0 && (
-        <Alert severity="info">No hay tiquetes para mostrar.</Alert>
+        <Alert severity="info">{t('tickets.noTicketsToShow')}</Alert>
       )}
 
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mt: 1 }}>
@@ -130,7 +143,7 @@ export default function TicketsPorAdmi() {
               >
                 <CardContent>
                   <Typography variant="subtitle2" color="text.secondary">
-                    Tiquete #{id}
+                    {t('tickets.ticketLabel')} #{id}
                   </Typography>
                   <Typography variant="h6" sx={{ mb: 1 }}>
                     {ticket.titulo}
@@ -147,7 +160,7 @@ export default function TicketsPorAdmi() {
                   >
                     <Chip
                       size="small"
-                      label={ticket.estado}
+                      label={translateEstadoLabel(ticket.estado)}
                       sx={{
                         bgcolor: getStatusColor(ticket.estado),
                         color: "#fff",

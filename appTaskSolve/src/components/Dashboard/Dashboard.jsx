@@ -65,8 +65,10 @@ import {
   LineChart,
   Line
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const [tecnicos, setTecnicos] = useState([]);
@@ -218,12 +220,12 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) {
+    if (loading) {
     return (
       <Container sx={{ textAlign: 'center', mt: 4 }}>
         <CircularProgress />
         <Typography variant="body1" sx={{ mt: 2 }}>
-          Cargando dashboard...
+          {t('dashboard.loading')}
         </Typography>
       </Container>
     );
@@ -342,16 +344,16 @@ const Dashboard = () => {
             </Box>
             <Box>
               <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', mb: 0.3, letterSpacing: '-0.5px', textShadow: '0 2px 6px rgba(0,0,0,0.25)', fontSize: '1.8rem' }}>
-                Panel Ejecutivo
+                {t('dashboard.title')}
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: 0.6 }}>
                 <SpeedIcon sx={{ fontSize: 18 }} />
-                Monitoreo en tiempo real del sistema de tiquetes
+                {t('dashboard.subtitle')}
               </Typography>
             </Box>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, position: 'relative', zIndex: 1 }}>
-            <Tooltip title="Actualizar datos" arrow>
+            <Tooltip title={t('dashboard.refresh')} arrow>
               <IconButton 
                 onClick={() => fetchDashboardData()}
                 sx={{ 
@@ -392,7 +394,7 @@ const Dashboard = () => {
                 transition: 'all 0.3s'
               }}
             >
-              Gestionar Asignaciones
+              {t('dashboard.manageAssignments')}
             </Button>
           </Box>
         </Box>
@@ -460,7 +462,7 @@ const Dashboard = () => {
                   {stats.distribucionPorEstado['Resuelto'] || 0}
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  Tiquetes Resueltos
+                  {t('dashboard.kpi.resolved')}
                 </Typography>
               </CardContent>
             </Card>
@@ -543,7 +545,7 @@ const Dashboard = () => {
                   {stats.distribucionPorEstado['Pendiente'] || 0}
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  Tiquetes Abiertos
+                  {t('dashboard.kpi.open')}
                 </Typography>
               </CardContent>
             </Card>
@@ -611,7 +613,7 @@ const Dashboard = () => {
                   {(stats.distribucionPorEstado['Asignado'] || 0) + (stats.distribucionPorEstado['En Proceso'] || 0)}
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  En Proceso
+                  {t('dashboard.kpi.inProgress')}
                 </Typography>
               </CardContent>
             </Card>
@@ -678,7 +680,7 @@ const Dashboard = () => {
                   {stats.totalTickets || 0}
                 </Typography>
                 <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600, fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: 0.5 }}>
-                  Total de Tiquetes
+                  {t('dashboard.kpi.total')}
                 </Typography>
               </CardContent>
             </Card>
@@ -706,12 +708,12 @@ const Dashboard = () => {
           border: '1px solid #f0f0f0',
           mb: 4
         }}>
-          <Box sx={{ p: 3, borderBottom: '1px solid #f0f0f0' }}>
+            <Box sx={{ p: 3, borderBottom: '1px solid #f0f0f0' }}>
             <Typography variant="h6" sx={{ fontWeight: 600, color: '#1e293b', fontSize: '1.125rem' }}>
-              Distribución por Estado
+              {t('dashboard.distribution.title')}
             </Typography>
             <Typography variant="body2" sx={{ color: '#64748b', mt: 0.5 }}>
-              Estado actual de todos los tiquetes del sistema
+              {t('dashboard.distribution.subtitle')}
             </Typography>
           </Box>
           <CardContent sx={{ p: 3 }}>
@@ -722,7 +724,7 @@ const Dashboard = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <CheckCircleIcon sx={{ fontSize: 18, color: '#10b981' }} />
                     <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
-                      Resueltos
+                      {t('status.resolved')}
                     </Typography>
                   </Box>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: '#10b981' }}>
@@ -751,7 +753,7 @@ const Dashboard = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <HourglassIcon sx={{ fontSize: 18, color: '#f59e0b' }} />
                     <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
-                      En Proceso
+                      {t('status.inProgress')}
                     </Typography>
                   </Box>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: '#f59e0b' }}>
@@ -780,7 +782,7 @@ const Dashboard = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <PlayArrowIcon sx={{ fontSize: 18, color: '#3b82f6' }} />
                     <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
-                      Pendientes
+                      {t('status.pending', 'Pendientes')}
                     </Typography>
                   </Box>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: '#3b82f6' }}>
@@ -810,7 +812,7 @@ const Dashboard = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <CloseIcon sx={{ fontSize: 18, color: '#64748b' }} />
                       <Typography variant="body2" sx={{ fontWeight: 600, color: '#1e293b' }}>
-                        Cerrados
+                        {t('status.closed')}
                       </Typography>
                     </Box>
                     <Typography variant="body2" sx={{ fontWeight: 700, color: '#64748b' }}>
@@ -847,7 +849,7 @@ const Dashboard = () => {
           mb: 4,
           overflow: 'hidden'
         }}>
-          <Box sx={{ 
+                <Box sx={{ 
             p: 3, 
             background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
             display: 'flex',
@@ -865,10 +867,10 @@ const Dashboard = () => {
             </Box>
             <Box>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', fontSize: '1.25rem' }}>
-                Top 5 Categorías
+                {t('dashboard.topCategories.title')}
               </Typography>
               <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', mt: 0.3 }}>
-                Categorías con mayor cantidad de tiquetes
+                {t('dashboard.topCategories.subtitle')}
               </Typography>
             </Box>
           </Box>
@@ -925,7 +927,7 @@ const Dashboard = () => {
                         </Typography>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="caption" sx={{ color: '#64748b', fontWeight: 600 }}>
-                            {value} tickets
+                            {value} {t('dashboard.topCategories.tickets')}
                           </Typography>
                           <Box sx={{ 
                             width: 2, 
@@ -1003,10 +1005,10 @@ const Dashboard = () => {
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', fontSize: '1.25rem' }}>
-                  Tendencia Anual
+                  {t('dashboard.trends.title')}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', mt: 0.3 }}>
-                  Comparativa de resolución mensual
+                  {t('dashboard.trends.subtitle')}
                 </Typography>
               </Box>
             </Box>
@@ -1147,7 +1149,7 @@ const Dashboard = () => {
                   textShadow: '0 2px 6px rgba(0,0,0,0.25)',
                   fontSize: '1.55rem'
                 }}>
-                  Equipo Técnico
+                  {t('dashboard.team.title')}
                 </Typography>
                 <Typography variant="body2" sx={{ 
                   color: 'rgba(255, 255, 255, 0.9)', 
@@ -1158,7 +1160,7 @@ const Dashboard = () => {
                   gap: 0.6
                 }}>
                   <WorkIcon sx={{ fontSize: 16 }} />
-                  Disponibilidad y carga en tiempo real
+                  {t('dashboard.team.subtitle')}
                 </Typography>
               </Box>
             </Box>
@@ -1169,7 +1171,7 @@ const Dashboard = () => {
             {tecnicos.length > 0 ? (
               tecnicos.map((tec) => {
                 const ticketsCount = parseInt(tec.tickets_abiertos) || 0;
-                const cargaText = ticketsCount === 0 ? 'Sin asignaciones' : `${ticketsCount} ticket${ticketsCount > 1 ? 's' : ''} activo${ticketsCount > 1 ? 's' : ''}`;
+                const cargaText = ticketsCount === 0 ? t('dashboard.team.noAssignments') : `${ticketsCount} ${t('dashboard.topCategories.tickets')} ${ticketsCount > 1 ? t('dashboard.team.activePlural') : t('dashboard.team.active')}`;
                 
                 // Configuración de estado con colores profesionales
                 const statusConfig = ticketsCount > 3 
@@ -1178,7 +1180,7 @@ const Dashboard = () => {
                       bg: '#ffebee',
                       color: '#d32f2f',
                       icon: '🔴',
-                      label: 'Alta Carga',
+                      label: t('dashboard.team.status.highLoad'),
                       border: '#ef9a9a',
                       chipBg: '#d32f2f'
                     }
@@ -1188,7 +1190,7 @@ const Dashboard = () => {
                       bg: '#fff3e0',
                       color: '#f57c00',
                       icon: '🟡',
-                      label: 'Trabajando',
+                      label: t('dashboard.team.status.working'),
                       border: '#ffcc80',
                       chipBg: '#f57c00'
                     }
@@ -1198,7 +1200,7 @@ const Dashboard = () => {
                       bg: '#e3f2fd',
                       color: '#1976d2',
                       icon: '🔵',
-                      label: 'Ocupado',
+                      label: t('dashboard.team.status.busy'),
                       border: '#90caf9',
                       chipBg: '#1976d2'
                     }
@@ -1207,7 +1209,7 @@ const Dashboard = () => {
                       bg: '#e8f5e9',
                       color: '#2e7d32',
                       icon: '🟢',
-                      label: 'Disponible',
+                      label: t('dashboard.team.status.available'),
                       border: '#a5d6a7',
                       chipBg: '#2e7d32'
                     };
@@ -1364,7 +1366,7 @@ const Dashboard = () => {
                             letterSpacing: 0.5,
                             fontSize: '0.6rem'
                           }}>
-                            Carga Actual
+                            {t('dashboard.team.loadTitle')}
                           </Typography>
                           <Typography variant="h5" sx={{ 
                             fontWeight: 800, 
@@ -1396,7 +1398,7 @@ const Dashboard = () => {
                               letterSpacing: 0.5,
                               fontSize: '0.6rem'
                             }}>
-                              Especialidades
+                              {t('dashboard.team.specialties')}
                             </Typography>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.8 }}>
                               {tec.especialidades.split(',').slice(0, 3).map((esp, idx) => (
@@ -1450,10 +1452,10 @@ const Dashboard = () => {
                   <CardContent sx={{ textAlign: 'center' }}>
                     <GroupIcon sx={{ fontSize: 64, color: 'secondary.light', mb: 2, opacity: 0.5 }} />
                     <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.secondary', mb: 1 }}>
-                      No hay técnicos disponibles
+                      {t('dashboard.team.noTechnicians')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      No se encontraron técnicos registrados en el sistema
+                      {t('dashboard.team.noTechniciansSubtitle')}
                     </Typography>
                   </CardContent>
                 </Card>
