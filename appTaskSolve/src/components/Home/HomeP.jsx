@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Box, Typography, Container, Card, CardContent } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import logo from '../../assets/TaskSolve-Logo.jpg';
 
 const authors = [
@@ -37,6 +38,7 @@ function ImageCard() {
 }
 
 const HomeP = () => {
+  const { t } = useTranslation();
   return (
     <Box>
       <Box sx={{display: 'flex', justifyContent: 'center', py: 6, gap: 2, flexDirection: 'column', alignItems: 'center' , margin: '0 auto' }}>
@@ -49,10 +51,10 @@ const HomeP = () => {
         <Card sx={{ width: { xs: '95%', md: 1000 }, borderRadius: 3, boxShadow: 8 }}>
           <CardContent sx={{ bgcolor: 'rgba(11,61,145,0.95)', color: '#fff', p: { xs: 4, md: 8 } }}>
             <Typography variant="h2" component="h1" sx={{ color: '#fff', fontWeight: 900, fontStyle: 'italic' }}>
-              "TaskSolve — la mejor opción para gestionar tus tickets"
+              "{t('homePage.tagline')}"
             </Typography>
             <Typography variant="h6" sx={{ color: '#e6f0ff', mt: 2, fontWeight: 800, fontSize: { xs: 14, md: 18 } }}>
-              Simplifica, asigna y resuelve. Tu soporte, más rápido y más organizado.
+              {t('homePage.description')}
             </Typography>
           </CardContent>
         </Card>
@@ -60,7 +62,7 @@ const HomeP = () => {
 
       <Container sx={{ py: 6 }}>
         <Typography variant="h2" component="h2" sx={{ textAlign: 'center', mb: 4, fontWeight: 800, color: 'primary.main' }}>
-          Autores
+          {t('homePage.authorsTitle')}
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -79,7 +81,7 @@ const HomeP = () => {
                   {initials}
                 </Box>
                 <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{name}</Typography>
-                <Typography variant="caption" color="text.secondary">Equipo TaskSolve</Typography>
+                <Typography variant="caption" color="text.secondary">{t('homePage.teamLabel')}</Typography>
               </Box>
             );
           })}

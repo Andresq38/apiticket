@@ -258,12 +258,12 @@ export default function CreateTicket() {
       {/* Encabezado estilizado */}
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>Crear Nuevo Ticket</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>{t('ticketForm.createTitle')}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Complete el formulario para registrar su solicitud
+            {t('ticketForm.createSubtitle')}
           </Typography>
         </Box>
-  <Button variant="text" onClick={() => navigate('/mantenimientos')} startIcon={<ArrowBackIcon />}>Volver</Button>
+  <Button variant="text" onClick={() => navigate('/mantenimientos')} startIcon={<ArrowBackIcon />}>{t('ticketForm.goBack')}</Button>
       </Box>
 
       {/* Formulario principal */}
@@ -280,7 +280,7 @@ export default function CreateTicket() {
       >
         {/* Ribbon Prioridad */}
         <Chip
-          label={`Prioridad: ${form.prioridad}`}
+          label={`${t('ticketForm.priority')}: ${form.prioridad}`}
           color={prioridadColor(form.prioridad)}
           size="small"
           sx={{ position: 'absolute', top: 12, right: 12, fontWeight: 600 }}
@@ -292,22 +292,22 @@ export default function CreateTicket() {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Título del Ticket"
+                label={t('ticketForm.ticketTitle')}
                 name="titulo"
                 value={form.titulo}
                 onChange={handleChange}
                 onBlur={() => markTouched('titulo')}
                 required
                 error={Boolean(touched.titulo && errors.titulo)}
-                helperText={touched.titulo && errors.titulo || 'Resuma el problema en 5-200 caracteres'}
-                placeholder="Ej: Error al iniciar sesión"
+                helperText={touched.titulo && errors.titulo || t('ticketForm.ticketTitleHelper')}
+                placeholder={t('ticketForm.ticketTitlePlaceholder')}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
                 select
                 fullWidth
-                label="Prioridad"
+                label={t('ticketForm.priority')}
                 name="prioridad"
                 value={form.prioridad}
                 onChange={handleChange}
@@ -322,14 +322,14 @@ export default function CreateTicket() {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Estado"
-                value="Pendiente"
+                label={t('ticketForm.state')}
+                value={t('ticketForm.pendingStatus')}
                 disabled
                 InputProps={{
                   readOnly: true,
                   startAdornment: <FlagOutlinedIcon sx={{ mr: 1, color: 'info.main' }} />
                 }}
-                helperText="Pendiente Estado inicial"
+                helperText={t('ticketForm.pendingStatus')}
               />
             </Grid>
 
@@ -338,15 +338,15 @@ export default function CreateTicket() {
                 fullWidth
                 multiline
                 minRows={4}
-                label="Descripción del Problema"
+                label={t('ticketForm.problemDescription')}
                 name="descripcion"
                 value={form.descripcion}
                 onChange={handleChange}
                 onBlur={() => markTouched('descripcion')}
                 required
                 error={Boolean(touched.descripcion && errors.descripcion)}
-                helperText={touched.descripcion && errors.descripcion || 'Describa detalladamente el problema (10-1000 caracteres)'}
-                placeholder="Explique el problema con el mayor detalle posible, incluyendo cuándo ocurrió, qué estaba haciendo, mensajes de error, etc."
+                helperText={touched.descripcion && errors.descripcion || t('ticketForm.descriptionHelper')}
+                placeholder={t('ticketForm.descriptionPlaceholder')}
                 InputProps={{
                   startAdornment: <DescriptionOutlinedIcon sx={{ mr: 1, color: 'primary.main' }} />,
                 }}
@@ -402,7 +402,7 @@ export default function CreateTicket() {
                   return (
                     <TextField
                       {...params}
-                      label="Etiqueta"
+                      label={t('ticketForm.tag')}
                       required
                       onBlur={() => markTouched('id_etiqueta')}
                       error={Boolean(touched.id_etiqueta && errors.id_etiqueta)}
@@ -420,16 +420,16 @@ export default function CreateTicket() {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Tooltip title="Se deriva automáticamente según la etiqueta elegida" placement="top">
+              <Tooltip title={t('ticketForm.categoryTooltip')} placement="top">
                 <TextField
                   fullWidth
-                  label="Categoría (derivada)"
+                  label={t('ticketForm.categoryDerived')}
                   value={categoriaPreview ? `${categoriaPreview.id_categoria} - ${categoriaPreview.nombre}` : ''}
                   InputProps={{
                     readOnly: true,
                     startAdornment: <CategoryOutlinedIcon sx={{ mr: 1, color: categoriaPreview ? 'success.main' : 'text.disabled' }} />
                   }}
-                  placeholder="Se mostrará al elegir una etiqueta"
+                  placeholder={t('ticketForm.categoryPlaceholder')}
                 />
               </Tooltip>
             </Grid>
@@ -448,8 +448,8 @@ export default function CreateTicket() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Especialidad (opcional)"
-                    helperText={categoriaPreview ? 'Seleccione la especialidad relacionada a la categoría' : 'Se mostrará al elegir una etiqueta/categoría'}
+                    label={t('ticketForm.specialty')}
+                    helperText={categoriaPreview ? t('ticketForm.specialtyHelper') : t('ticketForm.specialtyPlaceholder')}
                     InputProps={{
                       ...params.InputProps,
                       startAdornment: <PersonOutlineIcon sx={{ mr: 1, color: 'primary.main' }} />
@@ -481,13 +481,13 @@ export default function CreateTicket() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Usuario Solicitante"
+                    label={t('ticketForm.requesterUser')}
                     required
                     onBlur={() => markTouched('id_usuario')}
                     error={Boolean(touched.id_usuario && errors.id_usuario)}
                     helperText={
                       touched.id_usuario && errors.id_usuario
-                        || `Clientes`
+                        || t('ticketForm.requesterUserHelper')
                     }
                     InputProps={{
                       ...params.InputProps,
@@ -496,7 +496,7 @@ export default function CreateTicket() {
                   />
                 )}
                 isOptionEqualToValue={(o, v) => o.id_usuario === v.id_usuario}
-                noOptionsText={clienteRolId ? 'No hay usuarios con rol Cliente disponibles' : 'Cargando roles...'}
+                noOptionsText={clienteRolId ? t('ticketForm.noUsersAvailable') : t('ticketForm.loadingRoles')}
               />
             </Grid>
 
@@ -505,25 +505,25 @@ export default function CreateTicket() {
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
-                    label="ID Usuario"
+                    label={t('ticketForm.userId')}
                     value={usuarioInfo.id || ''}
                     InputProps={{ readOnly: true }}
-                    helperText="Identificador único del usuario"
+                    helperText={t('ticketForm.userIdHelper')}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
-                    label="Correo Electrónico"
+                    label={t('ticketForm.userEmail')}
                     value={usuarioInfo.correo || ''}
                     InputProps={{ readOnly: true }}
-                    helperText="Correo del usuario solicitante"
+                    helperText={t('ticketForm.userEmailHelper')}
                   />
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <TextField
                     fullWidth
-                    label="Fecha de creación"
+                    label={t('ticketForm.creationDate')}
                     value={formatDate(fechaCreacion)}
                     InputProps={{ readOnly: true }}
                   />
@@ -535,7 +535,7 @@ export default function CreateTicket() {
               <Grid item xs={12} md={6}>
                 <TextField
                   fullWidth
-                  label="Fecha de creación"
+                  label={t('ticketForm.creationDate')}
                   value={formatDate(fechaCreacion)}
                   InputProps={{ readOnly: true }}
                 />
@@ -546,11 +546,11 @@ export default function CreateTicket() {
               <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
                 <TextField
                   type="file"
-                  label="Imagen del Ticket"
+                  label={t('ticketForm.ticketImage')}
                   inputProps={{ accept: 'image/*' }}
                   onChange={handleChangeImage}
                   InputLabelProps={{ shrink: true }}
-                  helperText="(Opcional) Adjunte una imagen relacionada con el problema"
+                  helperText={t('ticketForm.ticketImageHelper')}
                 />
               </FormControl>
               {fileURL && (
@@ -568,7 +568,7 @@ export default function CreateTicket() {
                     }}
                     size="small"
                   >
-                    Borrar imagen
+                    {t('ticketForm.removeImage')}
                   </Button>
                 </Box>
               )}
@@ -585,7 +585,7 @@ export default function CreateTicket() {
                     startIcon={!loading ? <SaveRoundedIcon /> : null}
                     sx={{ minWidth: 180, fontWeight: 600 }}
                   >
-                    {loading ? <CircularProgress size={20} /> : 'Guardar Ticket'}
+                    {loading ? <CircularProgress size={20} /> : t('ticketForm.saveTicket')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -595,7 +595,7 @@ export default function CreateTicket() {
                     startIcon={<CancelRoundedIcon />}
                     sx={{ minWidth: 140 }}
                   >
-                    Cancelar
+                    {t('ticketForm.cancel')}
                   </Button>
                 </Box>
               </Fade>

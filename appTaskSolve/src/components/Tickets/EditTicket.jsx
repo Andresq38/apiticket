@@ -357,7 +357,7 @@ export default function EditTicket() {
       <Container maxWidth="lg" sx={{ py: 5, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
         <Box sx={{ textAlign: 'center' }}>
           <CircularProgress size={60} />
-          <Typography variant="body1" sx={{ mt: 2 }}>Cargando datos del ticket...</Typography>
+          <Typography variant="body1" sx={{ mt: 2 }}>{t('tickets.loadingData')}</Typography>
         </Box>
       </Container>
     );
@@ -367,7 +367,7 @@ export default function EditTicket() {
     return (
       <Container maxWidth="lg" sx={{ py: 5 }}>
         <Alert severity="error" sx={{ mb: 2 }}>{loadError}</Alert>
-        <Button variant="outlined" onClick={() => navigate('/tickets')}>Volver a tickets</Button>
+        <Button variant="outlined" onClick={() => navigate('/tickets')}>{t('createForm.goToListButton')}</Button>
       </Container>
     );
   }
@@ -387,7 +387,7 @@ export default function EditTicket() {
           onClick={(e) => { e.preventDefault(); navigate('/'); }}
           sx={{ display: 'flex', alignItems: 'center' }}
         >
-          Inicio
+          {t('header.home')}
         </Link>
         <Link 
           underline="hover" 
@@ -395,7 +395,7 @@ export default function EditTicket() {
           href="#" 
           onClick={(e) => { e.preventDefault(); navigate('/mantenimientos'); }}
         >
-          Mantenimientos
+          {t('header.maintenance')}
         </Link>
         <Link 
           underline="hover" 
@@ -403,23 +403,23 @@ export default function EditTicket() {
           href="#" 
           onClick={(e) => { e.preventDefault(); navigate(`/tickets/${id}`); }}
         >
-          Ticket #{id}
+          {t('ticketForm.editTitle', { id })}
         </Link>
         <Typography color="warning.main" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 600 }}>
           <EditIcon fontSize="small" />
-          Editar
+          {t('createForm.editLabel')}
         </Typography>
       </Breadcrumbs>
 
       {/* Encabezado */}
       <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>Editar Ticket #{id}</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 700 }}>{t('ticketForm.editTitle', { id })}</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            Actualice la información del ticket
+            {t('ticketForm.editSubtitle')}
           </Typography>
         </Box>
-        <Button variant="text" onClick={() => navigate(`/tickets/${id}`)} startIcon={<ArrowBackIcon />}>Volver</Button>
+        <Button variant="text" onClick={() => navigate(`/tickets/${id}`)} startIcon={<ArrowBackIcon />}>{t('ticketForm.goBack')}</Button>
       </Box>
 
       {/* Formulario principal */}
@@ -437,7 +437,7 @@ export default function EditTicket() {
       >
         {/* Ribbon Prioridad */}
         <Chip
-          label={`Prioridad: ${form.prioridad}`}
+          label={`${t('ticketForm.priority')}: ${form.prioridad}`}
           color={prioridadColor(form.prioridad)}
           size="small"
           sx={{ position: 'absolute', top: 12, right: 12, fontWeight: 600 }}
@@ -449,22 +449,22 @@ export default function EditTicket() {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Título del Ticket"
+                label={t('ticketForm.ticketTitle')}
                 name="titulo"
                 value={form.titulo}
                 onChange={handleChange}
                 onBlur={() => markTouched('titulo')}
                 required
                 error={Boolean(touched.titulo && errors.titulo)}
-                helperText={touched.titulo && errors.titulo || 'Resuma el problema en 5-200 caracteres'}
-                placeholder="Ej: Error al iniciar sesión"
+                helperText={touched.titulo && errors.titulo || t('ticketForm.ticketTitleHelper')}
+                placeholder={t('ticketForm.ticketTitlePlaceholder')}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
                 select
                 fullWidth
-                label="Prioridad"
+                label={t('ticketForm.priority')}
                 name="prioridad"
                 value={form.prioridad}
                 onChange={handleChange}
@@ -480,7 +480,7 @@ export default function EditTicket() {
               <TextField
                 select
                 fullWidth
-                label="Estado"
+                label={t('ticketForm.state')}
                 name="id_estado"
                 value={form.id_estado}
                 onChange={handleChange}
@@ -499,15 +499,15 @@ export default function EditTicket() {
                 fullWidth
                 multiline
                 minRows={4}
-                label="Descripción del Problema"
+                label={t('ticketForm.problemDescription')}
                 name="descripcion"
                 value={form.descripcion}
                 onChange={handleChange}
                 onBlur={() => markTouched('descripcion')}
                 required
                 error={Boolean(touched.descripcion && errors.descripcion)}
-                helperText={touched.descripcion && errors.descripcion || 'Describa detalladamente el problema (10-1000 caracteres)'}
-                placeholder="Explique el problema con el mayor detalle posible, incluyendo cuándo ocurrió, qué estaba haciendo, mensajes de error, etc."
+                helperText={touched.descripcion && errors.descripcion || t('ticketForm.descriptionHelper')}
+                placeholder={t('ticketForm.descriptionPlaceholder')}
                 InputProps={{
                   startAdornment: <DescriptionOutlinedIcon sx={{ mr: 1, color: 'primary.main' }} />,
                 }}
@@ -559,10 +559,10 @@ export default function EditTicket() {
                     ? `${selectedEtiqueta.id_etiqueta} - ${selectedEtiqueta.nombre || ''}`
                     : '';
                   
-                  return (
+                    return (
                     <TextField
                       {...params}
-                      label="Etiqueta"
+                      label={t('ticketForm.tag')}
                       required
                       onBlur={() => markTouched('id_etiqueta')}
                       error={Boolean(touched.id_etiqueta && errors.id_etiqueta)}
@@ -580,16 +580,16 @@ export default function EditTicket() {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Tooltip title="Se deriva automáticamente según la etiqueta elegida" placement="top">
+              <Tooltip title={t('ticketForm.categoryTooltip')} placement="top">
                 <TextField
                   fullWidth
-                  label="Categoría (derivada)"
+                  label={t('ticketForm.categoryDerived')}
                   value={categoriaPreview ? `${categoriaPreview.id_categoria} - ${categoriaPreview.nombre}` : ''}
                   InputProps={{
                     readOnly: true,
                     startAdornment: <CategoryOutlinedIcon sx={{ mr: 1, color: categoriaPreview ? 'success.main' : 'text.disabled' }} />
                   }}
-                  placeholder="Se mostrará al elegir una etiqueta"
+                  placeholder={t('ticketForm.categoryPlaceholder')}
                 />
               </Tooltip>
             </Grid>
@@ -606,10 +606,10 @@ export default function EditTicket() {
                 }}
                 onChange={(_, val) => setForm((f) => ({ ...f, id_especialidad: val?.id_especialidad || '' }))}
                 renderInput={(params) => (
-                  <TextField
+                    <TextField
                     {...params}
-                    label="Especialidad (opcional)"
-                    helperText={categoriaPreview ? 'Seleccione la especialidad relacionada a la categoría' : 'Se mostrará al elegir una etiqueta/categoría'}
+                    label={t('ticketForm.specialty') + ' (optional)'}
+                    helperText={categoriaPreview ? t('ticketForm.specialtyHelper') : t('ticketForm.specialtyPlaceholder')}
                     InputProps={{
                       ...params.InputProps,
                       startAdornment: <PersonOutlineIcon sx={{ mr: 1, color: 'primary.main' }} />
@@ -624,7 +624,7 @@ export default function EditTicket() {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Usuario solicitante"
+                label={t('ticketForm.requesterUser')}
                 value={usuarioInfo ? usuarioInfo.nombre : ''}
                 InputProps={{
                   readOnly: true,
@@ -636,27 +636,34 @@ export default function EditTicket() {
             <Grid item xs={12} md={6}>
               <TextField
                 fullWidth
-                label="Fecha de creación"
+                label={t('ticketForm.creationDate')}
                 value={fechaCreacion ? formatDate(new Date(fechaCreacion)) : ''}
                 InputProps={{ readOnly: true }}
               />
             </Grid>
 
             <Grid item xs={12}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>Imágenes del Ticket</Typography>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>{t('tickets.images.title')}</Typography>
               
               {/* Seleccionar nueva imagen */}
               <Paper sx={{ p: 2, mb: 3, bgcolor: 'background.default' }}>
-                <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
-                  <TextField
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  sx={{ mb: 2 }}
+                >
+                  {t('ticketForm.fileSelectButton')}
+                  <input
+                    hidden
+                    accept="image/*"
                     type="file"
-                    label="Agregar imagen"
-                    inputProps={{ accept: 'image/*' }}
                     onChange={handleChangeImage}
-                    InputLabelProps={{ shrink: true }}
-                    helperText="(Opcional) Adjunte una imagen. Se guardará al guardar el ticket."
                   />
-                </FormControl>
+                </Button>
+                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+                  {t('ticketForm.ticketImageHelper')}
+                </Typography>
                 {fileURL && (
                   <Box sx={{ mt: 2 }}>
                     <img src={fileURL} alt="preview" width={150} style={{ borderRadius: '8px' }} />
@@ -684,7 +691,7 @@ export default function EditTicket() {
                         }}
                       />
                       <CardActions sx={{ p: 1, justifyContent: 'center', flexShrink: 0 }}>
-                        <Tooltip title="Eliminar imagen">
+                        <Tooltip title={t('ticketForm.imageDeleteTooltip')}>
                           <Button
                             size="small"
                             variant="contained"
@@ -693,16 +700,16 @@ export default function EditTicket() {
                             onClick={() => handleDeleteImage(img.id_imagen)}
                             fullWidth
                           >
-                            Eliminar
+                            {t('ticketForm.imageDeleteButton')}
                           </Button>
                         </Tooltip>
                       </CardActions>
                     </Card>
                   ))}
                 </Box>
-              ) : (
+                ) : (
                 <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
-                  No hay imágenes asociadas a este ticket
+                  {t('tickets.images.none')}
                 </Typography>
               )}
             </Grid>
@@ -719,7 +726,7 @@ export default function EditTicket() {
                     startIcon={!loading ? <SaveRoundedIcon /> : null}
                     sx={{ minWidth: 180, fontWeight: 600 }}
                   >
-                    {loading ? <CircularProgress size={20} /> : 'Actualizar Ticket'}
+                    {loading ? <CircularProgress size={20} /> : t('ticketForm.updateTicket')}
                   </Button>
                   <Button
                     variant="outlined"
@@ -728,7 +735,7 @@ export default function EditTicket() {
                     startIcon={<CancelRoundedIcon />}
                     sx={{ minWidth: 140 }}
                   >
-                    Cancelar
+                    {t('ticketForm.cancel')}
                   </Button>
                 </Box>
               </Fade>
@@ -740,12 +747,12 @@ export default function EditTicket() {
       <SuccessOverlay
         open={showSuccessOverlay}
         mode="update"
-        entity="Ticket"
+        entity={t('home.ticketEntity')}
         onClose={() => setShowSuccessOverlay(false)}
-        subtitle={success || `✓ Ticket #${id} actualizado exitosamente`}
+        subtitle={success || t('tickets.updateSuccess', { id })}
         actions={[
-          { label: 'Ver detalle', onClick: () => navigate(`/tickets/${id}`), variant: 'contained', color: 'warning' },
-          { label: 'Ir al listado', onClick: () => navigate('/'), variant: 'outlined', color: 'warning' }
+          { label: t('createForm.viewDetailButton'), onClick: () => navigate(`/tickets/${id}`), variant: 'contained', color: 'warning' },
+          { label: t('createForm.goToListButton'), onClick: () => navigate('/'), variant: 'outlined', color: 'warning' }
         ]}
       />
     </Container>
