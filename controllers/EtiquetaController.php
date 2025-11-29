@@ -35,6 +35,16 @@ class etiqueta
             $inputJSON = $request->getJSON();
             $model = new EtiquetaModel();
             $result = $model->create($inputJSON);
+
+            // Notificar a administradores sobre nuevo mantenimiento (Etiqueta creada)
+            try {
+                if ($result && isset($result->nombre)) {
+                    $notif = new NotificacionModel();
+                    $notif->notificarMantenimientoCreado('Etiqueta', $result->nombre, $inputJSON->id_usuario_remitente ?? null);
+                }
+            } catch (Exception $e) {
+                error_log('No se pudo notificar mantenimiento (Etiqueta): ' . $e->getMessage());
+            }
             $response->toJSON($result);
         } catch (Exception $e) {
             handleException($e);

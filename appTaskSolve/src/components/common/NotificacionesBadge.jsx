@@ -20,27 +20,72 @@ export default function NotificacionesBadge({ userId }) {
   const [countNoLeidas, setCountNoLeidas] = useState(0);
   const [loading, setLoading] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState('disconnected'); // 'connected', 'connecting', 'disconnected', 'error'
+  const [adminFallbackId, setAdminFallbackId] = useState(null);
+  const [notificacionesMarcadasLeidas, setNotificacionesMarcadasLeidas] = useState(() => {
+    try {
+      const stored = localStorage.getItem('notificacionesMarcadasLeidas');
+      return stored ? new Set(JSON.parse(stored)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
   const navigate = useNavigate();
   const eventSourceRef = useRef(null);
 
   const open = Boolean(anchorEl);
   const apiBase = getApiOrigin();
 
-  // Cargar notificaciones no leídas y el contador (fallback manual)
+  // Resolver id efectivo (prop o fallback admin)
+  const effectiveUserId = userId || adminFallbackId;
+
+  // Sincronizar con localStorage cuando cambie el Set
+  useEffect(() => {
+    try {
+      localStorage.setItem('notificacionesMarcadasLeidas', JSON.stringify([...notificacionesMarcadasLeidas]));
+    } catch (error) {
+      console.error('Error guardando en localStorage:', error);
+    }
+  }, [notificacionesMarcadasLeidas]);
+
+  // Obtener id de administrador por defecto si no se pasa userId
+  const fetchAdminFallback = async () => {
+    if (userId || adminFallbackId) return;
+    try {
+      const res = await axios.get(`${apiBase}/apiticket/notificacion/adminDefault`);
+      const idAdmin = res.data?.id_admin;
+      if (idAdmin) {
+        setAdminFallbackId(idAdmin);
+        // Luego de resolver, cargar notificaciones iniciales
+        setTimeout(() => fetchNotificaciones(), 50);
+      } else {
+        console.warn('adminDefault endpoint no devolvió id_admin');
+      }
+    } catch (e) {
+      console.error('Error obteniendo adminDefault:', e);
+    }
+  };
+
+  // Cargar notificaciones no leídas y el contador
   const fetchNotificaciones = async () => {
-    if (!userId) return;
+    if (!effectiveUserId) return;
     
     try {
       setLoading(true);
       // Usar NotificacionService en lugar de axios directo
       const [notifs, count] = await Promise.all([
-        NotificacionService.getNoLeidas(userId),
-        NotificacionService.contarNoLeidas(userId)
+        NotificacionService.getNoLeidas(effectiveUserId),
+        NotificacionService.contarNoLeidas(effectiveUserId)
       ]);
 
-      const notificaciones = Array.isArray(notifs) ? notifs : (notifs?.data || []);
-      setNotificaciones(notificaciones);
-      setCountNoLeidas(count);
+      const notificacionesList = Array.isArray(notifs) ? notifs : (notifs?.data || []);
+      
+      // Filtrar notificaciones que ya fueron marcadas como leídas localmente
+      const notificacionesFiltradas = notificacionesList.filter(n => 
+        !notificacionesMarcadasLeidas.has(String(n.id_notificacion))
+      );
+      
+      setNotificaciones(notificacionesFiltradas);
+      setCountNoLeidas(notificacionesFiltradas.length);
     } catch (error) {
       console.error('Error al cargar notificaciones:', error);
     } finally {
@@ -50,7 +95,12 @@ export default function NotificacionesBadge({ userId }) {
 
   // Conectar a SSE para notificaciones en tiempo real
   useEffect(() => {
-    if (!userId) return;
+    // Intentar resolver admin primero si falta userId
+    if (!userId && !adminFallbackId) {
+      fetchAdminFallback();
+      return; // esperar a que se resuelva adminFallbackId
+    }
+    if (!effectiveUserId) return;
 
     let reconnectTimeout;
     let reconnectAttempts = 0;
@@ -65,7 +115,7 @@ export default function NotificacionesBadge({ userId }) {
 
       try {
         setConnectionStatus('connecting');
-        const eventSource = new EventSource(`${apiBase}/apiticket/notificationstream/stream/${userId}`);
+        const eventSource = new EventSource(`${apiBase}/apiticket/notificationstream/stream/${effectiveUserId}`);
         eventSourceRef.current = eventSource;
 
         // Evento: conexión establecida
@@ -155,7 +205,7 @@ export default function NotificacionesBadge({ userId }) {
         clearInterval(reconnectTimeout);
       }
     };
-  }, [userId, apiBase]);
+  }, [userId, adminFallbackId, effectiveUserId, apiBase]);
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -168,20 +218,39 @@ export default function NotificacionesBadge({ userId }) {
 
   const handleMarcarComoLeida = async (id, event) => {
     event.stopPropagation();
+    if (!effectiveUserId) return;
     try {
-      // Usar NotificacionService en lugar de axios directo
-      await NotificacionService.marcarComoLeida(id, userId);
-      fetchNotificaciones(); // Recargar lista
+      // Agregar a la lista de marcadas como leídas
+      setNotificacionesMarcadasLeidas(prev => new Set([...prev, String(id)]));
+      
+      // Eliminar de la lista (ya que mostramos solo no leídas)
+      setNotificaciones(prev => {
+        const filtered = prev.filter(n => String(n.id_notificacion) !== String(id));
+        console.log('Filtrando notificación', id, 'Antes:', prev.length, 'Después:', filtered.length);
+        return filtered;
+      });
+      setCountNoLeidas(prev => Math.max(0, prev - 1));
+      
+      // Hacer request al backend
+      await NotificacionService.marcarComoLeida(id, effectiveUserId);
     } catch (error) {
       console.error('Error al marcar como leída:', error);
     }
   };
 
   const handleMarcarTodasLeidas = async () => {
+    if (!effectiveUserId) return;
     try {
-      // Usar NotificacionService en lugar de axios directo
-      await NotificacionService.marcarTodasLeidas(userId);
-      fetchNotificaciones();
+      // Agregar todas las notificaciones actuales a la lista de marcadas
+      const idsActuales = notificaciones.map(n => String(n.id_notificacion));
+      setNotificacionesMarcadasLeidas(prev => new Set([...prev, ...idsActuales]));
+      
+      // Limpiar lista y contador inmediatamente
+      setNotificaciones([]);
+      setCountNoLeidas(0);
+      
+      // Hacer request al backend
+      await NotificacionService.marcarTodasLeidas(effectiveUserId);
     } catch (error) {
       console.error('Error al marcar todas como leídas:', error);
     }
@@ -301,6 +370,47 @@ export default function NotificacionesBadge({ userId }) {
                   bgcolor: notif.estado === 'No Leida' ? 'action.hover' : 'transparent',
                   '&:hover': {
                     bgcolor: 'action.selected'
+                  }
+                }}
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  
+                  // Extraer id de ticket del mensaje primero
+                  const msg = notif.mensaje || '';
+                  const match = msg.match(/ticket #(\d+)/i);
+                  const ticketId = match ? match[1] : null;
+                  
+                  // Marcar como leída si está 'No Leida'
+                  if (notif.estado === 'No Leida' && effectiveUserId) {
+                    try {
+                      console.log('Marcando notificación como leída:', notif.id_notificacion);
+                      
+                      // Agregar a la lista de marcadas como leídas
+                      setNotificacionesMarcadasLeidas(prev => new Set([...prev, String(notif.id_notificacion)]));
+                      
+                      // Actualizar UI inmediatamente
+                      setNotificaciones(prev => {
+                        const filtered = prev.filter(n => 
+                          String(n.id_notificacion) !== String(notif.id_notificacion)
+                        );
+                        console.log('Click notif - Filtrando:', notif.id_notificacion, 'Antes:', prev.length, 'Después:', filtered.length);
+                        return filtered;
+                      });
+                      setCountNoLeidas(prev => Math.max(0, prev - 1));
+                      
+                      // Luego hacer el request al backend
+                      NotificacionService.marcarComoLeida(notif.id_notificacion, effectiveUserId).catch(error => {
+                        console.error('Error al marcar notificación como leída:', error);
+                      });
+                    } catch (error) {
+                      console.error('Error al procesar notificación:', error);
+                    }
+                  }
+                  
+                  // Navegar si hay ticket
+                  if (ticketId) {
+                    handleClose();
+                    navigate(`/tickets/${ticketId}`);
                   }
                 }}
               >

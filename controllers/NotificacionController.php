@@ -74,6 +74,22 @@ class notificacion
     }
 
     /**
+     * Obtener id de administrador por defecto (para frontend sin login)
+     * GET /apiticket/notificacion/adminDefault
+     */
+    public function adminDefault()
+    {
+        try {
+            $response = new Response();
+            $notificacion = new NotificacionModel();
+            $idAdmin = $notificacion->obtenerAdminPorDefecto();
+            $response->toJSON(['id_admin' => $idAdmin]);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    /**
      * Marcar notificación como leída
      * PUT /apiticket/notificacion/marcarLeida/{id}
      */

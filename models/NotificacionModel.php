@@ -7,6 +7,31 @@ class NotificacionModel
         $this->enlace = new MySqlConnect();
     }
 
+    /** Obtener id de usuario administrador por defecto (primer admin encontrado) */
+    private function getDefaultAdminId()
+    {
+        try {
+            $sql = "SELECT u.id_usuario
+                    FROM usuario u
+                    JOIN rol r ON r.id_rol = u.id_rol
+                    WHERE r.descripcion = 'Administrador'
+                    ORDER BY u.id_usuario LIMIT 1";
+            $rows = $this->enlace->ExecuteSQL($sql);
+            if (!empty($rows) && isset($rows[0]->id_usuario)) {
+                return (string)$rows[0]->id_usuario;
+            }
+        } catch (Exception $e) {
+            error_log('Error obteniendo admin por defecto: ' . $e->getMessage());
+        }
+        return null; // si no hay administrador
+    }
+
+    /** Exponer id de admin por defecto públicamente para frontend */
+    public function obtenerAdminPorDefecto()
+    {
+        return $this->getDefaultAdminId();
+    }
+
     /**
      * Listar todas las notificaciones
      */
@@ -115,8 +140,17 @@ class NotificacionModel
     public function create($objeto)
     {
         try {
-            if (empty($objeto->id_usuario_destinatario) || empty($objeto->tipo_evento)) {
-                throw new Exception("Campos requeridos: id_usuario_destinatario, tipo_evento");
+            if (empty($objeto->tipo_evento)) {
+                throw new Exception("Campo requerido: tipo_evento");
+            }
+
+            // Si no viene destinatario (no hay login), usar administrador por defecto
+            $idDest = $objeto->id_usuario_destinatario ?? null;
+            if (empty($idDest)) {
+                $idDest = $this->getDefaultAdminId();
+                if (empty($idDest)) {
+                    throw new Exception("No se encontró usuario administrador para asignar como destinatario por defecto");
+                }
             }
 
             $idRemitente = $objeto->id_usuario_remitente ?? null;
@@ -128,7 +162,7 @@ class NotificacionModel
                      VALUES (?, ?, ?, ?, ?, NOW())";
             
             $idNotificacion = $this->enlace->executePrepared_DML_last($vSql, 'sssss', [
-                (string)$objeto->id_usuario_destinatario,
+                (string)$idDest,
                 $idRemitente,
                 (string)$objeto->tipo_evento,
                 $mensaje,
@@ -199,55 +233,45 @@ class NotificacionModel
     }
 
     /**
+     * Notificar a administradores que se creó un mantenimiento (cat/etiq/especialidad)
+     * @param string $tipo  Ej: 'Categoría', 'Etiqueta', 'Especialidad'
+     * @param string $nombre  Nombre del registro creado
+     * @param string|null $idUsuarioRemitente  Usuario que ejecutó la acción (opcional)
+     */
+    public function notificarMantenimientoCreado($tipo, $nombre, $idUsuarioRemitente = null)
+    {
+        try {
+            $mensajeBase = sprintf("%s '%s' ha sido creado correctamente", $tipo, $nombre);
+            $n = $this->create((object)[
+                'id_usuario_destinatario' => null, // forzar uso de admin por defecto
+                'id_usuario_remitente' => $idUsuarioRemitente,
+                'tipo_evento' => 'Mantenimiento creado',
+                'mensaje' => $mensajeBase
+            ]);
+            return ['success' => true, 'notificaciones' => $n ? [$n] : []];
+        } catch (Exception $e) {
+            error_log('Error notificarMantenimientoCreado: ' . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Crear notificación de cambio de estado de ticket
      */
     public function notificarCambioEstado($idTicket, $idUsuarioRemitente, $nuevoEstado, $observaciones = null)
     {
         try {
-            // Obtener información del ticket
             $ticketModel = new TicketModel();
             $ticket = $ticketModel->get($idTicket);
-            
-            if (!$ticket) {
-                return null;
-            }
-
-            // Notificar al cliente (creador del ticket)
-            if ($ticket->id_usuario && $ticket->id_usuario !== $idUsuarioRemitente) {
-                $mensajeCliente = "El ticket #{$idTicket} ha cambiado a estado: {$nuevoEstado}";
-                if ($observaciones) {
-                    $mensajeCliente .= ". Observación: " . substr($observaciones, 0, 100);
-                }
-                
-                $this->create((object)[
-                    'id_usuario_destinatario' => $ticket->id_usuario,
-                    'id_usuario_remitente' => $idUsuarioRemitente,
-                    'tipo_evento' => 'Cambio de estado de ticket',
-                    'mensaje' => $mensajeCliente
-                ]);
-            }
-
-            // Notificar al técnico asignado (si existe y es diferente al remitente)
-            if ($ticket->id_tecnico) {
-                $tecnicoModel = new TecnicoModel();
-                $tecnico = $tecnicoModel->get($ticket->id_tecnico);
-                
-                if ($tecnico && $tecnico->id_usuario && $tecnico->id_usuario !== $idUsuarioRemitente) {
-                    $mensajeTecnico = "El ticket #{$idTicket} asignado a ti ha cambiado a estado: {$nuevoEstado}";
-                    if ($observaciones) {
-                        $mensajeTecnico .= ". Observación: " . substr($observaciones, 0, 100);
-                    }
-                    
-                    $this->create((object)[
-                        'id_usuario_destinatario' => $tecnico->id_usuario,
-                        'id_usuario_remitente' => $idUsuarioRemitente,
-                        'tipo_evento' => 'Cambio de estado de ticket',
-                        'mensaje' => $mensajeTecnico
-                    ]);
-                }
-            }
-
-            return ['success' => true];
+            if (!$ticket) { return ['success' => false, 'error' => 'Ticket no encontrado']; }
+            $mensaje = "Se ha cambiado el estado del ticket #{$idTicket}";
+            $n = $this->create((object)[
+                'id_usuario_destinatario' => null, // fallback a admin
+                'id_usuario_remitente' => $idUsuarioRemitente,
+                'tipo_evento' => 'Cambio de estado',
+                'mensaje' => $mensaje
+            ]);
+            return ['success' => true, 'notificaciones' => $n ? [$n] : []];
         } catch (Exception $e) {
             // No fallar la operación principal si falla la notificación
             error_log("Error al crear notificaciones: " . $e->getMessage());

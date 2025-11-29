@@ -73,6 +73,16 @@ class categoria_ticket
             $inputJSON = $request->getJSON();
             $model = new Categoria_ticketModel();
             $result = $model->create($inputJSON);
+
+            // Notificar a administradores sobre nuevo mantenimiento (Categoría creada)
+            try {
+                if ($result && isset($result->nombre)) {
+                    $notif = new NotificacionModel();
+                    $notif->notificarMantenimientoCreado('Categoría', $result->nombre, $inputJSON->id_usuario_remitente ?? null);
+                }
+            } catch (Exception $e) {
+                error_log('No se pudo notificar mantenimiento (Categoría): ' . $e->getMessage());
+            }
             $response->toJSON($result);
         } catch (Exception $e) {
             handleException($e);
