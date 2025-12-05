@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import FraseCarrusel from './FraseCarrusel';
 import {
   Container,
   Typography,
@@ -398,6 +399,8 @@ const Dashboard = () => {
             </Button>
           </Box>
         </Box>
+
+        {/* Widget Frase del día / Tip rápido eliminado del Dashboard */}
 
         {/* SECCIÓN: MÉTRICAS PRINCIPALES - CON COLOR Y DETALLES */}
         <Grid container spacing={3} sx={{ mb: 4 }}>

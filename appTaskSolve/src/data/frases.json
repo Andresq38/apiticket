@@ -1,0 +1,12 @@
+[
+  { "tipo": "tip", "texto": "Tip: Podés filtrar tickets escribiendo directamente en la barra de búsqueda." },
+  { "tipo": "frase", "texto": "Frase del día: La calidad no es un acto, es un hábito." },
+  { "tipo": "tip", "texto": "Tip: Usa los chips de estado para identificar rápidamente el avance de cada ticket." },
+  { "tipo": "frase", "texto": "Frase del día: El éxito es la suma de pequeños esfuerzos repetidos cada día." },
+  { "tipo": "tip", "texto": "Tip: Puedes asignar técnicos desde la vista de detalle del ticket." },
+  { "tipo": "frase", "texto": "Frase del día: La mejor manera de empezar es dejar de hablar y comenzar a hacer." },
+  { "tipo": "tip", "texto": "Tip: Haz clic en el ícono de notificaciones para ver cambios recientes en tiempo real." },
+  { "tipo": "frase", "texto": "Frase del día: La perseverancia es el camino al éxito." },
+  { "tipo": "tip", "texto": "Tip: Puedes editar la información del usuario desde el panel de usuarios." },
+  { "tipo": "frase", "texto": "Frase del día: La innovación distingue a los líderes de los seguidores." }
+]

@@ -39,6 +39,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SuccessOverlay from '../common/SuccessOverlay';
 import { getApiOrigin } from '../../utils/apiBase';
+import FraseCarrusel from '../Dashboard/FraseCarrusel';
 
 // Datos simulados como fallback
 const TICKET_DATA_HOME = [];
@@ -221,37 +222,49 @@ const Home = () => {
   };
 
   return (
-    <Container sx={{ py: 4 }}>
-      {/* Header con gradiente */}
-      <Box sx={{
-        mb: 4,
-        borderRadius: 8,
-        px: 4,
-        py: 3,
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-        background: 'linear-gradient(135deg,#0B5CC2 0%, #1569d4 40%, #1b74e5 100%)',
-        color: 'common.white',
-        boxShadow: '0 12px 28px -6px rgba(11,92,194,0.35)',
-        '&:after': {
-          content: '""',
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          height: 6,
-          background: '#F5A000',
-          borderBottomLeftRadius: 8,
-          borderBottomRightRadius: 8
-        }
-      }}>
-        <Typography variant="h4" sx={{ fontWeight: 700, letterSpacing: '.5px' }}>{t('home.title')}</Typography>
-        <Typography variant="body2" sx={{ mt: .5, fontWeight: 500, opacity: .9 }}>
-          {t('home.subtitle')}
-        </Typography>
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Box
+        sx={{
+          mb: 4,
+          px: { xs: 2, sm: 4 },
+          py: { xs: 2.2, sm: 2.8 },
+          borderRadius: 3,
+          background: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)',
+          boxShadow: '0 6px 22px rgba(25,118,210,0.25)',
+          position: 'relative',
+          overflow: 'hidden',
+          border: '2px solid rgba(255,255,255,0.14)',
+          maxWidth: 1100,
+          mx: 'auto',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 65%)',
+            pointerEvents: 'none'
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: '3px',
+            background: 'linear-gradient(90deg, #2e7d32, #1976d2, #ed6c02, #d32f2f)',
+            backgroundSize: '300% 100%',
+          }
+        }}
+      >
+        <Typography variant="h4" sx={{ fontWeight: 800, color: 'white', mb: 0.3, letterSpacing: '-0.5px', textShadow: '0 2px 6px rgba(0,0,0,0.25)', fontSize: '1.55rem' }}>{t('home.title')}</Typography>
+        <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: 600, fontSize: '0.95rem' }}>{t('home.subtitle')}</Typography>
       </Box>
-
+      {/* Widget Frase del día / Tip rápido en Home */}
+      <Box sx={{ mb: 4 }}>
+        <FraseCarrusel />
+      </Box>
       {/* Toolbar: búsqueda, filtro y acciones */}
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center', mb: 3, justifyContent: 'center' }}>
         <TextField
