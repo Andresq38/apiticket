@@ -297,15 +297,13 @@ class NotificacionModel
     public function notificarInicioSesion($idUsuario)
     {
         try {
-            $mensaje = "Has iniciado sesión exitosamente el " . date('d/m/Y \a \l\a\s H:i');
-            
+            $mensaje = "Has iniciado sesión exitosamente";
             $this->create((object)[
                 'id_usuario_destinatario' => $idUsuario,
                 'id_usuario_remitente' => null,
                 'tipo_evento' => 'Inicio de sesión',
                 'mensaje' => $mensaje
             ]);
-
             return ['success' => true];
         } catch (Exception $e) {
             error_log("Error al crear notificación de login: " . $e->getMessage());

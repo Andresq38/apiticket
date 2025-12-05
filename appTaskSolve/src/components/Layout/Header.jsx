@@ -12,6 +12,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import NotificacionesBadge from "../common/NotificacionesBadge";
 import { useTranslation } from "react-i18next";
+import { useAuth } from '../../context/AuthContext';
 
 const Header = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ const Header = () => {
   const [userId, setUserId] = useState(null);
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language || 'en');
+  const { user, logout } = useAuth();
 
   // Obtener userId del localStorage
   useEffect(() => {
@@ -290,12 +292,34 @@ const Header = () => {
 
         {/* Badge de Notificaciones */}
         <NotificacionesBadge userId={getUserId()} />
-
         {/* Language switcher */}
         <Button color="inherit" onClick={toggleLang} sx={{ ml: 1 }} aria-label="Change language">
           { (lang || i18n.language || 'en').toUpperCase() }
         </Button>
-
+        {/* Botón de cerrar sesión si hay usuario */}
+        {user && (
+          <Button
+            color="inherit"
+            onClick={() => { logout(); navigate('/login'); }}
+            sx={{
+              ml: 2,
+              fontWeight: 700,
+              border: '2px solid #d32f2f',
+              color: '#d32f2f',
+              backgroundColor: 'white',
+              borderRadius: 2,
+              '&:hover': {
+                backgroundColor: '#ffebee',
+                color: '#b71c1c',
+                borderColor: '#b71c1c',
+              },
+              px: 2,
+              py: 1,
+            }}
+          >
+            Cerrar sesión
+          </Button>
+        )}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}

@@ -1,8 +1,11 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import Layout from './components/Layout/Layout';
 import Home from './components/Home/Home';
 import HomeP from './components/Home/HomeP';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+import Login from './components/Auth/Login';
 
 // Lazy-loaded routes to reduce initial bundle size
 const PageNotFound = lazy(() => import('./components/Home/PageNotFound'));
@@ -32,43 +35,58 @@ const SlaMonitor = lazy(() => import('./components/SLA/SlaMonitor'));
 
 export default function App() {
   return (
-    <Router>
-      <Layout>
-        <Suspense fallback={<div style={{ padding: 24 }}>Cargando…</div>}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/homeP" element={<HomeP />} />
-            <Route path="/asignaciones" element={<Navigate to="/tecnicos/asignaciones" replace />} />
-            <Route path="/tickets" element={<TicketsList />} />
-            <Route path="/tickets/crear" element={<CreateTicket />} />
-            <Route path="/tickets/Administrador" element={<TicketsPorAdmi />} />
-            <Route path="/tickets/cliente" element={<TicketsPorCliente />} />
-            <Route path="/tickets/tecnico" element={<TicketsPorTecnico />} />
-            <Route path="/tickets/:id" element={<DetalleTicket />} />
-            <Route path="/tickets/editar/:id" element={<EditTicket />} />
-            <Route path="/tecnicos/*" element={<TecnicosHub />} >
-              <Route index element={<Navigate to="listado" replace />} />
-              <Route path="listado" element={<TecnicosList />} />
-              <Route path="asignaciones" element={<AsignacionesTecnicos />} />
-              <Route path="tickets" element={<TicketsPorTecnico />} />
-              <Route path="crear" element={<CreateTecnico />} />
-            </Route>
-            <Route path="/asignaciones/gestionar" element={<AsignacionManager />} />
-            <Route path="/tecnicos/:id" element={<TecnicoDetalle />} />
-            <Route path="/tecnicos/editar/:id" element={<EditTecnico />} />
-            <Route path="/categorias" element={<CategoriasList />} />
-            <Route path="/categorias/crear" element={<Navigate to="/categorias" replace />} />
-            <Route path="/categorias/:id" element={<CategoriaDetalle />} />
-            <Route path="/categorias/editar/:id" element={<EditCategoria />} />
-            <Route path="/mantenimientos" element={<MantenimientosHome />} />
-            <Route path="/mantenimientos/categorias" element={<MantenimientosCategorias />} />
-            <Route path="/sla/monitor" element={<SlaMonitor />} />
-            <Route path="/notificaciones" element={<NotificacionesPage />} />
-            <Route path="*" element={<PageNotFound />} />
-          </Routes>
-        </Suspense>
-      </Layout>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Layout>
+          <Suspense fallback={<div style={{ padding: 24 }}>Cargando…</div>}>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/homeP" element={<HomeP />} />
+              <Route path="/asignaciones" element={<Navigate to="/tecnicos/asignaciones" replace />} />
+              <Route path="/tickets" element={
+                <ProtectedRoute>
+                  <TicketsList />
+                </ProtectedRoute>
+              } />
+              <Route path="/tickets/crear" element={
+                <ProtectedRoute>
+                  <CreateTicket />
+                </ProtectedRoute>
+              } />
+              <Route path="/tickets/Administrador" element={<ProtectedRoute><TicketsPorAdmi /></ProtectedRoute>} />
+              <Route path="/tickets/cliente" element={<ProtectedRoute><TicketsPorCliente /></ProtectedRoute>} />
+              <Route path="/tickets/tecnico" element={<ProtectedRoute><TicketsPorTecnico /></ProtectedRoute>} />
+              <Route path="/tickets/:id" element={<ProtectedRoute><DetalleTicket /></ProtectedRoute>} />
+              <Route path="/tickets/editar/:id" element={<ProtectedRoute><EditTicket /></ProtectedRoute>} />
+              <Route path="/tecnicos/*" element={<ProtectedRoute><TecnicosHub /></ProtectedRoute>} >
+                <Route index element={<Navigate to="listado" replace />} />
+                <Route path="listado" element={<TecnicosList />} />
+                <Route path="asignaciones" element={<AsignacionesTecnicos />} />
+                <Route path="tickets" element={<TicketsPorTecnico />} />
+                <Route path="crear" element={<CreateTecnico />} />
+              </Route>
+              <Route path="/asignaciones/gestionar" element={<ProtectedRoute><AsignacionManager /></ProtectedRoute>} />
+              <Route path="/tecnicos/:id" element={<ProtectedRoute><TecnicoDetalle /></ProtectedRoute>} />
+              <Route path="/tecnicos/editar/:id" element={<ProtectedRoute><EditTecnico /></ProtectedRoute>} />
+              <Route path="/categorias" element={<ProtectedRoute><CategoriasList /></ProtectedRoute>} />
+              <Route path="/categorias/crear" element={<Navigate to="/categorias" replace />} />
+              <Route path="/categorias/:id" element={<ProtectedRoute><CategoriaDetalle /></ProtectedRoute>} />
+              <Route path="/categorias/editar/:id" element={<ProtectedRoute><EditCategoria /></ProtectedRoute>} />
+              <Route path="/mantenimientos" element={<ProtectedRoute><MantenimientosHome /></ProtectedRoute>} />
+              <Route path="/mantenimientos/categorias" element={<ProtectedRoute><MantenimientosCategorias /></ProtectedRoute>} />
+              <Route path="/sla/monitor" element={<ProtectedRoute><SlaMonitor /></ProtectedRoute>} />
+              <Route path="/notificaciones" element={<ProtectedRoute><NotificacionesPage /></ProtectedRoute>} />
+              <Route path="*" element={<PageNotFound />} />
+            </Routes>
+          </Suspense>
+        </Layout>
+      </Router>
+    </AuthProvider>
   );
 }

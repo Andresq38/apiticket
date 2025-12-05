@@ -64,53 +64,28 @@ export default function Login() {
     <Box
       sx={{
         minHeight: '100vh',
+        width: '100vw',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-        p: 3,
-        '&::before': {
-          content: '""',
-          position: 'absolute',
-          top: '-10%',
-          right: '-10%',
-          width: '50%',
-          height: '50%',
-          background:
-            'radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%)',
-          animation: 'pulse 4s ease-in-out infinite',
-        },
-        '&::after': {
-          content: '""',
-          position: 'absolute',
-          bottom: '-10%',
-          left: '-10%',
-          width: '50%',
-          height: '50%',
-          background:
-            'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-          animation: 'pulse 6s ease-in-out infinite',
-        },
-        '@keyframes pulse': {
-          '0%, 100%': { transform: 'scale(1)', opacity: 1 },
-          '50%': { transform: 'scale(1.1)', opacity: 0.8 },
-        },
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        zIndex: 9999,
       }}
     >
       <Fade in timeout={800}>
-        <Paper
-          elevation={24}
+        <Box
           sx={{
             p: 5,
             maxWidth: 480,
             width: '100%',
             borderRadius: 4,
             background: 'rgba(255, 255, 255, 0.98)',
-            backdropFilter: 'blur(10px)',
+            boxShadow: 3,
             position: 'relative',
-            zIndex: 1,
+            zIndex: 2,
           }}
         >
           {/* Logo */}
@@ -297,7 +272,7 @@ export default function Login() {
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center' }}>
             {t('footer.developedBy')}
           </Typography>
-        </Paper>
+        </Box>
       </Fade>
     </Box>
   );

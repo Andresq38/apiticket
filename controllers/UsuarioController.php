@@ -1,6 +1,26 @@
 <?php
 class Usuario
 {
+    /**
+     * Retorna los datos del usuario autenticado usando JWT
+     */
+    public function me()
+    {
+        try {
+            $response = new Response();
+            $authUser = $_SERVER['auth_user'] ?? null;
+            if (!$authUser) {
+                http_response_code(401);
+                $response->toJSON(['error' => 'No autenticado']);
+                return;
+            }
+            $usuario = new UsuarioModel();
+            $userData = $usuario->get($authUser['id_usuario']);
+            $response->toJSON($userData);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
     public function index()
     {
         try {

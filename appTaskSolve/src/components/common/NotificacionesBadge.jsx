@@ -115,7 +115,7 @@ export default function NotificacionesBadge({ userId }) {
 
       try {
         setConnectionStatus('connecting');
-        const eventSource = new EventSource(`${apiBase}/apiticket/notificationstream/stream/${effectiveUserId}`);
+        const eventSource = new EventSource(`${apiBase}/apiticket/notificacion/stream/${effectiveUserId}`);
         eventSourceRef.current = eventSource;
 
         // Evento: conexión establecida

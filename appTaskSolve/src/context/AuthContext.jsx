@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import axios from 'axios';
 import { getApiOrigin, getApiBaseWithPrefix } from '../utils/apiBase';
 
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 const API_BASE = getApiBaseWithPrefix('/apiticket');
 // Asegurar baseURL de axios lo antes posible para evitar condiciones de carrera
