@@ -217,6 +217,18 @@ class NotificacionModel
         }
     }
 
+    public function marcarComoLeidaUna($objeto){
+        try{
+          $vSql = "UPDATE notificacion SET estado = 'Leida' WHERE id_notificacion = ?";
+
+            $this->enlace->executePrepared_DML($vSql, 'i', [(int)$objeto->id_notificacion]);
+            return ['success' => true, 'message' => 'Notificación marcada como leída'];
+        }
+        catch(Exception $e){
+            handleException($e);
+        }
+    }
+
     /**
      * Eliminar notificación
      */

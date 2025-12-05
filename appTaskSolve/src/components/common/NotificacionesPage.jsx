@@ -1,16 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
-  Container, Typography, Box, Card, CardContent, Chip, IconButton,
-  Button, Grid, CircularProgress, Alert, Divider, Tabs, Tab
-} from '@mui/material';
-import MarkEmailReadIcon from '@mui/icons-material/MarkEmailRead';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import axios from 'axios';
-import { getApiOrigin } from '../../utils/apiBase';
-import { formatDateTime } from '../../utils/format';
+  Container,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  IconButton,
+  Button,
+  Grid,
+  CircularProgress,
+  Alert,
+  Divider,
+  Tabs,
+  Tab,
+} from "@mui/material";
+import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
+import DeleteIcon from "@mui/icons-material/Delete";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import axios from "axios";
+import { getApiOrigin } from "../../utils/apiBase";
+import { formatDateTime } from "../../utils/format";
 
 export default function NotificacionesPage() {
   const [notificaciones, setNotificaciones] = useState([]);
@@ -23,29 +35,31 @@ export default function NotificacionesPage() {
 
   // Obtener userId del contexto/localStorage
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
+    const userStr = localStorage.getItem("user");
     if (userStr) {
       try {
         const user = JSON.parse(userStr);
         setUserId(user.id);
       } catch (e) {
-        console.error('Error al parsear usuario:', e);
+        console.error("Error al parsear usuario:", e);
       }
     }
   }, []);
 
   const fetchNotificaciones = async () => {
     if (!userId) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      const res = await axios.get(`${apiBase}/apiticket/notificacion/porUsuario/${userId}`);
-      const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+      const res = await axios.get(
+        `${apiBase}/apiticket/notificacion/porUsuario/${userId}`
+      );
+      const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
       setNotificaciones(data);
     } catch (err) {
-      console.error('Error al cargar notificaciones:', err);
-      setError('Error al cargar las notificaciones');
+      console.error("Error al cargar notificaciones:", err);
+      setError("Error al cargar las notificaciones");
     } finally {
       setLoading(false);
     }
@@ -59,34 +73,34 @@ export default function NotificacionesPage() {
 
   const handleMarcarComoLeida = async (id) => {
     try {
-      await axios.put(`${apiBase}/apiticket/notificacion/marcarLeida/${id}`, {
-        id_usuario: userId
+      await axios.post(`${apiBase}/apiticket/notificacion/marcarLeidaUna`, {
+        id_notificacion: id,
       });
       fetchNotificaciones();
     } catch (error) {
-      console.error('Error al marcar como leída:', error);
+      console.error("Error al marcar como leída:", error);
     }
   };
 
   const handleMarcarTodasLeidas = async () => {
     try {
       await axios.post(`${apiBase}/apiticket/notificacion/marcarTodasLeidas`, {
-        id_usuario: userId
+        id_usuario: userId,
       });
       fetchNotificaciones();
     } catch (error) {
-      console.error('Error al marcar todas como leídas:', error);
+      console.error("Error al marcar todas como leídas:", error);
     }
   };
 
   const handleEliminar = async (id) => {
-    if (!window.confirm('¿Estás seguro de eliminar esta notificación?')) return;
-    
+    if (!window.confirm("¿Estás seguro de eliminar esta notificación?")) return;
+
     try {
       await axios.delete(`${apiBase}/apiticket/notificacion/${id}`);
       fetchNotificaciones();
     } catch (error) {
-      console.error('Error al eliminar notificación:', error);
+      console.error("Error al eliminar notificación:", error);
     }
   };
 
@@ -95,25 +109,28 @@ export default function NotificacionesPage() {
   };
 
   const getTipoColor = (tipo) => {
-    if (tipo?.includes('estado')) return 'primary';
-    if (tipo?.includes('sesión') || tipo?.includes('sesi')) return 'success';
-    if (tipo?.includes('asignación') || tipo?.includes('asignacion')) return 'warning';
-    return 'default';
+    if (tipo?.includes("estado")) return "primary";
+    if (tipo?.includes("sesión") || tipo?.includes("sesi")) return "success";
+    if (tipo?.includes("asignación") || tipo?.includes("asignacion"))
+      return "warning";
+    return "default";
   };
 
-  const notificacionesFiltradas = notificaciones.filter(n => {
+  const notificacionesFiltradas = notificaciones.filter((n) => {
     if (tabValue === 0) return true; // Todas
-    if (tabValue === 1) return n.estado === 'No Leida'; // No leídas
-    if (tabValue === 2) return n.estado === 'Leida'; // Leídas
+    if (tabValue === 1) return n.estado === "No Leida"; // No leídas
+    if (tabValue === 2) return n.estado === "Leida"; // Leídas
     return true;
   });
 
-  const noLeidas = notificaciones.filter(n => n.estado === 'No Leida').length;
+  const noLeidas = notificaciones.filter((n) => n.estado === "No Leida").length;
 
   if (!userId) {
     return (
       <Container sx={{ py: 4 }}>
-        <Alert severity="warning">Debes iniciar sesión para ver las notificaciones</Alert>
+        <Alert severity="warning">
+          Debes iniciar sesión para ver las notificaciones
+        </Alert>
       </Container>
     );
   }
@@ -121,17 +138,32 @@ export default function NotificacionesPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
             <NotificationsIcon sx={{ fontSize: 36 }} />
             Mis Notificaciones
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {noLeidas} notificación{noLeidas !== 1 ? 'es' : ''} sin leer
+            {noLeidas} notificación{noLeidas !== 1 ? "es" : ""} sin leer
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
           {noLeidas > 0 && (
             <Button
               variant="outlined"
@@ -148,7 +180,7 @@ export default function NotificacionesPage() {
       </Box>
 
       {/* Tabs de filtrado */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs value={tabValue} onChange={handleTabChange}>
           <Tab label={`Todas (${notificaciones.length})`} />
           <Tab label={`No leídas (${noLeidas})`} />
@@ -158,7 +190,7 @@ export default function NotificacionesPage() {
 
       {/* Contenido */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+        <Box sx={{ display: "flex", justifyContent: "center", py: 8 }}>
           <CircularProgress />
         </Box>
       ) : error ? (
@@ -170,23 +202,40 @@ export default function NotificacionesPage() {
           {notificacionesFiltradas.map((notif) => (
             <Grid item xs={12} key={notif.id_notificacion}>
               <Card
-                elevation={notif.estado === 'No Leida' ? 3 : 1}
+                elevation={notif.estado === "No Leida" ? 3 : 1}
                 sx={{
-                  borderLeft: notif.estado === 'No Leida' ? '4px solid' : 'none',
-                  borderLeftColor: 'primary.main',
-                  bgcolor: notif.estado === 'No Leida' ? 'action.hover' : 'background.paper'
+                  borderLeft:
+                    notif.estado === "No Leida" ? "4px solid" : "none",
+                  borderLeftColor: "primary.main",
+                  bgcolor:
+                    notif.estado === "No Leida"
+                      ? "action.hover"
+                      : "background.paper",
                 }}
               >
                 <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "start",
+                    }}
+                  >
                     <Box sx={{ flex: 1 }}>
-                      <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          mb: 1,
+                          alignItems: "center",
+                        }}
+                      >
                         <Chip
-                          label={notif.tipo_evento || 'Notificación'}
+                          label={notif.tipo_evento || "Notificación"}
                           size="small"
                           color={getTipoColor(notif.tipo_evento)}
                         />
-                        {notif.estado === 'No Leida' && (
+                        {notif.estado === "No Leida" && (
                           <Chip
                             label="Nueva"
                             size="small"
@@ -194,7 +243,7 @@ export default function NotificacionesPage() {
                             sx={{ fontWeight: 700 }}
                           />
                         )}
-                        {notif.estado === 'Leida' && (
+                        {notif.estado === "Leida" && (
                           <Chip
                             icon={<CheckCircleIcon />}
                             label="Leída"
@@ -208,30 +257,40 @@ export default function NotificacionesPage() {
                       <Typography
                         variant="body1"
                         sx={{
-                          fontWeight: notif.estado === 'No Leida' ? 600 : 400,
-                          mb: 1
+                          fontWeight: notif.estado === "No Leida" ? 600 : 400,
+                          mb: 1,
                         }}
                       >
-                        {notif.mensaje || 'Sin mensaje'}
+                        {notif.mensaje || "Sin mensaje"}
                       </Typography>
 
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ display: "block", mb: 0.5 }}
+                      >
                         📅 {formatDateTime(notif.fecha_hora)}
                       </Typography>
 
                       {notif.nombre_remitente && (
-                        <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block" }}
+                        >
                           👤 De: {notif.nombre_remitente}
                         </Typography>
                       )}
                     </Box>
 
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      {notif.estado === 'No Leida' && (
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      {notif.estado === "No Leida" && (
                         <IconButton
                           size="small"
                           color="primary"
-                          onClick={() => handleMarcarComoLeida(notif.id_notificacion)}
+                          onClick={() =>
+                            handleMarcarComoLeida(notif.id_notificacion)
+                          }
                           title="Marcar como leída"
                         >
                           <MarkEmailReadIcon />

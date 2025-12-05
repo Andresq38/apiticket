@@ -133,6 +133,31 @@ class notificacion
             handleException($e);
         }
     }
+    
+    /**
+     * Metodo para marcar notifiación como léida
+     * solo una por una 
+     */
+
+    public function marcarLeidaUna()
+    {
+        try {
+            $request = new Request();
+            $response = new Response();
+            $body = $request->getJSON();
+            
+            if (!isset($body->id_notificacion)) {
+                $response->toJSON(['success' => false, 'message' => 'id_notificacion requerido']);
+                return;
+            }
+            
+            $notificacion = new NotificacionModel();
+            $result = $notificacion->marcarComoLeidaUna($body);
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 
     /**
      * Crear nueva notificación
