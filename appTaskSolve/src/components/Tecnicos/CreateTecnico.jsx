@@ -49,7 +49,11 @@ const schema = yup.object({
   password: yup.string()
     .required('La contraseña es requerida')
     .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .max(50, 'La contraseña no puede exceder 50 caracteres'),
+    .max(50, 'La contraseña no puede exceder 50 caracteres')
+    .matches(/[A-Z]/, 'Debe contener al menos una letra mayúscula')
+    .matches(/[a-z]/, 'Debe contener al menos una letra minúscula')
+    .matches(/[0-9]/, 'Debe contener al menos un número')
+    .matches(/[^A-Za-z0-9]/, 'Debe contener al menos un símbolo'),
     
   confirm_password: yup.string().when('password', (password, schema) => {
   if (password && password.length > 0) {
