@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Typography,
@@ -24,6 +25,7 @@ import EngineeringIcon from '@mui/icons-material/Engineering';
 import TimerIcon from '@mui/icons-material/Timer';
 
 const CategoriaDetalle = () => {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [categoria, setCategoria] = useState(null);
@@ -92,7 +94,7 @@ const CategoriaDetalle = () => {
           onClick={() => navigate('/categorias')}
           sx={{ mt: 2 }}
         >
-          Volver a Categorías
+          {t('categories.backToCategories')}
         </Button>
       </Container>
     );
@@ -101,13 +103,13 @@ const CategoriaDetalle = () => {
   if (!categoria) {
     return (
       <Container sx={{ mt: 4 }}>
-        <Alert severity="warning">Categoría no encontrada</Alert>
+        <Alert severity="warning">{t('categories.categoryNotFound')}</Alert>
         <Button 
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/categorias')}
           sx={{ mt: 2 }}
         >
-          Volver a Categorías
+          {t('categories.backToCategories')}
         </Button>
       </Container>
     );
@@ -117,7 +119,7 @@ const CategoriaDetalle = () => {
     <Container sx={{ mt: 4, mb: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3, gap: 2, flexWrap: 'wrap' }}>
         <Button variant="outlined" startIcon={<ArrowBackIcon />} onClick={() => navigate('/categorias')}>
-          Volver a Categorías
+          {t('categories.backToCategories')}
         </Button>
         <Button
           variant="contained"
@@ -125,7 +127,7 @@ const CategoriaDetalle = () => {
           startIcon={<EditIcon />}
           onClick={() => navigate(`/categorias/editar/${id}`)}
         >
-          Editar Categoría
+          {t('categories.editCategory')}
         </Button>
       </Box>
 
@@ -143,7 +145,7 @@ const CategoriaDetalle = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <LabelIcon sx={{ mr: 1, color: 'rgba(0,0,139,0.9)' }} />
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  Etiquetas
+                  {t('categories.tags')}
                 </Typography>
               </Box>
               <Divider sx={{ mb: 2 }} />
@@ -179,7 +181,7 @@ const CategoriaDetalle = () => {
                 }
                 return (
                   <Typography variant="body2" color="text.secondary">
-                    No hay etiquetas asociadas a esta categoría.
+                    {t('categories.noTagsAssociated')}
                   </Typography>
                 );
               })()}
@@ -194,7 +196,7 @@ const CategoriaDetalle = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                 <EngineeringIcon sx={{ mr: 1, color: 'rgba(0,0,139,0.9)' }} />
                 <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  Especialidades
+                  {t('categories.specialties')}
                 </Typography>
               </Box>
               <Divider sx={{ mb: 2 }} />
@@ -229,7 +231,7 @@ const CategoriaDetalle = () => {
 
                 return (
                 <Typography variant="body2" color="text.secondary">
-                  No hay especialidades asociadas a esta categoría.
+                  {t('categories.noSpecialtiesAssociated')}
                 </Typography>
                 );
               })()}
@@ -252,26 +254,26 @@ const CategoriaDetalle = () => {
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <Typography variant="body1" sx={{ mb: 1, color: 'text.primary' }}>
-                <strong>Nivel:</strong> {`${categoria?.id_sla ?? ''}${(categoria?.id_sla) ? ' - ' : ''}${categoria.sla_nombre ?? ''}`}
+                <strong>{t('categories.slaLevel')}:</strong> {`${categoria?.id_sla ?? ''}${(categoria?.id_sla) ? ' - ' : ''}${categoria.sla_nombre ?? ''}`}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid rgba(0,0,139,0.9)' }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  Tiempo de Respuesta
+                  {t('categories.responseTime')}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.primary' }}>
-                  {categoria.tiempo_respuesta_min} - {categoria.tiempo_respuesta_max} horas
+                  {categoria.tiempo_respuesta_min} - {categoria.tiempo_respuesta_max} {t('categories.hours')}
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 1, border: '1px solid rgba(0,0,139,0.9)' }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  Tiempo de Resolución
+                  {t('categories.resolutionTime')}
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'text.primary' }}>
-                  {categoria.tiempo_resolucion_min} - {categoria.tiempo_resolucion_max} horas
+                  {categoria.tiempo_resolucion_min} - {categoria.tiempo_resolucion_max} {t('categories.hours')}
                 </Typography>
               </Box>
             </Grid>
