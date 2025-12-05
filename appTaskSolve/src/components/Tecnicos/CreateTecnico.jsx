@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -64,6 +65,7 @@ const schema = yup.object({
 
 export default function CreateTecnico() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { control, handleSubmit, formState: { errors }, watch, reset } = useForm({
     defaultValues: {
       id_rol: 0,
@@ -198,22 +200,22 @@ export default function CreateTecnico() {
     }
   };
 
-  const onError = () => setSnackbar({ open: true, message: 'Revisa los campos requeridos', severity: 'warning' });
+  const onError = () => setSnackbar({ open: true, message: t('technicianForm.reviewRequired'), severity: 'warning' });
 
   return (
     <>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Box sx={{ textAlign: 'left' }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, lineHeight: 1 }}>Crear Nuevo Usuario</Typography>
-          <Typography variant="body2" color="text.secondary">Complete el formulario para registrar un nuevo usuario o técnico</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, lineHeight: 1 }}>{t('technicianForm.createTitle')}</Typography>
+          <Typography variant="body2" color="text.secondary">{t('technicianForm.createSubtitle')}</Typography>
         </Box>
-        <Button variant="text" onClick={() => navigate(-1)}>&larr; Volver</Button>
+        <Button variant="text" onClick={() => navigate(-1)}>&larr; {t('technicianForm.goBack')}</Button>
       </Box>
 
       <Paper elevation={2} sx={{ p: 3, borderTop: 4, borderTopColor: 'primary.main', borderRadius: 2 }}>
         <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
           {/* SECCIÓN: Datos de Usuario */}
-          <Typography variant="h6" sx={{ mt: 1, mb: 2, fontWeight: 700 }}>Datos de usuario</Typography>
+          <Typography variant="h6" sx={{ mt: 1, mb: 2, fontWeight: 700 }}>{t('technicianForm.personalData')}</Typography>
           <Grid container spacing={3}>
             {/* Rol */}
             <Grid item xs={12} md={6}>
@@ -222,7 +224,7 @@ export default function CreateTecnico() {
                   <TextField
                     {...field}
                     id="id_rol"
-                    label="Rol"
+                    label={t('technicianForm.role')}
                     select
                     value={field.value || 0}
                     onChange={(e) => {
@@ -230,12 +232,12 @@ export default function CreateTecnico() {
                       field.onChange(val > 0 ? val : 0);
                     }}
                     error={Boolean(errors.id_rol)}
-                    helperText={errors.id_rol ? errors.id_rol.message : 'Seleccione el rol del usuario'}
+                    helperText={errors.id_rol ? errors.id_rol.message : t('technicianForm.roleHelper')}
                     InputProps={{
                       startAdornment: (<InputAdornment position="start"><SecurityIcon color="action" /></InputAdornment>)
                     }}
                   >
-                    <MenuItem value={0}>-- Seleccionar Rol --</MenuItem>
+                    <MenuItem value={0}>{t('technicianForm.selectRole')}</MenuItem>
                     {sortedRoles.map(role => (
                       <MenuItem key={role.id_rol} value={role.id_rol}>
                         {role.descripcion}
@@ -253,10 +255,10 @@ export default function CreateTecnico() {
                   <TextField
                     {...field}
                     id="id_usuario"
-                    label="Cédula (ID Usuario)"
-                    placeholder="1-2345-6789"
+                    label={t('technicianForm.cedula')}
+                    placeholder={t('technicianForm.cedulaPlaceholder')}
                     error={Boolean(errors.id_usuario)}
-                    helperText={errors.id_usuario ? errors.id_usuario.message : 'Ingrese la cédula con formato: #-####-####'}
+                    helperText={errors.id_usuario ? errors.id_usuario.message : t('technicianForm.cedulaHelper')}
                     InputProps={{
                       startAdornment: (<InputAdornment position="start"><BadgeIcon color="action" /></InputAdornment>)
                     }}
@@ -272,10 +274,10 @@ export default function CreateTecnico() {
                   <TextField
                     {...field}
                     id="nombre"
-                    label="Nombre Completo"
-                    placeholder="Juan Pérez González"
+                    label={t('technicianForm.fullName')}
+                    placeholder={t('technicianForm.fullNamePlaceholder')}
                     error={Boolean(errors.nombre)}
-                    helperText={errors.nombre ? errors.nombre.message : 'Ingrese nombre y apellido(s) completos'}
+                    helperText={errors.nombre ? errors.nombre.message : t('technicianForm.fullNameHelper')}
                     InputProps={{
                       startAdornment: (<InputAdornment position="start"><PersonIcon color="action" /></InputAdornment>)
                     }}
@@ -291,11 +293,11 @@ export default function CreateTecnico() {
                   <TextField
                     {...field}
                     id="correo"
-                    label="Correo Electrónico"
+                    label={t('technicianForm.email')}
                     type="email"
                     error={Boolean(errors.correo)}
-                    helperText={errors.correo ? errors.correo.message : 'Ej: usuario@empresa.com'}
-                    placeholder="usuario@empresa.com"
+                    helperText={errors.correo ? errors.correo.message : t('technicianForm.emailHelper')}
+                    placeholder={t('technicianForm.emailPlaceholder')}
                     InputProps={{
                       startAdornment: (<InputAdornment position="start"><EmailIcon color="action" /></InputAdornment>)
                     }}
@@ -311,10 +313,10 @@ export default function CreateTecnico() {
                   <TextField
                     {...field}
                     id="password"
-                    label="Contraseña"
+                    label={t('technicianForm.password')}
                     type="password"
                     error={Boolean(errors.password)}
-                    helperText={errors.password ? errors.password.message : 'Mínimo 6 caracteres'}
+                    helperText={errors.password ? errors.password.message : t('technicianForm.passwordHelper')}
                     InputProps={{
                       startAdornment: (<InputAdornment position="start"><LockIcon color="action" /></InputAdornment>)
                     }}
@@ -331,12 +333,12 @@ export default function CreateTecnico() {
                   <TextField
                     {...field}
                     id="confirm_password"
-                    label="Confirmar Contraseña"
+                    label={t('technicianForm.confirmPassword')}
                     type="password"
                     error={Boolean(errors.confirm_password) || (passwordsMatch === false)}
                     helperText={
                       errors.confirm_password ? errors.confirm_password.message
-                        : (passwordsMatch === null ? 'Repita la contraseña' : (passwordsMatch ? 'Contraseñas coinciden' : 'Las contraseñas no coinciden'))
+                        : (passwordsMatch === null ? t('technicianForm.confirmPasswordHelper') : (passwordsMatch ? t('technicianForm.passwordMatch') : t('technicianForm.passwordMismatch')))
                     }
                     FormHelperTextProps={{ sx: { color: passwordsMatch === true ? 'success.main' : passwordsMatch === false ? 'error.main' : 'text.secondary' } }}
                     InputProps={{
@@ -356,7 +358,7 @@ export default function CreateTecnico() {
           {isTecnico && (
             <>
               <Divider sx={{ my: 3 }} />
-              <Typography variant="h6" sx={{ mt: 1, mb: 2, fontWeight: 700 }}>Datos técnicos</Typography>
+              <Typography variant="h6" sx={{ mt: 1, mb: 2, fontWeight: 700 }}>{t('technicianForm.technicalData')}</Typography>
               <Grid container spacing={3}>
                  {/* Disponibilidad */}
                 <Grid item xs={12} md={6}>
@@ -365,20 +367,20 @@ export default function CreateTecnico() {
                       <TextField
                         {...field}
                         id="disponibilidad"
-                        label="Estado de Disponibilidad"
+                        label={t('technicianForm.availabilityStatus')}
                         select
                         value={field.value ? 'true' : 'false'}
                         onChange={(e) => field.onChange(e.target.value === 'true')}
-                        helperText="Indica si el técnico está disponible para recibir tiquetes"
+                        helperText={t('technicianForm.availabilityHelper')}
                       >
                         <MenuItem value="true">
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <CheckCircleOutlineIcon color="success" fontSize="small" /> Disponible
+                            <CheckCircleOutlineIcon color="success" fontSize="small" /> {t('technicianForm.available')}
                           </Box>
                         </MenuItem>
                         <MenuItem value="false">
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <HighlightOffIcon color="warning" fontSize="small" /> No Disponible
+                            <HighlightOffIcon color="warning" fontSize="small" /> {t('technicianForm.notAvailable')}
                           </Box>
                         </MenuItem>
                       </TextField>
@@ -393,14 +395,14 @@ export default function CreateTecnico() {
                           <TextField
                             {...field}
                             id="carga_trabajo"
-                            label="Carga Actual"
+                            label={t('technicianForm.currentLoad')}
                             type="number"
                             value={field.value ?? 0}
                             InputProps={{
                               readOnly: true,
                               startAdornment: (<InputAdornment position="start"><AssignmentIcon color="action" /></InputAdornment>)
                             }}
-                            helperText="Se inicializa en 0 para nuevos técnicos"
+                            helperText={t('technicianForm.currentLoadHelper')}
                             disabled
                           />
                         )} />
@@ -445,10 +447,10 @@ export default function CreateTecnico() {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Especialidades"
-                        placeholder="Seleccione especialidades"
+                        label={t('technicianForm.specialties')}
+                        placeholder={t('technicianForm.specialtiesPlaceholder')}
                         error={Boolean(errors.especialidades)}
-                        helperText={errors.especialidades ? errors.especialidades.message : `${(field.value || []).length} seleccionada(s)`}
+                        helperText={errors.especialidades ? errors.especialidades.message : t('technicianForm.specialtiesSelected', { count: (field.value || []).length })}
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: (<InputAdornment position="start"><WorkIcon color="action" /></InputAdornment>)
@@ -499,7 +501,7 @@ export default function CreateTecnico() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <WorkIcon sx={{ color: (watch('especialidades') || []).length > 0 ? 'info.main' : 'text.secondary' }} />
                         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                          Especialidades seleccionadas
+                          {t('technicianForm.specialtiesHeader')}
                         </Typography>
                       </Box>
                       <Chip
@@ -546,10 +548,10 @@ export default function CreateTecnico() {
                     ) : (
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 80 }}>
                         <Typography variant="body2" color="text.secondary" align="center">
-                          No hay especialidades seleccionadas
+                          {t('technicianForm.noSpecialties')}
                         </Typography>
                         <Typography variant="caption" color="text.disabled" align="center" sx={{ mt: 0.5 }}>
-                          Seleccione especialidades usando el campo anterior
+                          {t('technicianForm.selectSpecialties')}
                         </Typography>
                       </Box>
                     )}
@@ -562,10 +564,10 @@ export default function CreateTecnico() {
           <Divider sx={{ my: 3 }} />
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <Button type="submit" variant="contained" color="primary" startIcon={<SaveIcon />} disabled={loading} sx={{ m: 0 }}>
-              Guardar
+              {t('technicianForm.save')}
             </Button>
             <Button variant="outlined" onClick={() => navigate(-1)} sx={{ m: 0 }}>
-              Cancelar
+              {t('technicianForm.reviewRequired')}
             </Button>
           </Box>
         </form>

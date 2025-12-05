@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Container, Typography, CircularProgress, Box, Alert, Paper, Chip, Grid, Button, Divider, Snackbar } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -16,6 +17,7 @@ const apiBase = getApiOrigin();
 export default function TecnicoDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +31,7 @@ export default function TecnicoDetalle() {
       setData(res.data || null);
     } catch (e) {
       console.error(e);
-      setError('No se pudo cargar la información del técnico.');
+      setError(t('tecnicoDetail.errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,9 @@ export default function TecnicoDetalle() {
       await TecnicoService.toggleDisponibilidad(id);
       setSnackbar({
         open: true,
-        message: `Disponibilidad cambiada a ${newDisponibilidad ? 'Disponible' : 'Ocupado'}`,
+        message: t('tecnicoDetail.availabilityChanged', { 
+          status: newDisponibilidad ? t('tecnicoDetail.available') : 'Ocupado' 
+        }),
         severity: 'success'
       });
       // Recargar datos actualizados del servidor
@@ -69,7 +73,7 @@ export default function TecnicoDetalle() {
       setData(previousData);
       setSnackbar({
         open: true,
-        message: 'Error al cambiar disponibilidad',
+        message: t('tecnicoDetail.availabilityChangeError'),
         severity: 'error'
       });
     } finally {
@@ -79,28 +83,28 @@ export default function TecnicoDetalle() {
 
   if (loading) return <Box textAlign="center" mt={5}><CircularProgress /></Box>;
   if (error) return <Alert severity="error">{error}</Alert>;
-  if (!data) return <Alert severity="info">Técnico no encontrado</Alert>;
+  if (!data) return <Alert severity="info">{t('tecnicoDetail.notFound')}</Alert>;
 
   const ticketsAbiertos = data.tickets_abiertos ?? 0;
   const disponibleCalculada = ticketsAbiertos < 5;
-  const disponibilidad = (data.disponibilidad_tabla ?? data.disponibilidad_calculada) ? 'Disponible' : 'Ocupado';
+  const disponibilidad = (data.disponibilidad_tabla ?? data.disponibilidad_calculada) ? t('tecnicoDetail.available') : 'Ocupado';
   
   // Calcular color de carga
   let cargaColor = 'success';
-  let cargaLabel = 'Disponible';
+  let cargaLabel = t('menuLabels.disponible');
   if (ticketsAbiertos >= 5) {
     cargaColor = 'error';
-    cargaLabel = 'Saturado';
+    cargaLabel = t('menuLabels.saturado');
   } else if (ticketsAbiertos >= 3) {
     cargaColor = 'warning';
-    cargaLabel = 'Ocupado';
+    cargaLabel = t('menuLabels.ocupado');
   }
 
   return (
     <Container sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h4">
-          Técnico: {data.nombre_usuario}
+          {t('tecnicoDetail.technician', { name: data.nombre_usuario })}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
           <Button 
@@ -109,27 +113,27 @@ export default function TecnicoDetalle() {
             startIcon={<EditIcon />}
             onClick={() => navigate(`/tecnicos/editar/${id}`)}
           >
-            Editar
+            {t('tecnicoDetail.edit')}
           </Button>
           <Button 
             variant="contained" 
-            color={disponibilidad === 'Disponible' ? 'warning' : 'success'}
+            color={disponibilidad === t('tecnicoDetail.available') ? 'warning' : 'success'}
             startIcon={<ToggleOnIcon />}
             onClick={handleToggleDisponibilidad}
             disabled={toggling}
           >
-            {toggling ? 'Cambiando...' : disponibilidad === 'Disponible' ? 'Marcar Ocupado' : 'Marcar Disponible'}
+            {toggling ? t('tecnicoDetail.changing') : disponibilidad === t('tecnicoDetail.available') ? t('tecnicoDetail.markBusy') : t('technicianForm.available')}
           </Button>
-          <Button variant="outlined" onClick={() => navigate('/tecnicos')}>Volver al listado</Button>
+          <Button variant="outlined" onClick={() => navigate('/tecnicos')}>{t('tecnicoDetail.backToList')}</Button>
         </Box>
       </Box>
 
       {/* Datos personales */}
       <Paper sx={{ p: 3, mb: 3, borderTop: 4, borderTopColor: disponibleCalculada ? 'success.main' : 'warning.main' }}>
-        <Typography variant="h6" color="primary" gutterBottom>Datos personales</Typography>
-        <Typography><strong>Nombre:</strong> {data.nombre_usuario}</Typography>
-        <Typography><strong>Correo:</strong> {data.correo_usuario}</Typography>
-        <Typography><strong>ID Técnico:</strong> {data.id_tecnico}</Typography>
+        <Typography variant="h6" color="primary" gutterBottom>{t('tecnicoDetail.personalData')}</Typography>
+        <Typography><strong>{t('tecnicoDetail.fullName')}</strong> {data.nombre_usuario}</Typography>
+        <Typography><strong>{t('tecnicoDetail.email')}</strong> {data.correo_usuario}</Typography>
+        <Typography><strong>{t('tecnicoDetail.technicianId')}</strong> {data.id_tecnico}</Typography>
         
         <Divider sx={{ my: 2 }} />
         
@@ -137,16 +141,16 @@ export default function TecnicoDetalle() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           {disponibleCalculada ? <CheckCircleIcon color="success" /> : <WarningIcon color="warning" />}
           <Typography variant="body2">
-            <strong>Disponibilidad:</strong>
+            <strong>{t('tecnicoDetail.availability')}</strong>
           </Typography>
           <Chip 
             size="small" 
             label={disponibilidad} 
-            color={disponibilidad === 'Disponible' ? 'success' : 'warning'} 
+            color={disponibilidad === t('tecnicoDetail.available') ? 'success' : 'warning'} 
             variant="filled"
           />
           <Typography variant="caption" color="text.secondary">
-            ({disponibleCalculada ? 'Acepta nuevos tickets' : 'Carga alta'})
+            ({disponibleCalculada ? t('tecnicoDetail.acceptsNewTickets') : t('tecnicoDetail.highLoad')})
           </Typography>
         </Box>
 
@@ -154,11 +158,11 @@ export default function TecnicoDetalle() {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <AssignmentIcon fontSize="small" color="action" />
           <Typography variant="body2">
-            <strong>Tickets abiertos:</strong>
+            <strong>{t('tecnicoDetail.openTickets')}</strong>
           </Typography>
           <Chip 
             size="small" 
-            label={`${ticketsAbiertos} tickets`}
+            label={`${ticketsAbiertos} ${ticketsAbiertos === 1 ? 'ticket' : 'tickets'}`}
             color={cargaColor}
             variant="outlined"
           />
@@ -174,7 +178,7 @@ export default function TecnicoDetalle() {
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <AssignmentIcon color="primary" />
-          <Typography variant="h6" color="primary">Carga de trabajo por estado</Typography>
+          <Typography variant="h6" color="primary">{t('tecnicoDetail.workloadByStatus')}</Typography>
         </Box>
         {Array.isArray(data.carga_trabajo) && data.carga_trabajo.length > 0 ? (
           <Grid container spacing={2}>
@@ -201,7 +205,7 @@ export default function TecnicoDetalle() {
             })}
           </Grid>
         ) : (
-          <Typography color="text.secondary">Sin tiquetes asignados</Typography>
+          <Typography color="text.secondary">{t('tecnicoDetail.noTicketsAssigned')}</Typography>
         )}
       </Paper>
 
@@ -209,7 +213,7 @@ export default function TecnicoDetalle() {
       <Paper sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <SchoolIcon color="primary" />
-          <Typography variant="h6" color="primary">Especialidades</Typography>
+          <Typography variant="h6" color="primary">{t('tecnicoDetail.specialties')}</Typography>
         </Box>
         {Array.isArray(data.especialidades) && data.especialidades.length > 0 ? (
           <Grid container spacing={2}>
@@ -241,7 +245,7 @@ export default function TecnicoDetalle() {
             ))}
           </Grid>
         ) : (
-          <Alert severity="info" variant="outlined">No se registran especialidades</Alert>
+          <Alert severity="info" variant="outlined">{t('tecnicoDetail.noSpecialties')}</Alert>
         )}
       </Paper>
 

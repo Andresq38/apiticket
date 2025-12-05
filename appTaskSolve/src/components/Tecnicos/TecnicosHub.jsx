@@ -1,14 +1,16 @@
 import React from 'react';
 import { Box, Tabs, Tab } from '@mui/material';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function TecnicosHub() {
   const location = useLocation();
+  const { t } = useTranslation();
 
   const tabs = [
-    { label: 'Equipo', to: '/tecnicos/listado', value: 'listado' },
-    { label: 'Asignaciones', to: '/tecnicos/asignaciones', value: 'asignaciones' },
-    { label: 'Bandeja del Técnico', to: '/tecnicos/tickets', value: 'tickets' },
+    { label: t('menuLabels.equipo'), to: '/tecnicos/listado', value: 'listado' },
+    { label: t('menuLabels.asignaciones'), to: '/tecnicos/asignaciones', value: 'asignaciones' },
+    { label: t('menuLabels.bandeja'), to: '/tecnicos/tickets', value: 'tickets' },
   ];
 
   const current = tabs.find(t => location.pathname.includes(`/tecnicos/${t.value}`))?.value || 'listado';

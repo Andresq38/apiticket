@@ -85,16 +85,27 @@ const Home = () => {
     const horas = parseInt(match[1]);
     
     if (horas < 0) {
-      return { level: 'vencido', color: '#d32f2f', bgColor: '#ffebee', icon: ErrorIcon, label: 'VENCIDO' };
+      return { level: 'vencido', color: '#d32f2f', bgColor: '#ffebee', icon: ErrorIcon };
     } else if (horas <= 2) {
-      return { level: 'critico', color: '#d32f2f', bgColor: '#ffe0e0', icon: ErrorIcon, label: 'CRÍTICO' };
+      return { level: 'critico', color: '#d32f2f', bgColor: '#ffe0e0', icon: ErrorIcon };
     } else if (horas <= 4) {
-      return { level: 'urgente', color: '#f57c00', bgColor: '#fff3e0', icon: WarningAmberIcon, label: 'URGENTE' };
+      return { level: 'urgente', color: '#f57c00', bgColor: '#fff3e0', icon: WarningAmberIcon };
     } else if (horas <= 24) {
-      return { level: 'proximo', color: '#ed6c02', bgColor: '#fff8e1', icon: AccessTimeIcon, label: 'PRÓXIMO' };
+      return { level: 'proximo', color: '#ed6c02', bgColor: '#fff8e1', icon: AccessTimeIcon };
     }
     
     return { level: 'normal', color: '#2e7d32', bgColor: '#f1f8f4', icon: AccessTimeIcon, label: 'NORMAL' };
+  };
+
+  const translateEstadoLabel = (estadoNombre) => {
+    if (!estadoNombre) return '';
+    const n = String(estadoNombre).toLowerCase();
+    if (n.includes('pend')) return t('status.pending');
+    if (n.includes('asign')) return t('status.assigned');
+    if (n.includes('proceso') || n.includes('en proceso')) return t('status.inProgress');
+    if (n.includes('resuel') || n.includes('resuelto')) return t('status.resolved');
+    if (n.includes('cerr')) return t('status.closed');
+    return estadoNombre;
   };
 
   // Traer tickets
@@ -350,14 +361,14 @@ const Home = () => {
                     <TableCell width={90}>#{ticket.id_ticket}</TableCell>
                     <TableCell>{ticket.titulo}</TableCell>
                     <TableCell width={160}>
-                      <Chip size="small" label={ticket.estado} sx={{ bgcolor: getStatusColor(ticket.estado), color: '#fff', fontWeight: 600 }} />
+                      <Chip size="small" label={translateEstadoLabel(ticket.estado)} sx={{ bgcolor: getStatusColor(ticket.estado), color: '#fff', fontWeight: 600 }} />
                     </TableCell>
                     <TableCell width={160}>{ticket.fecha_creacion || ''}</TableCell>
                     <TableCell width={220}>
                       {ticket.sla ? (
                         urgency ? (
                           <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 1, p: 0.5, px: 1, bgcolor: urgency.bgColor, borderRadius: 1, borderLeft: `4px solid ${urgency.color}` }}>
-                            <Typography variant="caption" sx={{ color: urgency.color, fontWeight: 700 }}>{urgency.label}</Typography>
+                            <Typography variant="caption" sx={{ color: urgency.color, fontWeight: 700 }}>{t(`sla.${urgency.level}`)}</Typography>
                             <Typography variant="caption" color="text.secondary">{ticket.sla}</Typography>
                           </Box>
                         ) : (

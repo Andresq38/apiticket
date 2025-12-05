@@ -1,5 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
+import { useTranslation } from 'react-i18next';
 import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid2";
 import Typography from "@mui/material/Typography";
@@ -21,11 +22,14 @@ export function TicketUploadImage() {
   let formData = new FormData();
   
   // Esquema de validación
+  const { t } = useTranslation();
+
+  // Esquema de validación (usa i18n)
   const ticketSchema = yup.object({
     ticket_id: yup
       .number()
-      .typeError("Seleccione un tiquete")
-      .required("El tiquete es requerido"),
+      .typeError(t('tickets.validation.selectTicket'))
+      .required(t('tickets.validation.ticketRequired')),
   });
   
   const {
@@ -117,7 +121,7 @@ export function TicketUploadImage() {
         <Grid container spacing={1}>
           <Grid size={12} sm={12}>
             <Typography variant="h5" gutterBottom>
-              Imágenes Tiquete
+              {t('tickets.images.title')}
             </Typography>
           </Grid>
 
@@ -130,11 +134,11 @@ export function TicketUploadImage() {
                   control={control}
                   render={({ field }) => (
                     <>
-                      <InputLabel id="ticket_id">Tiquete</InputLabel>
+                      <InputLabel id="ticket_id">{t('tickets.fields.ticket')}</InputLabel>
                       <Select
                         {...field}
                         labelId="ticket_id"
-                        label="Tiquete"
+                        label={t('tickets.fields.ticket')}
                         value={field.value}
                       >
                         {dataTicket &&
@@ -177,7 +181,7 @@ export function TicketUploadImage() {
               color="secondary"
               sx={{ m: 1 }}
             >
-              Guardar
+              {t('actions.save')}
             </Button>
           </Grid>
         </Grid>

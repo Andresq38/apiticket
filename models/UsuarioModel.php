@@ -1,4 +1,5 @@
 <?php
+use Firebase\JWT\JWT;
 class UsuarioModel
 {
     public $enlace;
@@ -60,6 +61,45 @@ public function get($id)
             }
             return null;
         } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+    
+    public function login($objeto){
+        try{
+            $sql = "SELECT * from usuario where id_usuario = '$objeto->id_usuario'";
+            $vResultado = $this->enlace->ExecuteSQL ($sql);
+            if(is_object($vResultado[0])){
+                $usuario = $vResultado[0];
+                if(password_verify($objeto->password, $usuario->password)){
+                    $usuario = $this->get($objeto->id_usuario);
+                    if(!empty($usuario)){
+                        // Datos para el token JWT
+                        $data = [
+                            'id_usuario' => $usuario->id_usuario,
+                            'nombre' => $usuario->nombre,
+                            'correo' => $usuario->correo,
+                            'id_rol' => $usuario->id_rol,
+                            'iat' => time(),  // Hora de emisión
+							'exp' => time() + 3600 // Expiración en 1 hora
+                        ];
+
+                        	// Generar el token JWT
+                        $jwt_token = JWT::encode($data, Config::get('SECRET_KEY'), 'HS256');
+
+						// Enviar el token como respuesta
+						return $jwt_token;
+                    } else {
+                        throw new Exception("Usuario no encontrado");
+                    }
+
+                } else {
+                    throw new Exception("Contraseña incorrecta");
+                }
+            }
+
+        }   
+        catch(Exception $e){
             handleException($e);
         }
     }

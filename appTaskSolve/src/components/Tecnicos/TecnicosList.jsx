@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Typography, Grid, Card, CardContent, Chip, Box, CircularProgress, Alert, Avatar, Button, Divider, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Tooltip, Snackbar } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { getApiOrigin } from '../../utils/apiBase';
@@ -20,6 +21,7 @@ import SuccessOverlay from '../common/SuccessOverlay';
 const getApiBase = () => getApiOrigin();
 
 export default function TecnicosList() {
+  const { t } = useTranslation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -150,7 +152,7 @@ export default function TecnicosList() {
                 textShadow: '0 2px 6px rgba(0,0,0,0.2)',
                 fontSize: '1.45rem'
               }}>
-                Equipo Técnico
+                {t('technicians.title')}
               </Typography>
               <Typography variant="body2" sx={{ 
                 color: 'rgba(255, 255, 255, 0.95)', 
@@ -161,13 +163,13 @@ export default function TecnicosList() {
                 gap: 0.6
               }}>
                 <WorkIcon sx={{ fontSize: 15 }} />
-                Gestión y monitoreo del equipo especializado
+                {t('technicians.subtitle')}
               </Typography>
             </Box>
           </Box>
           
           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-            <Tooltip title="Actualizar lista" arrow>
+            <Tooltip title={t('technicians.refresh')} arrow>
               <IconButton 
                 onClick={fetchTecnicos}
                 sx={{ 
@@ -209,8 +211,8 @@ export default function TecnicosList() {
                 },
                 transition: 'all 0.3s'
               }}
-            >
-              Nuevo
+              >
+              {t('technicians.new')}
             </Button>
             
             <Button
@@ -238,7 +240,7 @@ export default function TecnicosList() {
                 transition: 'all 0.3s'
               }}
             >
-              {deleteMode ? 'Cancelar' : 'Eliminar'}
+              {deleteMode ? t('home.cancel') : t('home.delete')}
             </Button>
           </Box>
         </Box>
@@ -255,7 +257,7 @@ export default function TecnicosList() {
         }}>
           <CircularProgress size={80} thickness={4} sx={{ color: 'primary.main' }} />
           <Typography variant="h6" sx={{ fontWeight: 600, color: 'text.secondary' }}>
-            Cargando técnicos...
+            {t('technicians.loading')}
           </Typography>
         </Box>
       )}
@@ -281,7 +283,7 @@ export default function TecnicosList() {
       )}
       
       {!loading && !error && items.length === 0 && (
-        <Card 
+            <Card 
           elevation={0}
           sx={{ 
             borderRadius: 4,
@@ -291,7 +293,7 @@ export default function TecnicosList() {
             py: 8
           }}
         >
-          <CardContent sx={{ textAlign: 'center' }}>
+            <CardContent sx={{ textAlign: 'center' }}>
             <Box
               sx={{
                 display: 'inline-flex',
@@ -309,12 +311,12 @@ export default function TecnicosList() {
               <GroupIcon sx={{ fontSize: 50, color: 'white' }} />
             </Box>
             <Typography variant="h5" sx={{ fontWeight: 800, color: 'text.primary', mb: 1 }}>
-              No hay técnicos registrados
+              {t('technicians.noRegistered')}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              Comienza agregando técnicos al sistema para gestionar las asignaciones
+              {t('technicians.startByAdding')}
             </Typography>
-            <Button
+              <Button
               variant="contained"
               size="large"
               startIcon={<AddIcon />}
@@ -331,16 +333,16 @@ export default function TecnicosList() {
                   boxShadow: '0 6px 20px rgba(25, 118, 210, 0.4)'
                 }
               }}
-            >
-              Crear Primer Técnico
+              >
+              {t('technicians.createFirst')}
             </Button>
           </CardContent>
         </Card>
       )}
 
       <Grid container spacing={3}>
-        {items.map((t) => {
-          const ticketsAbiertos = parseInt(t.tickets_abiertos) || 0;
+        {items.map((tech) => {
+          const ticketsAbiertos = parseInt(tech.tickets_abiertos) || 0;
           
           // Sistema de colores profesional según carga
           const statusConfig = ticketsAbiertos >= 5 
@@ -349,7 +351,7 @@ export default function TecnicosList() {
                 bg: '#ffebee',
                 color: '#d32f2f',
                 icon: '🔴',
-                label: 'Saturado',
+                labelKey: 'saturated',
                 border: '#ef9a9a',
                 chipBg: '#d32f2f'
               }
@@ -359,7 +361,7 @@ export default function TecnicosList() {
                 bg: '#fff3e0',
                 color: '#f57c00',
                 icon: '🟡',
-                label: 'Ocupado',
+                labelKey: 'busy',
                 border: '#ffcc80',
                 chipBg: '#f57c00'
               }
@@ -369,7 +371,7 @@ export default function TecnicosList() {
                 bg: '#e3f2fd',
                 color: '#1976d2',
                 icon: '🔵',
-                label: 'Trabajando',
+                labelKey: 'working',
                 border: '#90caf9',
                 chipBg: '#1976d2'
               }
@@ -378,7 +380,7 @@ export default function TecnicosList() {
                 bg: '#e8f5e9',
                 color: '#2e7d32',
                 icon: '🟢',
-                label: 'Disponible',
+                labelKey: 'available',
                 border: '#a5d6a7',
                 chipBg: '#2e7d32'
               };
@@ -422,7 +424,7 @@ export default function TecnicosList() {
                     '50%': { opacity: 0.6, transform: 'scale(1.2)' }
                   }
                 }} 
-                onClick={() => { if (!deleteMode) navigate(`/tecnicos/${t.id_tecnico}`); }}
+                onClick={() => { if (!deleteMode) navigate(`/tecnicos/${tech.id_tecnico}`); }}
               >
                 <CardContent sx={{ p: 2.5 }}>
                   {/* Indicador de Estado Animado - ahora arriba del avatar/nombre */}
@@ -432,7 +434,7 @@ export default function TecnicosList() {
                     alignItems: 'center',
                     mb: 1.1,
                   }}>
-                    <Box sx={{
+                      <Box sx={{ 
                       display: 'flex',
                       alignItems: 'center',
                       bgcolor: statusConfig.bg,
@@ -443,7 +445,7 @@ export default function TecnicosList() {
                       boxShadow: `0 2px 6px ${statusConfig.color}15`,
                       gap: 0.8,
                     }}>
-                      <Box sx={{ 
+                        <Box sx={{ 
                         width: 8,
                         height: 8,
                         borderRadius: '50%',
@@ -455,18 +457,18 @@ export default function TecnicosList() {
                         color: statusConfig.color,
                         fontSize: '0.65rem'
                       }}>
-                        {statusConfig.label}
+                        {t(`technicians.status.${statusConfig.labelKey}`)}
                       </Typography>
                     </Box>
                   </Box>
 
                   {/* Botón Eliminar (modo delete) */}
-                  {deleteMode && (
-                    <Tooltip title={`Eliminar técnico #${t.id_tecnico}`}> 
+                      {deleteMode && (
+                    <Tooltip title={t('technicians.deleteTechnicianTitle', { id: tech.id_tecnico })}> 
                       <IconButton 
                         color="error" 
                         size="small" 
-                        onClick={(e) => { e.stopPropagation(); requestDelete(t); }}
+                        onClick={(e) => { e.stopPropagation(); requestDelete(tech); }}
                         sx={{
                           position: 'absolute',
                           top: 16,
@@ -512,7 +514,7 @@ export default function TecnicosList() {
                         pointerEvents: 'none'
                       }
                     }}>
-                      {t.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+                      {tech.nombre.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
                     </Box>
                     <Box sx={{ flex: 1, minWidth: 0, pr: 5 }}>
                       <Typography variant="h6" sx={{ 
@@ -525,17 +527,23 @@ export default function TecnicosList() {
                         textOverflow: 'ellipsis',
                         whiteSpace: 'nowrap'
                       }} 
-                      title={t.nombre}
+                      title={tech.nombre}
                       >
-                        {t.nombre}
+                        {tech.nombre}
                       </Typography>
-                      {/* Ocultar ID crudo para UX más limpia */}
-                      <Box sx={{ display: 'inline-block', visibility: 'hidden' }}>
-                        <Chip 
-                          label={`ID: ${t.id_tecnico}`} 
-                          size="small" 
-                        />
-                      </Box>
+                      <Chip 
+                        label={`${t('technicians.idPrefix')} ${tech.id_tecnico}`} 
+                        size="small" 
+                        sx={{ 
+                          height: 20,
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          bgcolor: statusConfig.bg,
+                          color: statusConfig.color,
+                          border: `1px solid ${statusConfig.border}`,
+                          '& .MuiChip-label': { px: 0.8 }
+                        }}
+                      />
                     </Box>
                   </Box>
 
@@ -550,8 +558,8 @@ export default function TecnicosList() {
                     borderRadius: 1.5,
                     border: '1px solid #e2e8f0'
                   }}>
-                    <EmailIcon sx={{ color: '#64748b', fontSize: 16, flexShrink: 0 }} />
-                    <Typography 
+                      <EmailIcon sx={{ color: '#64748b', fontSize: 16, flexShrink: 0 }} />
+                      <Typography 
                       variant="body2" 
                       sx={{ 
                         color: '#475569',
@@ -562,9 +570,9 @@ export default function TecnicosList() {
                         whiteSpace: 'nowrap',
                         flex: 1
                       }} 
-                      title={t.correo || 'Sin correo'}
+                      title={tech.correo || t('technicians.noEmail')}
                     >
-                      {t.correo || 'Sin correo'}
+                      {tech.correo || t('technicians.noEmail')}
                     </Typography>
                   </Box>
 
@@ -597,7 +605,7 @@ export default function TecnicosList() {
                       letterSpacing: 0.5,
                       fontSize: '0.6rem'
                     }}>
-                      Tickets Activos
+                      {t('technicians.ticketsActive')}
                     </Typography>
                     <Typography variant="h4" sx={{ 
                       fontWeight: 900, 
@@ -613,7 +621,7 @@ export default function TecnicosList() {
                       fontWeight: 600,
                       fontSize: '0.7rem'
                     }}>
-                      {ticketsAbiertos === 0 ? 'Sin asignaciones' : ticketsAbiertos === 1 ? '1 ticket' : `${ticketsAbiertos} tickets`}
+                      {ticketsAbiertos === 0 ? t('technicians.noAssignments') : ticketsAbiertos === 1 ? t('technicians.oneTicket') : t('technicians.multipleTickets', { count: ticketsAbiertos })}
                     </Typography>
                   </Box>
                 </CardContent>
@@ -624,13 +632,13 @@ export default function TecnicosList() {
       </Grid>
       {/* Diálogo confirmación */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogTitle>{t('home.confirmDeleteTitle')}</DialogTitle>
         <DialogContent>
-          ¿Seguro que deseas eliminar el técnico #{targetTecnico?.id_tecnico}? Esta acción es permanente.
+          {t('technicians.confirmDeleteBody', { id: targetTecnico?.id_tecnico })}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
-          <Button color="error" variant="contained" onClick={confirmDelete}>Eliminar</Button>
+          <Button onClick={() => setConfirmOpen(false)}>{t('home.cancel')}</Button>
+          <Button color="error" variant="contained" onClick={confirmDelete}>{t('home.delete')}</Button>
         </DialogActions>
       </Dialog>
 
@@ -644,16 +652,16 @@ export default function TecnicosList() {
       <SuccessOverlay
         open={showDeleteSuccess}
         mode="delete"
-        entity="Técnico"
-        subtitle={`El técnico #${deletedInfo?.id_tecnico} ha sido eliminado correctamente.`}
+        entity={t('technicians.entity')}
+        subtitle={t('technicians.deleteSuccessSubtitle', { id: deletedInfo?.id_tecnico })}
         onClose={closeOverlay}
         actions={[{
-          label: 'Cerrar',
+          label: t('home.close'),
           onClick: closeOverlay,
           variant: 'contained',
           color: 'error'
         }, {
-          label: 'Crear Técnico',
+          label: t('technicians.createTechnician'),
           onClick: () => { closeOverlay(); navigate('/tecnicos/crear'); },
           variant: 'outlined',
           color: 'error'

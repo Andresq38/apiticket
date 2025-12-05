@@ -74,6 +74,22 @@ class notificacion
     }
 
     /**
+     * Obtener id de administrador por defecto (para frontend sin login)
+     * GET /apiticket/notificacion/adminDefault
+     */
+    public function adminDefault()
+    {
+        try {
+            $response = new Response();
+            $notificacion = new NotificacionModel();
+            $idAdmin = $notificacion->obtenerAdminPorDefecto();
+            $response->toJSON(['id_admin' => $idAdmin]);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    /**
      * Marcar notificación como leída
      * PUT /apiticket/notificacion/marcarLeida/{id}
      */
@@ -112,6 +128,31 @@ class notificacion
             
             $notificacion = new NotificacionModel();
             $result = $notificacion->marcarTodasComoLeidas($body->id_usuario);
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+    
+    /**
+     * Metodo para marcar notifiación como léida
+     * solo una por una 
+     */
+
+    public function marcarLeidaUna()
+    {
+        try {
+            $request = new Request();
+            $response = new Response();
+            $body = $request->getJSON();
+            
+            if (!isset($body->id_notificacion)) {
+                $response->toJSON(['success' => false, 'message' => 'id_notificacion requerido']);
+                return;
+            }
+            
+            $notificacion = new NotificacionModel();
+            $result = $notificacion->marcarComoLeidaUna($body);
             $response->toJSON($result);
         } catch (Exception $e) {
             handleException($e);

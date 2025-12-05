@@ -6,6 +6,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import {
   Box, Grid, Paper, Divider, Typography, FormControl, TextField, MenuItem, InputAdornment, Button, Snackbar, Alert, Autocomplete, CircularProgress, Breadcrumbs, Link, Checkbox, Chip,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import SuccessOverlay from '../common/SuccessOverlay';
 import SaveIcon from '@mui/icons-material/Save';
 import PersonIcon from '@mui/icons-material/Person';
@@ -25,38 +26,39 @@ import TecnicoService from '../../services/TecnicoService';
 
 const apiBase = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE) || 'http://localhost:81';
 
-// Schema de validación (password opcional en edición)
+// Validation schema (password optional on edit)
 const schema = yup.object({
   id_usuario: yup.string()
-    .required('La cédula es requerida')
-    .matches(/^[0-9]-[0-9]{4}-[0-9]{4}$/, 'Formato inválido. Use: #-####-####'),
+    .required('Identity number is required')
+    .matches(/^[0-9]-[0-9]{4}-[0-9]{4}$/, 'Invalid format. Use: #-####-####'),
   nombre: yup.string()
-    .required('El nombre completo es requerido')
-    .min(3, 'El nombre debe tener al menos 3 caracteres')
-    .max(150, 'El nombre no puede exceder 150 caracteres')
-    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'El nombre solo debe contener letras y espacios')
-    .test('dos-palabras', 'Debe ingresar nombre y apellido (mínimo 2 palabras)', value => {
+    .required('Full name is required')
+    .min(3, 'Name must be at least 3 characters')
+    .max(150, 'Name cannot exceed 150 characters')
+    .matches(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/, 'Name may only contain letters and spaces')
+    .test('dos-palabras', 'Enter first and last name (minimum 2 words)', value => {
       if (!value) return false;
       const palabras = value.trim().split(/\s+/);
       return palabras.length >= 2 && palabras.every(p => p.length > 0);
     }),
   correo: yup.string()
-    .required('El correo electrónico es requerido')
-    .email('Debe ser un correo electrónico válido')
-    .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Formato de correo inválido'),
+    .required('Email is required')
+    .email('Must be a valid email address')
+    .matches(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
   password: yup.string()
-    .min(6, 'La contraseña debe tener al menos 6 caracteres')
-    .max(50, 'La contraseña no puede exceder 50 caracteres')
+    .min(6, 'Password must be at least 6 characters')
+    .max(50, 'Password cannot exceed 50 characters')
     .optional(),
   confirm_password: yup.string().when('password', (pw, schema) => (
-    pw ? schema.required('Confirme la contraseña').oneOf([yup.ref('password')], 'Las contraseñas deben coincidir') : schema
+    pw ? schema.required('Confirm the password').oneOf([yup.ref('password')], 'Passwords must match') : schema
   )),
-  disponibilidad: yup.boolean().required('Debe seleccionar la disponibilidad'),
-  especialidades: yup.array().of(yup.object()).required('Debe seleccionar al menos una especialidad'),
-  carga_trabajo: yup.number().min(0, 'La carga debe ser 0 o mayor').optional(),
+  disponibilidad: yup.boolean().required('Select availability'),
+  especialidades: yup.array().of(yup.object()).required('Select at least one specialty'),
+  carga_trabajo: yup.number().min(0, 'Workload must be 0 or greater').optional(),
 });
 
 export default function EditTecnico() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -123,7 +125,7 @@ export default function EditTecnico() {
 
         // Verificar si se encontró el técnico
         if (!tecnicoData) {
-          setLoadError('No se encontró el técnico');
+          setLoadError(t('technicianForm.notFound'));
           setLoading(false);
           return;
         }
@@ -165,7 +167,7 @@ export default function EditTecnico() {
       } catch (err) {
         console.error('Error al cargar datos:', err);
         if (isMounted) {
-          setLoadError('Error al cargar los datos del técnico');
+          setLoadError(t('technicianForm.errorLoading'));
           setLoading(false);
         }
       }
@@ -194,15 +196,15 @@ export default function EditTecnico() {
       if (data?.id_tecnico || data) {
         setSuccessOpen(true);
       } else {
-        setSnackbar({ open: true, message: 'Respuesta inválida del servidor', severity: 'warning' });
+        setSnackbar({ open: true, message: t('createForm.invalidServerResponse'), severity: 'warning' });
       }
     } catch (err) {
       console.error('Error al actualizar:', err);
-      setSnackbar({ open: true, message: err?.response?.data?.error || err?.message || 'Error al actualizar el técnico', severity: 'error' });
+      setSnackbar({ open: true, message: err?.response?.data?.error || err?.message || t('technicianForm.updateError'), severity: 'error' });
     }
   };
 
-  const onError = () => setSnackbar({ open: true, message: 'Revisa los campos requeridos', severity: 'warning' });
+  const onError = () => setSnackbar({ open: true, message: t('technicianForm.reviewRequired'), severity: 'warning' });
 
   if (loading) {
     return (
@@ -215,9 +217,9 @@ export default function EditTecnico() {
   if (loadError) {
     return (
       <Box sx={{ textAlign: 'center', mt: 4 }}>
-        <Alert severity="error" sx={{ mb: 2 }}>{loadError}</Alert>
-        <Button variant="outlined" onClick={() => navigate('/tecnicos')}>Volver al listado</Button>
-      </Box>
+          <Alert severity="error" sx={{ mb: 2 }}>{loadError}</Alert>
+          <Button variant="outlined" onClick={() => navigate('/tecnicos')}>{t('createForm.goToListButton')}</Button>
+        </Box>
     );
   }
 
@@ -234,7 +236,7 @@ export default function EditTecnico() {
           href="#" 
           onClick={(e) => { e.preventDefault(); navigate('/'); }}
         >
-          Inicio
+          {t('header.home')}
         </Link>
         <Link 
           underline="hover" 
@@ -242,7 +244,7 @@ export default function EditTecnico() {
           href="#" 
           onClick={(e) => { e.preventDefault(); navigate('/mantenimientos'); }}
         >
-          Mantenimientos
+          {t('header.maintenance')}
         </Link>
         <Link 
           underline="hover" 
@@ -250,7 +252,7 @@ export default function EditTecnico() {
           href="#" 
           onClick={(e) => { e.preventDefault(); navigate('/tecnicos'); }}
         >
-          Técnicos
+          {t('header.technicians')}
         </Link>
         <Link 
           underline="hover" 
@@ -258,51 +260,51 @@ export default function EditTecnico() {
           href="#" 
           onClick={(e) => { e.preventDefault(); navigate(`/tecnicos/${id}`); }}
         >
-          Detalle
+          {t('createForm.detailLabel')}
         </Link>
         <Typography color="warning.main" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, fontWeight: 600 }}>
           <EditIcon fontSize="small" />
-          Editar
+          {t('createForm.editLabel')}
         </Typography>
       </Breadcrumbs>
 
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <Box sx={{ textAlign: 'left' }}>
-          <Typography variant="h4" sx={{ fontWeight: 800, lineHeight: 1 }}>Editar Técnico</Typography>
-          <Typography variant="body2" color="text.secondary">Visualice y edite solo los campos permitidos</Typography>
+          <Typography variant="h4" sx={{ fontWeight: 800, lineHeight: 1 }}>{t('technicianForm.editTitle')}</Typography>
+          <Typography variant="body2" color="text.secondary">{t('technicianForm.editSubtitle')}</Typography>
         </Box>
-        <Button variant="text" onClick={() => navigate(-1)}>&larr; Volver</Button>
+        <Button variant="text" onClick={() => navigate(-1)}>{`\u2190 ${t('technicianForm.goBack')}`}</Button>
       </Box>
       <Paper elevation={2} sx={{ p: 3, borderTop: 4, borderTopColor: 'primary.main', borderRadius: 2, bgcolor: 'background.paper', position: 'relative' }}>
         <SuccessOverlay
           open={successOpen}
           mode="update"
-          entity="Técnico"
-          subtitle={`✓ Técnico #${id} actualizado exitosamente`}
+          entity={t('technicians.entity')}
+          subtitle={t('technicianForm.updateSuccess', { id })}
           onClose={() => setSuccessOpen(false)}
           actions={[
-            { label: 'Ver detalle', onClick: () => { setSuccessOpen(false); navigate(`/tecnicos/${id}`); }, variant: 'contained', color: 'warning' },
-            { label: 'Ir al listado', onClick: () => { setSuccessOpen(false); navigate('/tecnicos'); }, variant: 'outlined', color: 'warning' }
+            { label: t('createForm.viewDetailButton'), onClick: () => { setSuccessOpen(false); navigate(`/tecnicos/${id}`); }, variant: 'contained', color: 'warning' },
+            { label: t('createForm.goToListButton'), onClick: () => { setSuccessOpen(false); navigate('/tecnicos'); }, variant: 'outlined', color: 'warning' }
           ]}
         />
         <form onSubmit={handleSubmit(onSubmit, onError)} noValidate>
-          <Typography variant="h6" sx={{ mt: 1, mb: 2, fontWeight: 700 }}>Datos personales</Typography>
+          <Typography variant="h6" sx={{ mt: 1, mb: 2, fontWeight: 700 }}>{t('technicianForm.personalData')}</Typography>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
                 <Controller name="id_rol" control={control} render={({ field }) => (
                   <TextField
                     {...field}
-                    id="id_rol"
-                    label="Rol"
+                      id="id_rol"
+                      label={t('technicianForm.role')}
                     select
                     value={field.value || 0}
                     onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                    helperText={'Seleccione el rol del usuario'}
+                    helperText={t('technicianForm.roleHelper')}
                     InputProps={{ startAdornment: (<InputAdornment position="start"><SecurityIcon color="action" /></InputAdornment>) }}
                     disabled
                   >
-                    <MenuItem value={0}>-- Seleccionar Rol --</MenuItem>
+                    <MenuItem value={0}>{t('technicianForm.selectRole')}</MenuItem>
                     {sortedRoles.map(role => (
                       <MenuItem key={role.id_rol} value={role.id_rol}>{role.descripcion}</MenuItem>
                     ))}
@@ -316,10 +318,10 @@ export default function EditTecnico() {
                   <TextField 
                     {...field} 
                     id="id_usuario" 
-                    label="Cédula (ID Usuario)" 
-                    placeholder="1-2345-6789" 
+                    label={t('technicianForm.cedula')} 
+                    placeholder={t('technicianForm.cedulaPlaceholder')} 
                     error={Boolean(errors.id_usuario)} 
-                    helperText={errors.id_usuario ? errors.id_usuario.message : 'Campo de solo lectura - No editable'} 
+                    helperText={errors.id_usuario ? errors.id_usuario.message : t('technicianForm.readOnlyField')} 
                     InputProps={{ 
                       readOnly: true,
                       startAdornment: (<InputAdornment position="start"><BadgeIcon color="action" /></InputAdornment>) 
@@ -334,10 +336,10 @@ export default function EditTecnico() {
                   <TextField 
                     {...field} 
                     id="nombre" 
-                    label="Nombre Completo" 
-                    placeholder="Juan Pérez González"
+                    label={t('technicianForm.fullName')} 
+                    placeholder={t('technicianForm.fullNamePlaceholder')}
                     error={Boolean(errors.nombre)} 
-                    helperText={errors.nombre ? errors.nombre.message : 'Campo de solo lectura - No editable'} 
+                    helperText={errors.nombre ? errors.nombre.message : t('technicianForm.readOnlyField')} 
                     InputProps={{ 
                       readOnly: true,
                       startAdornment: (<InputAdornment position="start"><PersonIcon color="action" /></InputAdornment>) 
@@ -352,11 +354,11 @@ export default function EditTecnico() {
                   <TextField 
                     {...field} 
                     id="correo" 
-                    label="Correo Electrónico" 
+                    label={t('technicianForm.email')} 
                     type="email" 
                     error={Boolean(errors.correo)} 
-                    helperText={errors.correo ? errors.correo.message : 'Ej: usuario@empresa.com'} 
-                    placeholder="usuario@empresa.com" 
+                    helperText={errors.correo ? errors.correo.message : t('technicianForm.emailHelper')} 
+                    placeholder={t('technicianForm.emailPlaceholder')} 
                     InputProps={{ 
                       startAdornment: (<InputAdornment position="start"><EmailIcon color="action" /></InputAdornment>) 
                     }} 
@@ -370,10 +372,10 @@ export default function EditTecnico() {
                   <TextField 
                     {...field} 
                     id="password" 
-                    label="Nueva Contraseña (opcional)" 
+                    label={t('technicianForm.newPasswordOptional')} 
                     type="password" 
                     error={Boolean(errors.password)} 
-                    helperText={errors.password ? errors.password.message : 'Dejar en blanco para mantener la contraseña actual'} 
+                    helperText={errors.password ? errors.password.message : t('technicianForm.newPasswordHelper')} 
                     InputProps={{ 
                       startAdornment: (<InputAdornment position="start"><LockIcon color="action" /></InputAdornment>) 
                     }} 
@@ -389,12 +391,12 @@ export default function EditTecnico() {
                   <TextField
                     {...field}
                     id="confirm_password"
-                    label="Confirmar Contraseña"
+                    label={t('technicianForm.confirmPassword')}
                     type="password"
                     error={Boolean(errors.confirm_password) || (passwordsMatch === false)}
                     helperText={
                       errors.confirm_password ? errors.confirm_password.message
-                        : (passwordsMatch === null ? 'Repita la contraseña' : (passwordsMatch ? 'Contraseñas coinciden' : 'Las contraseñas no coinciden'))
+                        : (passwordsMatch === null ? t('technicianForm.confirmPasswordHelper') : (passwordsMatch ? t('technicianForm.passwordMatch') : t('technicianForm.passwordMismatch')))
                     }
                     FormHelperTextProps={{ sx: { color: passwordsMatch === true ? 'success.main' : passwordsMatch === false ? 'error.main' : 'text.secondary' } }}
                     InputProps={{ startAdornment: (<InputAdornment position="start"><LockIcon color="action" /></InputAdornment>) }}
@@ -408,7 +410,7 @@ export default function EditTecnico() {
             </Grid>
           </Grid>
           <Divider sx={{ my: 3 }} />
-          <Typography variant="h6" sx={{ mt: 1, mb: 2, fontWeight: 700 }}>Datos técnicos</Typography>
+          <Typography variant="h6" sx={{ mt: 1, mb: 2, fontWeight: 700 }}>{t('technicianForm.technicalData')}</Typography>
           <Grid container spacing={3}>
             <Grid item xs={12} md={4}>
               <FormControl variant="standard" fullWidth sx={{ m: 1 }}>
@@ -416,22 +418,22 @@ export default function EditTecnico() {
                   <TextField 
                     {...field} 
                     id="disponibilidad" 
-                    label="Estado de Disponibilidad" 
+                    label={t('technicianForm.availabilityStatus')} 
                     select 
                     value={field.value ? 'true' : 'false'} 
                     onChange={(e) => field.onChange(e.target.value === 'true')}
-                    helperText={errors.disponibilidad ? errors.disponibilidad.message : 'Campo de solo lectura - No editable'}
+                    helperText={errors.disponibilidad ? errors.disponibilidad.message : t('technicianForm.readOnlyField')}
                     InputProps={{ readOnly: true }}
                     disabled
                   >
                     <MenuItem value="true">
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <CheckCircleOutlineIcon color="success" fontSize="small" /> Disponible
+                        <CheckCircleOutlineIcon color="success" fontSize="small" /> {t('technicianForm.available')}
                       </Box>
                     </MenuItem>
                     <MenuItem value="false">
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <HighlightOffIcon color="warning" fontSize="small" /> No Disponible
+                        <HighlightOffIcon color="warning" fontSize="small" /> {t('technicianForm.notAvailable')}
                       </Box>
                     </MenuItem>
                   </TextField>
@@ -444,14 +446,14 @@ export default function EditTecnico() {
                   <TextField 
                     {...field} 
                     id="carga_trabajo" 
-                    label="Carga Actual" 
+                    label={t('technicianForm.currentLoad')} 
                     type="number" 
                     value={field.value ?? 0}
                     InputProps={{ 
                       readOnly: true,
                       startAdornment: (<InputAdornment position="start"><AssignmentIcon color="action" /></InputAdornment>) 
                     }} 
-                    helperText="Campo de solo lectura"
+                    helperText={t('technicianForm.loadReadOnly')}
                     disabled
                   />
                 )} />
@@ -494,10 +496,10 @@ export default function EditTecnico() {
                     renderInput={(params) => (
                       <TextField
                         {...params}
-                        label="Especialidades"
-                        placeholder="Seleccione especialidades"
+                        label={t('technicianForm.specialties')}
+                        placeholder={t('technicianForm.specialtiesPlaceholder')}
                         error={Boolean(errors.especialidades)}
-                        helperText={errors.especialidades ? errors.especialidades.message : `${(field.value || []).length} seleccionada(s)`}
+                        helperText={errors.especialidades ? errors.especialidades.message : t('technicianForm.specialtiesSelected', { count: (field.value || []).length })}
                         InputProps={{
                           ...params.InputProps,
                           startAdornment: (<InputAdornment position="start"><WorkIcon color="action" /></InputAdornment>)
@@ -548,11 +550,11 @@ export default function EditTecnico() {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <WorkIcon sx={{ color: (watch('especialidades') || []).length > 0 ? 'info.main' : 'text.secondary' }} />
                     <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                      Especialidades seleccionadas
+                      {t('technicianForm.specialtiesHeader')}
                     </Typography>
                   </Box>
                   <Chip
-                    label={(watch('especialidades') || []).length}
+                    label={t('technicianForm.specialtiesSelected', { count: (watch('especialidades') || []).length })}
                     size="small"
                     color={(watch('especialidades') || []).length > 0 ? 'info' : 'default'}
                     sx={{ fontWeight: 600 }}
@@ -595,10 +597,10 @@ export default function EditTecnico() {
                 ) : (
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 80 }}>
                     <Typography variant="body2" color="text.secondary" align="center">
-                      No hay especialidades seleccionadas
+                      {t('technicianForm.noSpecialties')}
                     </Typography>
                     <Typography variant="caption" color="text.disabled" align="center" sx={{ mt: 0.5 }}>
-                      Seleccione especialidades usando el campo anterior
+                      {t('technicianForm.selectSpecialties')}
                     </Typography>
                   </Box>
                 )}
@@ -607,8 +609,8 @@ export default function EditTecnico() {
           </Grid>
           <Divider sx={{ my: 3 }} />
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <Button type="submit" variant="contained" color="warning" startIcon={<SaveIcon />} sx={{ m: 0 }}>Actualizar Técnico</Button>
-            <Button variant="outlined" onClick={() => navigate(`/tecnicos/${id}`)} sx={{ m: 0 }}>Cancelar</Button>
+            <Button type="submit" variant="contained" color="warning" startIcon={<SaveIcon />} sx={{ m: 0 }}>{t('technicianForm.update')}</Button>
+            <Button variant="outlined" onClick={() => navigate(`/tecnicos/${id}`)} sx={{ m: 0 }}>{t('createForm.cancelButton')}</Button>
           </Box>
         </form>
       </Paper>

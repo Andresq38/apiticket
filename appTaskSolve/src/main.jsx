@@ -17,8 +17,10 @@ import enTranslations from './components/Traducciones/Inglés/en.json';
 import esTranslations from './components/Traducciones/Español/es.json';
 
 
+const savedLang = typeof window !== 'undefined' && localStorage.getItem('lang') ? localStorage.getItem('lang') : (typeof navigator !== 'undefined' && navigator.language && navigator.language.startsWith('es') ? 'es' : 'en');
+
 i18n.use(initReactI18next).init({
-  lng: 'en',
+  lng: savedLang,
   interpolation: {
     escapeValue: false,  
   },

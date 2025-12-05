@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import {
   Container,
@@ -35,73 +36,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 // Vista de catálogo: solo listado, sin formulario de creación
 
 const CategoriasList = () => {
-      // Sistema de colores para categorías (puedes ajustar según SLA, id, etc.)
-      function getCategoriaColor(id_categoria) {
-        // Ejemplo: alternar colores por id_categoria o usar lógica de SLA
-        const colorSets = [
-          {
-            gradient: 'linear-gradient(135deg, #1976d2 0%, #2196f3 100%)',
-            bg: '#e3f2fd',
-            text: '#1976d2',
-            border: '#90caf9',
-            bar: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)'
-          },
-          {
-            gradient: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
-            bg: '#e8f5e9',
-            text: '#2e7d32',
-            border: '#a5d6a7',
-            bar: 'linear-gradient(90deg, #2e7d32 0%, #4caf50 100%)'
-          },
-          {
-            gradient: 'linear-gradient(135deg, #f57c00 0%, #ff9800 100%)',
-            bg: '#fff3e0',
-            text: '#f57c00',
-            border: '#ffcc80',
-            bar: 'linear-gradient(90deg, #f57c00 0%, #ff9800 100%)'
-          },
-          {
-            gradient: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
-            bg: '#ffebee',
-            text: '#d32f2f',
-            border: '#ef9a9a',
-            bar: 'linear-gradient(90deg, #d32f2f 0%, #f44336 100%)'
-          }
-        ];
-        // Alternar por id_categoria para variedad visual
-        const idx = id_categoria % colorSets.length;
-        return colorSets[idx];
-      }
-    const navigate = useNavigate();
-    // Detectar base de la API
-    const getApiBase = () => {
-      if (import.meta.env.VITE_API_BASE) return import.meta.env.VITE_API_BASE;
-      return window.location.origin;
-    };
-
-    useEffect(() => {
-      const fetchCategorias = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const apiBase = getApiBase();
-          const res = await axios.get(`${apiBase}/apiticket/categoria_ticket`);
-          let data = res.data;
-          if (data && data.data) data = data.data;
-          if (Array.isArray(data)) {
-            setCategorias(data);
-          } else {
-            setCategorias([]);
-          }
-        } catch (err) {
-          setError('Error al cargar categorías');
-          setCategorias([]);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchCategorias();
-    }, []);
+  const { t } = useTranslation();
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -111,6 +46,183 @@ const CategoriasList = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deletedInfo, setDeletedInfo] = useState(null);
+  const navigate = useNavigate();
+
+  // Detección dinámica de la API base
+  const getApiBase = () => {
+    const envApiBase = import.meta.env.VITE_API_BASE;
+    if (envApiBase) return envApiBase;
+    const currentUrl = window.location.origin;
+    if (currentUrl.includes(':5173') || currentUrl.includes(':3000')) {
+      return 'http://localhost';
+    }
+    return currentUrl;
+  };
+
+  const fetchCategorias = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const apiBase = getApiBase();
+      const response = await axios.get(`${apiBase}/apiticket/categoria_ticket`);
+      const categoriasData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      categoriasData.sort((a, b) => {
+        const idA = Number(a?.id_categoria ?? a?.id ?? 0);
+        const idB = Number(b?.id_categoria ?? b?.id ?? 0);
+        return idA - idB;
+      });
+      setCategorias(categoriasData);
+    } catch (err) {
+      setError('Error al cargar categorías');
+      setCategorias([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategorias();
+  }, []);
+
+  // Función para obtener color distintivo por categoría
+  function getCategoriaColor(id_categoria) {
+    const colorSets = [
+      {
+        gradient: 'linear-gradient(135deg, #1976d2 0%, #2196f3 100%)',
+        bg: '#e3f2fd',
+        text: '#1976d2',
+        border: '#90caf9',
+        bar: 'linear-gradient(90deg, #1976d2 0%, #2196f3 100%)'
+      },
+      {
+        gradient: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+        bg: '#e8f5e9',
+        text: '#2e7d32',
+        border: '#a5d6a7',
+        bar: 'linear-gradient(90deg, #2e7d32 0%, #4caf50 100%)'
+      },
+      {
+        gradient: 'linear-gradient(135deg, #f57c00 0%, #ff9800 100%)',
+        bg: '#fff3e0',
+        text: '#f57c00',
+        border: '#ffcc80',
+        bar: 'linear-gradient(90deg, #f57c00 0%, #ff9800 100%)'
+      },
+      {
+        gradient: 'linear-gradient(135deg, #d32f2f 0%, #f44336 100%)',
+        bg: '#ffebee',
+        text: '#d32f2f',
+        border: '#ef9a9a',
+        bar: 'linear-gradient(90deg, #d32f2f 0%, #f44336 100%)'
+      }
+    ];
+    const idx = id_categoria % colorSets.length;
+    return colorSets[idx];
+  }
+  const [categorias, setCategorias] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [targetCategoria, setTargetCategoria] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [deletedInfo, setDeletedInfo] = useState(null);
+<<<<<<< HEAD
+=======
+  const navigate = useNavigate();
+
+  // Detección dinámica de la API base
+  const getApiBase = () => {
+    const envApiBase = import.meta.env.VITE_API_BASE;
+    if (envApiBase) return envApiBase;
+    
+    const currentUrl = window.location.origin;
+    if (currentUrl.includes(':5173') || currentUrl.includes(':3000')) {
+      return 'http://localhost';
+    }
+    return currentUrl;
+  };
+
+  const fetchCategorias = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const apiBase = getApiBase();
+        
+        // Verificar que axios tiene el token configurado
+        console.log('Authorization header:', axios.defaults.headers.common['Authorization']);
+        
+        const response = await axios.get(`${apiBase}/apiticket/categoria_ticket`);
+        
+        console.log('Datos de categorías:', response.data); // Para debug
+        
+        // Manejar diferentes formatos de respuesta
+        const categoriasData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+        // Ordenar ascendente por id_categoria (defensivo ante distintas formas de respuesta)
+        categoriasData.sort((a, b) => {
+          const idA = Number(a?.id_categoria ?? a?.id ?? 0);
+          const idB = Number(b?.id_categoria ?? b?.id ?? 0);
+          return idA - idB;
+        });
+        setCategorias(categoriasData);
+      } catch (err) {
+        console.error('Error al cargar categorías:', err);
+        const errorMsg = err.response?.data?.error || err.message || 'Error al cargar categorías';
+        const status = err.response?.status || 'desconocido';
+        setError(`${errorMsg} (Código: ${status})`);
+      } finally {
+        setLoading(false);
+      }
+  };
+
+  useEffect(() => {
+    fetchCategorias();
+  }, []);
+
+  const handleCategoriaClick = (idCategoria) => {
+    navigate(`/categorias/${idCategoria}`);
+  };
+
+  if (loading) {
+    return (
+      <Container sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400 }}>
+        <Box sx={{ textAlign: 'center' }}>
+          <CircularProgress size={60} />
+          <Typography variant="body1" sx={{ mt: 2, color: 'text.secondary' }}>
+            {t('categories.loading')}
+          </Typography>
+        </Box>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
+
+  // Función para obtener color distintivo por categoría
+  const getCategoriaColor = (idCategoria) => {
+    const colors = [
+      { gradient: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)', bg: '#e3f2fd', text: '#1976d2', border: '#90caf9', bar: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)' }, // Azul
+      { gradient: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)', bg: '#e8f5e9', text: '#2e7d32', border: '#a5d6a7', bar: 'linear-gradient(90deg, #2e7d32 0%, #4caf50 100%)' }, // Verde
+      { gradient: 'linear-gradient(135deg, #f57c00 0%, #ff9800 100%)', bg: '#fff3e0', text: '#f57c00', border: '#ffcc80', bar: 'linear-gradient(90deg, #f57c00 0%, #ff9800 100%)' }, // Naranja
+      { gradient: 'linear-gradient(135deg, #7b1fa2 0%, #9c27b0 100%)', bg: '#f3e5f5', text: '#7b1fa2', border: '#ce93d8', bar: 'linear-gradient(90deg, #7b1fa2 0%, #9c27b0 100%)' }, // Púrpura
+      { gradient: 'linear-gradient(135deg, #c62828 0%, #e53935 100%)', bg: '#ffebee', text: '#c62828', border: '#ef9a9a', bar: 'linear-gradient(90deg, #c62828 0%, #e53935 100%)' }, // Rojo
+      { gradient: 'linear-gradient(135deg, #0288d1 0%, #03a9f4 100%)', bg: '#e1f5fe', text: '#0288d1', border: '#81d4fa', bar: 'linear-gradient(90deg, #0288d1 0%, #03a9f4 100%)' }, // Cyan
+    ];
+    const index = (idCategoria - 1) % colors.length;
+    return colors[index];
+  };
+
+>>>>>>> cbf7f9799934842cdd2ec89408208a78f608c08f
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Título y subtítulo profesional */}
@@ -167,6 +279,7 @@ const CategoriasList = () => {
               textShadow: '0 2px 6px rgba(0,0,0,0.25)',
               fontSize: '1.55rem'
             }}>
+<<<<<<< HEAD
               Catálogo de Categorías
             </Typography>
             <Typography variant="body2" sx={{ 
@@ -179,6 +292,60 @@ const CategoriasList = () => {
           </Box>
         </Box>
       </Box>
+=======
+              <FolderSpecialIcon sx={{ fontSize: 30, color: 'white' }} />
+            </Box>
+            <Box>
+              <Typography variant="h5" sx={{ 
+                fontWeight: 800, 
+                color: 'white', 
+                mb: 0.3, 
+                letterSpacing: '-0.5px', 
+                textShadow: '0 2px 6px rgba(0,0,0,0.25)',
+                fontSize: '1.55rem'
+              }}>
+                {t('categories.title')}
+              </Typography>
+              <Typography variant="body2" sx={{ 
+                color: 'rgba(255, 255, 255, 0.9)', 
+                fontWeight: 600, 
+                fontSize: '0.75rem'
+              }}>
+                {t('categories.subtitle')}
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 3, gap: 2 }}>
+        <Button
+          variant="contained"
+          color="error"
+          startIcon={deleteMode ? <CloseIcon /> : <DeleteOutlineIcon />}
+          onClick={() => {
+            setDeleteMode(d => !d);
+            setTargetCategoria(null);
+          }}
+          sx={{
+            fontWeight: 700,
+            px: 3,
+            py: 1,
+            borderRadius: 2,
+            textTransform: 'none',
+            boxShadow: deleteMode ? '0 4px 12px rgba(211,47,47,0.3)' : '0 2px 8px rgba(211,47,47,0.2)',
+            transition: 'all 0.3s',
+            '&:hover': {
+              transform: 'translateY(-2px)',
+              boxShadow: '0 6px 16px rgba(211,47,47,0.4)'
+            }
+          }}
+        >
+          {deleteMode ? t('categories.cancel') : t('categories.delete')}
+        </Button>
+      </Box>
+
+>>>>>>> cbf7f9799934842cdd2ec89408208a78f608c08f
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
           <CircularProgress size={60} thickness={4} sx={{ color: 'primary.main' }} />
@@ -186,7 +353,7 @@ const CategoriasList = () => {
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : categorias.length === 0 ? (
-        <Alert severity="info">No hay categorías disponibles.</Alert>
+        <Alert severity="info">{t('categories.noCategories')}</Alert>
       ) : (
         <Grid container spacing={3} justifyContent="center" alignItems="stretch">
           {categorias.map((cat) => {
@@ -216,6 +383,7 @@ const CategoriasList = () => {
                       borderColor: catColor.text,
                       transform: 'translateY(-2px) scale(1.02)'
                     }
+<<<<<<< HEAD
                   }}
                 >
                   {/* Avatar y nombre */}
@@ -239,6 +407,140 @@ const CategoriasList = () => {
                     </Box>
                     <Box sx={{ flexGrow: 1, minWidth:0 }}>
                       <Typography variant="h6" sx={{ fontWeight: 800, mb: .2, fontSize: '1.18rem', color: '#222' }}>{cat.nombre}</Typography>
+=======
+                  }} 
+                />
+                {deleteMode && (
+                  <Tooltip title={t('categories.deleteTooltip', { id: cat.id_categoria })}>
+                    <Button
+                      size="small"
+                      color="error"
+                      variant="contained"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setTargetCategoria(cat);
+                        setConfirmOpen(true);
+                      }}
+                      sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2, minWidth: 'auto', p: 0.6 }}
+                    >
+                      <DeleteForeverIcon fontSize="small" />
+                    </Button>
+                  </Tooltip>
+                )}
+                
+                <CardContent sx={{ p: 3 }}>
+                  {/* ID Badge */}
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
+                    <Chip 
+                      label={`ID: ${cat.id_categoria}`} 
+                      size="small" 
+                      sx={{ 
+                        bgcolor: catColor.text,
+                        color: 'white',
+                        fontWeight: 800,
+                        fontSize: '0.75rem',
+                        height: 26,
+                        border: '2px solid white',
+                        boxShadow: `0 2px 8px ${catColor.text}40`
+                      }}
+                    />
+                    <ArrowForwardIcon 
+                      className="arrow-icon"
+                      sx={{ 
+                        color: catColor.text, 
+                        fontSize: 28,
+                        transition: 'all 0.3s ease',
+                        opacity: 0.6
+                      }} 
+                    />
+                  </Box>
+
+                  {/* Nombre de categoría */}
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      fontWeight: 700, 
+                      color: 'text.primary',
+                      mb: 2.5,
+                      lineHeight: 1.3,
+                      minHeight: 56,
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}
+                  >
+                    {cat.nombre}
+                  </Typography>
+
+                  <Divider sx={{ mb: 2 }} />
+
+                  {/* Información de SLA */}
+                  <Paper 
+                    elevation={0} 
+                    sx={{ 
+                      p: 2, 
+                      mb: 2,
+                      bgcolor: catColor.bg,
+                      borderRadius: 2,
+                      border: '2px solid',
+                      borderColor: catColor.border
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <AccessTimeIcon sx={{ color: catColor.text, fontSize: 22 }} />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography 
+                          variant="caption" 
+                          sx={{ 
+                            color: '#64748b',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            fontSize: '0.65rem',
+                            letterSpacing: 0.5
+                          }}
+                        >
+                          {t('categories.slaTitle')}
+                        </Typography>
+                        <Typography 
+                          variant="body2" 
+                          sx={{ 
+                            color: catColor.text,
+                            fontWeight: 700,
+                            mt: 0.25,
+                            fontSize: '0.9rem'
+                          }}
+                        >
+                          {cat.sla_nombre}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Paper>
+
+                  {/* Contador de etiquetas */}
+                  <Box 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'space-between',
+                      p: 2,
+                      bgcolor: catColor.bg,
+                      borderRadius: 2,
+                      border: '2px solid',
+                      borderColor: catColor.border
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <LocalOfferIcon sx={{ color: catColor.text, fontSize: 22 }} />
+                      <Typography 
+                        variant="body2" 
+                        sx={{ 
+                          color: catColor.text,
+                          fontWeight: 700,
+                          fontSize: '0.85rem'
+                        }}
+                      >
+                        {t('categories.availableTags')}
+                      </Typography>
+>>>>>>> cbf7f9799934842cdd2ec89408208a78f608c08f
                     </Box>
                   </Box>
                   {/* Estadística de etiquetas */}
@@ -257,14 +559,14 @@ const CategoriasList = () => {
         </Grid>
       )}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogTitle>{t('categories.confirmDeleteTitle')}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            ¿Seguro que deseas eliminar la categoría "{targetCategoria?.nombre}" (ID {targetCategoria?.id_categoria})? Esta acción no se puede deshacer.
+            {t('categories.confirmDeleteBody', { name: targetCategoria?.nombre, id: targetCategoria?.id_categoria })}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setConfirmOpen(false)}>Cancelar</Button>
+          <Button onClick={() => setConfirmOpen(false)}>{t('categories.cancel')}</Button>
           <Button
             color="error"
             variant="contained"
@@ -278,24 +580,24 @@ const CategoriasList = () => {
                 setDeletedInfo({ id: idDel, nombre: targetCategoria.nombre });
                 setShowDeleteSuccess(true);
               } catch (err) {
-                setSnackbar({ open: true, message: err?.response?.data?.error || err.message || 'Error al eliminar', severity: 'error' });
+                setSnackbar({ open: true, message: err?.response?.data?.error || err.message || t('categories.deleteError'), severity: 'error' });
               } finally {
                 setConfirmOpen(false);
                 setTargetCategoria(null);
               }
             }}
-          >Eliminar</Button>
+          >{t('categories.delete')}</Button>
         </DialogActions>
       </Dialog>
       <SuccessOverlay
         open={showDeleteSuccess}
         mode="delete"
-        entity="Categoría"
-        subtitle={deletedInfo ? `Se eliminó "${deletedInfo.nombre}" (ID ${deletedInfo.id}).` : undefined}
+        entity={t('categories.entity')}
+        subtitle={deletedInfo ? t('categories.deleteSuccessSubtitle', { name: deletedInfo.nombre, id: deletedInfo.id }) : undefined}
         onClose={() => setShowDeleteSuccess(false)}
         actions={[
-          { label: 'Cerrar', onClick: () => setShowDeleteSuccess(false), variant: 'contained', color: 'error' },
-          { label: 'Crear nueva', onClick: () => { setShowDeleteSuccess(false); navigate('/categorias/crear'); }, variant: 'outlined', color: 'error' }
+          { label: t('categories.close'), onClick: () => setShowDeleteSuccess(false), variant: 'contained', color: 'error' },
+          { label: t('categories.createNew'), onClick: () => { setShowDeleteSuccess(false); navigate('/categorias/crear'); }, variant: 'outlined', color: 'error' }
         ]}
       />
       <Snackbar

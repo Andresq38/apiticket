@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Paper,
@@ -40,6 +41,7 @@ import { getApiOrigin } from '../../utils/apiBase';
 export default function HistorialTimeline({ historial }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const [openImageDialog, setOpenImageDialog] = useState(false);
+  const { t } = useTranslation();
 
   const apiBase = getApiOrigin();
   const UPLOADS_BASE = `${apiBase}/apiticket/uploads`;
@@ -94,6 +96,18 @@ export default function HistorialTimeline({ historial }) {
       }
     };
     return configs[estadoNombre] || configs['Pendiente'];
+  };
+  // Traduce el nombre de estado retornado por el backend a una clave i18n
+  const translateEstadoLabel = (estadoNombre) => {
+    if (!estadoNombre) return '';
+    const n = String(estadoNombre).toLowerCase().trim();
+    if (n.includes('pend')) return t('status.pending');
+    if (n.includes('asign')) return t('status.assigned');
+    if (n.includes('proceso') || n.includes('en proceso')) return t('status.inProgress');
+    if (n.includes('resuel') || n.includes('resuelto')) return t('status.resolved');
+    if (n.includes('cerr')) return t('status.closed');
+    // fallback: return original string
+    return estadoNombre;
   };
 
   const handleImageClick = (imagen) => {
@@ -150,19 +164,19 @@ export default function HistorialTimeline({ historial }) {
 
               <TimelineSeparator>
                 <TimelineDot 
-                  sx={{ 
-                    backgroundColor: config.dotColor,
-                    boxShadow: 3,
-                    width: 48,
-                    height: 48,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white'
-                  }}
-                >
-                  {config.icon}
-                </TimelineDot>
+                          sx={{ 
+                            backgroundColor: config.dotColor,
+                            boxShadow: 3,
+                            width: 48,
+                            height: 48,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: 'white'
+                          }}
+                        >
+                          {config.icon}
+                        </TimelineDot>
                 {!isLast && <TimelineConnector sx={{ bgcolor: config.borderColor }} />}
               </TimelineSeparator>
 
@@ -182,13 +196,13 @@ export default function HistorialTimeline({ historial }) {
                   <CardContent sx={{ p: 2.5, '&:last-child': { pb: 2.5 } }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
                       <Chip
-                        label={item.estado_nombre || item.estado}
+                        label={translateEstadoLabel(item.estado_nombre || item.estado)}
                         color={config.color}
                         sx={{ fontWeight: 700, fontSize: '0.875rem' }}
                       />
                       {isFirst && (
                         <Chip
-                          label="Más reciente"
+                          label={t('tickets.mostRecent')}
                           size="small"
                           sx={{ 
                             bgcolor: '#1976d2', 

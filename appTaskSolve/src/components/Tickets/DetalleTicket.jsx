@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import TicketService from '../../services/TicketService';
+import { useTranslation } from 'react-i18next';
 import { 
   Container, Typography, CircularProgress, Box, Alert, 
   TextField, Button, Paper, Chip, Grid, Rating, 
@@ -26,6 +27,7 @@ function HistorialTicketSection({ ticketId }) {
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { t } = useTranslation();
   const apiBase = getApiOrigin();
 
   useEffect(() => {
@@ -53,7 +55,7 @@ function HistorialTicketSection({ ticketId }) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
         <HistoryIcon sx={{ fontSize: 28, color: 'primary.main' }} />
         <Typography variant="h6" color="primary" sx={{ fontWeight: 700 }}>
-          Historial Completo de Cambios de Estado
+          {t('tickets.history.title')}
         </Typography>
       </Box>
       
@@ -71,6 +73,7 @@ function HistorialTicketSection({ ticketId }) {
 }
 
 export default function DetalleTicket() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
@@ -104,7 +107,7 @@ export default function DetalleTicket() {
       setError(null);
     } catch (err) {
       console.error(err);
-      setError('No se pudo cargar la información del tiquete.');
+      setError(t('tickets.loadError') || t('createTicketForm.formIncomplete'));
     } finally {
       setLoading(false);
     }
@@ -123,7 +126,7 @@ export default function DetalleTicket() {
       setEstadosDisponibles(estadosArray);
     } catch (err) {
       console.error('Error al cargar estados:', err);
-      setSnackbar({ open: true, message: 'Error al cargar estados disponibles', severity: 'error' });
+      setSnackbar({ open: true, message: t('tickets.errorLoadStates') || 'Error al cargar estados disponibles', severity: 'error' });
     } finally {
       setLoadingEstados(false);
     }
@@ -144,7 +147,7 @@ export default function DetalleTicket() {
 
   const handleCambiarEstado = async () => {
     if (!nuevoEstado) {
-      setSnackbar({ open: true, message: 'Por favor selecciona un estado', severity: 'warning' });
+      setSnackbar({ open: true, message: t('tickets.selectStatePlease') || 'Por favor selecciona un estado', severity: 'warning' });
       return;
     }
 
@@ -152,7 +155,7 @@ export default function DetalleTicket() {
     if (!observaciones || observaciones.trim() === '') {
       setSnackbar({ 
         open: true, 
-        message: 'Las observaciones son obligatorias para cambiar el estado del tiquete', 
+        message: t('tickets.observationsRequired') || 'Las observaciones son obligatorias para cambiar el estado del tiquete', 
         severity: 'error' 
       });
       return;
@@ -180,7 +183,7 @@ export default function DetalleTicket() {
       });
 
       if (response.success) {
-        setSnackbar({ open: true, message: response.message || 'Estado actualizado correctamente', severity: 'success' });
+        setSnackbar({ open: true, message: response.message || t('tickets.stateUpdated') || 'Estado actualizado correctamente', severity: 'success' });
         handleCloseDialog();
         
         // Recargar el ticket para reflejar los cambios
@@ -188,11 +191,11 @@ export default function DetalleTicket() {
           fetchTicket();
         }, 500);
       } else {
-        setSnackbar({ open: true, message: response.message || 'Error al actualizar estado', severity: 'error' });
+        setSnackbar({ open: true, message: response.message || t('tickets.errorUpdateState') || 'Error al actualizar estado', severity: 'error' });
       }
     } catch (err) {
       console.error('Error al cambiar estado:', err);
-      const errorMessage = err.response?.data?.message || err.message || 'Error al cambiar el estado del tiquete';
+      const errorMessage = err.response?.data?.message || err.message || t('tickets.changeState.error');
       setSnackbar({ open: true, message: errorMessage, severity: 'error' });
     }
   };
@@ -207,12 +210,12 @@ export default function DetalleTicket() {
   if (error) return <Alert severity="error">{error}</Alert>;
 
   // If API returned no ticket
-  if (!ticket) return <Alert severity="info">Tiquete no encontrado.</Alert>;
+  if (!ticket) return <Alert severity="info">{t('tickets.notFound') || t('actions.notFound')}</Alert>;
 
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Detalles del Ticket #{ticket.id_ticket}
+        {t('tickets.detailsTitle', { id: ticket.id_ticket })}
       </Typography>
 
       <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
@@ -223,7 +226,7 @@ export default function DetalleTicket() {
           onClick={() => navigate(`/tickets/editar/${id}`)}
           disabled={ticket?.estado?.nombre === 'Cerrado'}
         >
-          Editar Tiquete
+          {t('tickets.edit')}
         </Button>
         <Button 
           variant="contained" 
@@ -232,10 +235,10 @@ export default function DetalleTicket() {
           onClick={handleOpenDialog}
           disabled={ticket?.estado?.nombre === 'Cerrado'}
         >
-          Cambiar Estado
+          {t('tickets.changeState')}
         </Button>
         <Button variant="outlined" onClick={() => navigate('/')}>
-          Volver al Inicio
+          {t('home.backToHome')}
         </Button>
       </Box>
 
@@ -246,39 +249,41 @@ export default function DetalleTicket() {
         if (!match) return null;
         
         const horas = parseInt(match[1]);
+        // legacy translations use `hours` placeholder — provide it for consistency
+        const hours = horas;
         let urgencyConfig;
         
         if (horas < 0) {
           urgencyConfig = { 
             severity: 'error', 
-            title: '⚠️ SLA VENCIDO', 
+            title: t('tickets.sla.overdueTitle'),
             color: '#d32f2f',
             bgColor: '#ffebee',
-            message: `Este tiquete ha excedido su tiempo SLA por ${Math.abs(horas)} horas. Requiere atención inmediata.`
+            message: t('tickets.sla.overdueMessage', { hours: Math.abs(horas) })
           };
         } else if (horas <= 2) {
           urgencyConfig = { 
             severity: 'error', 
-            title: '🚨 SLA CRÍTICO', 
+            title: t('tickets.sla.criticalTitle'),
             color: '#d32f2f',
             bgColor: '#ffe0e0',
-            message: `Solo quedan ${horas} horas para cumplir con el SLA. Acción urgente requerida.`
+            message: t('tickets.sla.criticalMessage', { hours })
           };
         } else if (horas <= 4) {
           urgencyConfig = { 
             severity: 'warning', 
-            title: '⚡ SLA URGENTE', 
+            title: t('tickets.sla.urgentTitle'),
             color: '#f57c00',
             bgColor: '#fff3e0',
-            message: `Quedan ${horas} horas para el vencimiento del SLA. Prioridad alta.`
+            message: t('tickets.sla.urgentMessage', { hours })
           };
         } else if (horas <= 24) {
           urgencyConfig = { 
             severity: 'warning', 
-            title: '⏰ SLA PRÓXIMO A VENCER', 
+            title: t('tickets.sla.nextTitle'),
             color: '#ed6c02',
             bgColor: '#fff8e1',
-            message: `El SLA vence en ${horas} horas. Mantener seguimiento.`
+            message: t('tickets.sla.nextMessage', { hours })
           };
         }
 
@@ -313,7 +318,7 @@ export default function DetalleTicket() {
             </Typography>
             <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
               <Chip 
-                label={`Tiempo restante: ${slaText}`}
+                label={`${t('tickets.sla.timeRemaining')}: ${slaText}`}
                 sx={{ 
                   bgcolor: 'white',
                   fontWeight: 600,
@@ -321,11 +326,11 @@ export default function DetalleTicket() {
                 }}
               />
               <Chip 
-                label={`SLA: ${ticket.sla?.nombre || 'N/A'}`}
+                label={`${t('tickets.sla.label')}: ${ticket.sla?.nombre || 'N/A'}`}
                 variant="outlined"
               />
               <Chip 
-                label={`Prioridad: ${ticket.prioridad || 'N/A'}`}
+                label={`${t('tickets.priority')}: ${ticket.prioridad || 'N/A'}`}
                 color={ticket.prioridad === 'Alta' ? 'error' : ticket.prioridad === 'Media' ? 'warning' : 'default'}
               />
             </Box>
@@ -335,20 +340,29 @@ export default function DetalleTicket() {
 
       {/* Información General */}
       <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" color="primary" gutterBottom>Información General</Typography>
-        <Typography><strong>Título:</strong> {ticket.titulo}</Typography>
-        <Typography><strong>Descripción:</strong> {ticket.descripcion}</Typography>
-        <Typography><strong>Prioridad:</strong> {ticket.prioridad}</Typography>
-        <Typography><strong>Estado:</strong> {ticket.estado?.nombre || 'N/A'}</Typography>
-  <Typography><strong>Fecha creación:</strong> {formatDateTime(ticket.fecha_creacion)}</Typography>
-  <Typography><strong>Fecha cierre:</strong> {ticket.fecha_cierre ? formatDateTime(ticket.fecha_cierre) : 'No cerrado'}</Typography>
+        <Typography variant="h6" color="primary" gutterBottom>{t('tickets.info.title')}</Typography>
+        <Typography><strong>{t('tickets.fields.title')}:</strong> {ticket.titulo}</Typography>
+        <Typography><strong>{t('tickets.fields.description')}:</strong> {ticket.descripcion}</Typography>
+        <Typography><strong>{t('tickets.fields.priority')}:</strong> {ticket.prioridad}</Typography>
+        <Typography><strong>{t('tickets.fields.status')}:</strong> {(() => {
+            const raw = ticket.estado?.nombre || ticket.estado || '';
+            const key = String(raw).toLowerCase();
+            if (key.includes('pend')) return t('status.pending');
+            if (key.includes('asign')) return t('status.assigned');
+            if (key.includes('proceso') || key.includes('en proceso')) return t('status.inProgress');
+            if (key.includes('resuel') || key.includes('resuelto')) return t('status.resolved');
+            if (key.includes('cerr')) return t('status.closed');
+            return raw || 'N/A';
+          })()}</Typography>
+      <Typography><strong>{t('tickets.fields.createdAt')}:</strong> {formatDateTime(ticket.fecha_creacion)}</Typography>
+      <Typography><strong>{t('tickets.fields.closedAt')}:</strong> {ticket.fecha_cierre ? formatDateTime(ticket.fecha_cierre) : t('tickets.notClosed')}</Typography>
       </Paper>
 
       {/* Métricas de SLA y Cumplimiento */}
       <Paper sx={{ p: 3, mb: 4, bgcolor: '#f0f7ff', border: '2px solid #2196f3' }}>
         <Typography variant="h6" color="primary" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <AccessTimeIcon />
-          Métricas de SLA y Cumplimiento
+          {t('tickets.sla.metricsTitle')}
         </Typography>
 
         {ticket.sla ? (
@@ -356,8 +370,8 @@ export default function DetalleTicket() {
             {/* Columna 1: Información del SLA */}
             <Grid item xs={12} md={6}>
               <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
-                  Nivel de SLA
+                  <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
+                  {t('tickets.sla.level')}
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 600 }}>
                   {ticket.sla.nombre || 'N/A'}
@@ -366,7 +380,7 @@ export default function DetalleTicket() {
 
               <Box sx={{ mb: 2 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
-                  SLA Respuesta
+                  {t('tickets.sla.response')}
                 </Typography>
                 <Typography variant="body1">
                   {ticket.sla.tiempo_respuesta_min && ticket.sla.tiempo_respuesta_max 
@@ -377,7 +391,7 @@ export default function DetalleTicket() {
 
               <Box sx={{ mb: 2 }}>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
-                  SLA de Resolución
+                  {t('tickets.sla.resolution')}
                 </Typography>
                 <Typography variant="body1">
                   {ticket.sla.tiempo_resolucion_min && ticket.sla.tiempo_resolucion_max 
@@ -388,19 +402,19 @@ export default function DetalleTicket() {
 
               <Box>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mb: 0.5 }}>
-                  Tiempo Restante SLA
+                  {t('tickets.sla.timeRemainingTitle')}
                 </Typography>
                 <Typography variant="body1" sx={{ fontWeight: 600, color: ticket.sla.tiempo_restante?.includes('-') ? 'error.main' : 'success.main' }}>
                   {ticket.sla.tiempo_restante || 'N/A'}
                 </Typography>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mt: 1 }}>
-                  Límite de Respuesta
+                  {t('tickets.sla.responseLimit')}
                 </Typography>
                 <Typography variant="body2">
                   {ticket.sla_fecha_respuesta ? formatDateTime(ticket.sla_fecha_respuesta) : 'N/A'}
                 </Typography>
                 <Typography variant="subtitle2" sx={{ fontWeight: 600, color: 'text.secondary', mt: 1 }}>
-                  Límite de Resolución
+                  {t('tickets.sla.resolutionLimit')}
                 </Typography>
                 <Typography variant="body2">
                   {ticket.sla_fecha_resolucion ? formatDateTime(ticket.sla_fecha_resolucion) : 'N/A'}
@@ -451,7 +465,7 @@ export default function DetalleTicket() {
                         {diasResolucion} {diasResolucion === 1 ? 'día' : 'días'} ({horasResolucion}h)
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {ticket.fecha_cierre ? 'Tiquete cerrado' : 'En curso'}
+                        {ticket.fecha_cierre ? t('tickets.closed') : t('tickets.inProgress')}
                       </Typography>
                     </Box>
 
@@ -504,9 +518,9 @@ export default function DetalleTicket() {
               })()}
             </Grid>
           </Grid>
-        ) : (
+          ) : (
           <Alert severity="info" sx={{ mt: 2 }}>
-            No hay información de SLA disponible para este ticket.
+            {t('tickets.sla.noInfo')}
           </Alert>
         )}
       </Paper>
@@ -553,7 +567,7 @@ export default function DetalleTicket() {
 
        {/* Imágenes (carrusel manual) */}
       <Paper sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h6" color="primary" gutterBottom>Imágenes del Tiquete</Typography>
+        <Typography variant="h6" color="primary" gutterBottom>{t('tickets.images.title')}</Typography>
         {Array.isArray(ticket.imagenes) && ticket.imagenes.length > 0 ? (
           (() => {
             const apiBase = getApiOrigin();
@@ -616,7 +630,7 @@ export default function DetalleTicket() {
             );
           })()
         ) : (
-          <Typography variant="body2">No hay imágenes asociadas a este tiquete.</Typography>
+          <Typography variant="body2">{t('tickets.images.none')}</Typography>
         )}
       </Paper>
 
@@ -624,7 +638,7 @@ export default function DetalleTicket() {
         <Box>
           <Paper sx={{ p: 2, bgcolor: 'white', borderLeft: '4px solid #1976d2' }} elevation={0}>
             <Typography variant="h6" color="primary" gutterBottom>
-              Comentario del cliente:
+              {t('tickets.clientComment.title')}
             </Typography>
 
             {ticket.comentario && ticket.comentario.trim().length > 0 ? (
@@ -635,11 +649,11 @@ export default function DetalleTicket() {
                 "{ticket.comentario}"
               </Typography>
             ) : (
-              <Typography
+                <Typography
                 variant="body2"
                 sx={{ color: 'text.secondary', fontStyle: 'italic' }}
               >
-                No hay comentarios asociados a este ticket.
+                {t('tickets.clientComment.none')}
               </Typography>
             )}
           </Paper>

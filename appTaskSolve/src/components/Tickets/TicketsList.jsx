@@ -1,4 +1,5 @@
 ﻿import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import axios from 'axios';
@@ -34,26 +35,40 @@ const statusColor = (estado) => {
 
 const getSlaUrgency = (slaText) => {
   if (!slaText) return null;
-  
   const match = slaText.match(/(-?\d+)h/);
   if (!match) return null;
-  
   const horas = parseInt(match[1]);
-  
-  if (horas < 0) {
-    return { level: 'vencido', color: '#d32f2f', bgColor: '#ffebee', icon: ErrorIcon, label: 'VENCIDO', pulse: true };
-  } else if (horas <= 2) {
-    return { level: 'critico', color: '#d32f2f', bgColor: '#ffe0e0', icon: ErrorIcon, label: 'CRÍTICO', pulse: true };
-  } else if (horas <= 4) {
-    return { level: 'urgente', color: '#f57c00', bgColor: '#fff3e0', icon: WarningAmberIcon, label: 'URGENTE', pulse: false };
-  } else if (horas <= 24) {
-    return { level: 'proximo', color: '#ed6c02', bgColor: '#fff8e1', icon: AccessTimeIcon, label: 'PRÓXIMO', pulse: false };
-  }
-  
-  return { level: 'normal', color: '#2e7d32', bgColor: '#f1f8f4', icon: AccessTimeIcon, label: 'NORMAL', pulse: false };
+  if (horas < 0) return { level: 'vencido', color: '#d32f2f', bgColor: '#ffebee', icon: ErrorIcon, pulse: true };
+  if (horas <= 2) return { level: 'critico', color: '#d32f2f', bgColor: '#ffe0e0', icon: ErrorIcon, pulse: true };
+  if (horas <= 4) return { level: 'urgente', color: '#f57c00', bgColor: '#fff3e0', icon: WarningAmberIcon, pulse: false };
+  if (horas <= 24) return { level: 'proximo', color: '#ed6c02', bgColor: '#fff8e1', icon: AccessTimeIcon, pulse: false };
+  return { level: 'normal', color: '#2e7d32', bgColor: '#f1f8f4', icon: AccessTimeIcon, pulse: false };
+};
+
+const statusKey = (estado) => {
+  const map = {
+    'Asignado': 'status.assigned',
+    'En Proceso': 'status.inProgress',
+    'Resuelto': 'status.resolved',
+    'Cerrado': 'status.closed'
+  };
+  return map[estado] || 'status.notFound';
+};
+
+// Robust translation helper: map backend state strings to i18n keys
+const translateStatusLabel = (tfn, estadoRaw) => {
+  if (!estadoRaw) return '';
+  const raw = String(estadoRaw).toLowerCase();
+  if (raw.includes('pend')) return tfn('status.pending');
+  if (raw.includes('asign')) return tfn('status.assigned');
+  if (raw.includes('proceso') || raw.includes('en proceso')) return tfn('status.inProgress');
+  if (raw.includes('resuel') || raw.includes('resuelto')) return tfn('status.resolved');
+  if (raw.includes('cerr')) return tfn('status.closed');
+  return estadoRaw;
 };
 
 export default function TicketsList() {
+  const { t } = useTranslation();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -85,8 +100,8 @@ export default function TicketsList() {
       setTickets(Array.isArray(data) ? data : []);
     } catch (e) {
       if (e.name !== 'AbortError' && e.code !== 'ERR_CANCELED') {
-        console.error('Error cargando tiquetes:', e);
-        setError(e.response?.data?.message || e.message || 'Error al cargar tiquetes');
+        console.error('Error cargando tickets:', e);
+        setError(e.response?.data?.message || e.message || 'Error al cargar tickets');
       }
     } finally {
       setLoading(false);
@@ -126,10 +141,10 @@ export default function TicketsList() {
     <Container sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Typography variant="h4" gutterBottom sx={{ mb: 0 }}>
-          Tiquetes
+          {t('header.tickets') || 'Tickets'}
         </Typography>
         <Button variant="contained" color="primary" onClick={() => navigate('/tickets/crear')}>
-          Crear Tiquete
+          {t('home.createTicket') || 'Crear Ticket'}
         </Button>
       </Box>
 
@@ -142,7 +157,7 @@ export default function TicketsList() {
       {!!error && <Alert severity="error">{error}</Alert>}
 
       {!loading && !error && tickets.length === 0 && (
-        <Alert severity="info">No hay tiquetes para mostrar.</Alert>
+        <Alert severity="info">{t('home.noResults') || 'No hay tickets para mostrar.'}</Alert>
       )}
 
       <Grid container spacing={3} sx={{ mt: 1 }}>
@@ -175,46 +190,37 @@ export default function TicketsList() {
                 onClick={() => navigate(`/tickets/${t['Identificador del Ticket']}`)}
               >
                 <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Chip 
-                      label={`Tiquete #${t['Identificador del Ticket']}`}
-                      size="small"
-                      sx={{
-                        bgcolor: '#1976d2',
-                        color: 'white',
-                        fontWeight: 800,
-                        fontSize: '0.8rem',
-                        height: 28,
-                        border: '2px solid white',
-                        boxShadow: '0 2px 8px #1976d240'
-                      }}
-                    />
+<<<<<<< HEAD
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Ticket #{t['Identificador del Ticket']}
+                    </Typography>
                     {urgency?.pulse && (
-                      <Chip 
-                        size="small" 
-                        label={urgency.label}
-                        sx={{ 
-                          bgcolor: urgency.color,
-                          color: 'white',
-                          fontWeight: 700,
-                          fontSize: '0.75rem',
-                          height: 28,
-                          border: '2px solid white',
-                          boxShadow: `0 2px 8px ${urgency.color}40`
-                        }}
-                      />
+                      <Chip size="small" label={t(`sla.${urgency.level}`)} sx={{ bgcolor: urgency.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
+=======
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Ticket #{t['Identificador del Ticket']}
+                    </Typography>
+                    {urgency?.pulse && (
+                      <Chip size="small" label={t(`sla.${urgency.level}`)} sx={{ bgcolor: urgency.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
+>>>>>>> cbf7f9799934842cdd2ec89408208a78f608c08f
                     )}
                   </Box>
 
                   <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 700 }}>{t['Categoría']}</Typography>
 
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1 }}>
+<<<<<<< HEAD
                     <Chip 
                       size="small" 
                       label={t['Estado actual']} 
                       color={statusColor(t['Estado actual'])}
                       sx={{ fontWeight: 700, fontSize: '0.85rem', height: 26 }}
                     />
+=======
+                    <Chip size="small" label={translateStatusLabel(t, t['Estado actual'] || t.estado?.nombre || t.estado)} color={statusColor(t['Estado actual'] || t.estado?.nombre || t.estado)} />
+>>>>>>> cbf7f9799934842cdd2ec89408208a78f608c08f
                   </Box>
 
                   {urgency && (
@@ -231,17 +237,9 @@ export default function TicketsList() {
                     >
                       {Icon && <Icon sx={{ fontSize: 18, color: urgency.color }} />}
                       <Box sx={{ flex: 1 }}>
-                        <Typography 
-                          variant="caption" 
-                          sx={{ 
-                            fontWeight: 600, 
-                            color: urgency.color,
-                            display: 'block',
-                            lineHeight: 1.2
-                          }}
-                        >
-                          {urgency.label}
-                        </Typography>
+                          <Typography variant="caption" sx={{ fontWeight: 600, color: urgency.color, display: 'block', lineHeight: 1.2 }}>
+                            {t(`sla.${urgency.level}`)}
+                          </Typography>
                         <Typography 
                           variant="caption" 
                           sx={{ 

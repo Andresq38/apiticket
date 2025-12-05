@@ -35,6 +35,16 @@ class especialidad
             $inputJSON = $request->getJSON();
             $model = new EspecialidadModel();
             $result = $model->create($inputJSON);
+
+            // Notificar a administradores sobre nuevo mantenimiento (Especialidad creada)
+            try {
+                if ($result && isset($result->nombre)) {
+                    $notif = new NotificacionModel();
+                    $notif->notificarMantenimientoCreado('Especialidad', $result->nombre, $inputJSON->id_usuario_remitente ?? null);
+                }
+            } catch (Exception $e) {
+                error_log('No se pudo notificar mantenimiento (Especialidad): ' . $e->getMessage());
+            }
             $response->toJSON($result);
         } catch (Exception $e) {
             handleException($e);

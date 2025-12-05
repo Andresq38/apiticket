@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Container,
   Paper,
@@ -40,6 +41,7 @@ export default function CreateCategoria({
   onCreated,
   hideEmbeddedHeader = false,
 }) {
+  const { t } = useTranslation();
   const apiBase = getApiOrigin();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -110,11 +112,10 @@ export default function CreateCategoria({
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-      // Validaciones mejoradas
       if (!form.nombre.trim()) {
         setSnackbar({
           open: true,
-          message: "El nombre de la categoría es requerido. Por favor, ingrese un nombre descriptivo.",
+          message: t('createForm.categoryNameRequired'),
           severity: "warning",
         });
         return;
@@ -123,7 +124,7 @@ export default function CreateCategoria({
       if (form.nombre.trim().length < 3) {
         setSnackbar({
           open: true,
-          message: "El nombre es muy corto. Debe tener al menos 3 caracteres. Ejemplo: 'Soporte Técnico'",
+          message: t('createForm.categoryNameTooShort'),
           severity: "warning",
         });
         return;
@@ -132,7 +133,7 @@ export default function CreateCategoria({
       if (form.nombre.trim().length > 100) {
         setSnackbar({
           open: true,
-          message: "El nombre es demasiado largo. Máximo 100 caracteres (actual: " + form.nombre.trim().length + ")",
+          message: t('createForm.categoryNameTooLong', { length: form.nombre.trim().length }),
           severity: "warning",
         });
         return;
@@ -141,7 +142,7 @@ export default function CreateCategoria({
       if (!form.id_sla) {
         setSnackbar({
           open: true,
-          message: "Debe seleccionar un SLA (Acuerdo de Nivel de Servicio) para esta categoría. Define el tiempo de respuesta.",
+          message: t('createForm.slaRequired'),
           severity: "warning",
         });
         return;
@@ -167,14 +168,14 @@ export default function CreateCategoria({
       } else {
         setSnackbar({
           open: true,
-          message: "Respuesta inválida del servidor",
+          message: t('createForm.invalidServerResponse'),
           severity: "warning",
         });
       }
     } catch (err) {
       setSnackbar({
         open: true,
-        message: err?.response?.data?.error || "Error al crear categoría",
+        message: err?.response?.data?.error || t('createForm.errorCreating'),
         severity: "error",
       });
     } finally {
@@ -204,14 +205,14 @@ export default function CreateCategoria({
         >
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 800 }}>
-              Crear Categoría
+              {t('createForm.categoryTitle')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Defina el SLA y las etiquetas relacionadas
+              {t('createForm.categorySubtitle')}
             </Typography>
           </Box>
           <Button variant="text" onClick={() => navigate(-1)}>
-            &larr; Volver
+            {t('createForm.backButton')}
           </Button>
         </Box>
       )}
@@ -219,10 +220,10 @@ export default function CreateCategoria({
       {embedded && !hideEmbeddedHeader && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            Nueva categoría
+            {t('createForm.categoryTitle')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Defina el SLA y las etiquetas relacionadas
+            {t('createForm.categorySubtitle')}
           </Typography>
         </Box>
       )}
@@ -232,13 +233,13 @@ export default function CreateCategoria({
           <Grid item xs={12} md={5}>
             <TextField
               fullWidth
-              label={<span>Nombre <span style={{ color: '#d32f2f' }}>*</span></span>}
+              label={<span>{t('createForm.categoryName')} <span style={{ color: '#d32f2f' }}>*</span></span>}
               value={form.nombre}
               onChange={(e) =>
                 setForm((f) => ({ ...f, nombre: e.target.value }))
               }
               required
-              helperText="Requerido (3-100 caracteres). Ejemplo: Soporte Técnico, Infraestructura"
+              helperText={t('createForm.categoryNameHelper')}
               sx={{ minWidth: { md: 300 } }}
             />
           </Grid>
@@ -247,7 +248,7 @@ export default function CreateCategoria({
               select
               fullWidth
               required
-              label={<span>SLA <span style={{ color: '#d32f2f' }}>*</span></span>}
+              label={<span>{t('createForm.sla')} <span style={{ color: '#d32f2f' }}>*</span></span>}
               value={form.id_sla}
               onChange={(e) =>
                 setForm((f) => ({ ...f, id_sla: e.target.value }))
@@ -296,9 +297,9 @@ export default function CreateCategoria({
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Etiquetas"
-                  placeholder="Seleccione etiquetas"
-                  helperText={`${form.etiquetas.length} seleccionada(s)`}
+                  label={t('createForm.tagsLabel')}
+                  placeholder={t('createForm.tagsPlaceholder')}
+                  helperText={t('createForm.tagsHelperText', { count: form.etiquetas.length })}
                 />
               )}
                 ListboxProps={{
@@ -323,7 +324,7 @@ export default function CreateCategoria({
               onClick={() => setOpenEtiquetaDialog(true)}
               sx={{ mt: 1 }}
             >
-              + Crear nueva etiqueta
+              {t('createForm.createNewTag')}
             </Button>
           </Grid>
           <Grid item xs={12} md={6}>
@@ -360,9 +361,9 @@ export default function CreateCategoria({
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Especialidades"
-                  placeholder="Seleccione especialidades"
-                  helperText={`${form.especialidades.length} seleccionada(s)`}
+                  label={t('createForm.specialtiesLabel')}
+                  placeholder={t('createForm.specialtiesPlaceholder')}
+                  helperText={t('createForm.specialtiesHelperText', { count: form.especialidades.length })}
                 />
               )}
                 ListboxProps={{
@@ -387,13 +388,13 @@ export default function CreateCategoria({
               onClick={() => setOpenEspDialog(true)}
               sx={{ mt: 1 }}
             >
-              + Crear nueva especialidad
+              {t('createForm.createNewSpecialty')}
             </Button>
           </Grid>
             <Grid item xs={12}>
               <Divider sx={{ my: 2 }} />
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: 'text.primary' }}>
-                Selección Actual ({form.etiquetas.length + form.especialidades.length} items)
+                {t('createForm.currentSelection', { count: form.etiquetas.length + form.especialidades.length })}
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={12} md={6}>
@@ -417,7 +418,7 @@ export default function CreateCategoria({
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <LabelIcon sx={{ color: form.etiquetas.length > 0 ? 'success.main' : 'text.secondary' }} />
                         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                          Etiquetas
+                          {t('createForm.tagsLabel')}
                         </Typography>
                       </Box>
                       <Chip
@@ -460,10 +461,10 @@ export default function CreateCategoria({
                     ) : (
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 120 }}>
                         <Typography variant="body2" color="text.secondary" align="center">
-                          No hay etiquetas seleccionadas
+                          {t('createForm.noTagsSelected')}
                         </Typography>
                         <Typography variant="caption" color="text.disabled" align="center" sx={{ mt: 0.5 }}>
-                          Seleccione etiquetas usando el campo superior
+                          {t('createForm.selectTagsUsing')}
                         </Typography>
                       </Box>
                     )}
@@ -490,7 +491,7 @@ export default function CreateCategoria({
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <WorkIcon sx={{ color: form.especialidades.length > 0 ? 'info.main' : 'text.secondary' }} />
                         <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-                          Especialidades
+                          {t('createForm.specialtiesLabel')}
                         </Typography>
                       </Box>
                       <Chip
@@ -533,10 +534,10 @@ export default function CreateCategoria({
                     ) : (
                       <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 120 }}>
                         <Typography variant="body2" color="text.secondary" align="center">
-                          No hay especialidades seleccionadas
+                          {t('createForm.noSpecialtiesSelected')}
                         </Typography>
                         <Typography variant="caption" color="text.disabled" align="center" sx={{ mt: 0.5 }}>
-                          Seleccione especialidades usando el campo superior
+                          {t('createForm.selectSpecialtiesUsing')}
                         </Typography>
                       </Box>
                     )}
@@ -550,11 +551,11 @@ export default function CreateCategoria({
           sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 4 }}
         >
           <Button type="submit" variant="contained" disabled={loading}>
-            Guardar
+            {t('createForm.saveButton')}
           </Button>
           {!embedded && (
             <Button variant="outlined" onClick={() => navigate("/categorias")}>
-              Cancelar
+              {t('createForm.cancelButton')}
             </Button>
           )}
           {embedded && (
@@ -562,7 +563,7 @@ export default function CreateCategoria({
               variant="outlined"
               onClick={() => setForm({ nombre: "", id_sla: "", etiquetas: [], especialidades: [] })}
             >
-              Limpiar
+              {t('createForm.clearButton')}
             </Button>
           )}
         </Box>
@@ -576,19 +577,19 @@ export default function CreateCategoria({
 
       {/* Dialog para crear nueva etiqueta */}
       <Dialog open={openEtiquetaDialog} onClose={() => setOpenEtiquetaDialog(false)}>
-        <DialogTitle>Nueva etiqueta</DialogTitle>
+        <DialogTitle>{t('createForm.newTagTitle')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             fullWidth
             margin="dense"
-            label="Nombre de la etiqueta"
+            label={t('createForm.newTagLabel')}
             value={newEtiqueta}
             onChange={(e) => setNewEtiqueta(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenEtiquetaDialog(false)}>Cancelar</Button>
+          <Button onClick={() => setOpenEtiquetaDialog(false)}>{t('createForm.cancelButton')}</Button>
           <Button
             disabled={!newEtiqueta.trim()}
             onClick={async () => {
@@ -605,12 +606,12 @@ export default function CreateCategoria({
                     const already = (prev || []).some(it => it && it.id_etiqueta === created.id_etiqueta);
                     return already ? prev : [...prev, created];
                   });
-                    setSnackbar({ open: true, message: "Etiqueta creada y agregada correctamente", severity: "success" });
+                    setSnackbar({ open: true, message: t('createForm.tagCreatedSuccess') || "Tag created and added successfully", severity: "success" });
                 } else {
-                  setSnackbar({ open: true, message: "No se pudo crear la etiqueta", severity: "error" });
+                  setSnackbar({ open: true, message: t('createForm.tagCreateError') || "Could not create tag", severity: "error" });
                 }
               } catch (err) {
-                setSnackbar({ open: true, message: err?.response?.data?.error || 'Error creando etiqueta', severity: 'error' });
+                setSnackbar({ open: true, message: err?.response?.data?.error || t('createForm.tagCreateError') || 'Error creating tag', severity: 'error' });
               } finally {
                 setNewEtiqueta("");
                 setOpenEtiquetaDialog(false);
@@ -618,26 +619,26 @@ export default function CreateCategoria({
               }
             }}
           >
-            Agregar
+            {t('createForm.addButton')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Dialog para crear nueva especialidad (solo nombre, local) */}
       <Dialog open={openEspDialog} onClose={() => setOpenEspDialog(false)}>
-        <DialogTitle>Nueva especialidad</DialogTitle>
+        <DialogTitle>{t('createForm.newSpecialtyTitle')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             fullWidth
             margin="dense"
-            label="Nombre de la especialidad"
+            label={t('createForm.newSpecialtyLabel')}
             value={newEspecialidad}
             onChange={(e) => setNewEspecialidad(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenEspDialog(false)}>Cancelar</Button>
+          <Button onClick={() => setOpenEspDialog(false)}>{t('createForm.cancelButton')}</Button>
           <Button
             disabled={!newEspecialidad.trim()}
             onClick={async () => {
@@ -656,12 +657,12 @@ export default function CreateCategoria({
                     const already = (prev || []).some(it => it && it.id_especialidad === created.id_especialidad);
                     return already ? prev : [...prev, created];
                   });
-                    setSnackbar({ open: true, message: "Especialidad creada y agregada correctamente", severity: "success" });
+                    setSnackbar({ open: true, message: t('createForm.specialtyCreatedSuccess') || "Specialty created and added successfully", severity: "success" });
                 } else {
-                  setSnackbar({ open: true, message: "No se pudo crear la especialidad", severity: "error" });
+                  setSnackbar({ open: true, message: t('createForm.specialtyCreateError') || "Could not create specialty", severity: "error" });
                 }
               } catch (err) {
-                setSnackbar({ open: true, message: err?.response?.data?.error || 'Error creando especialidad', severity: 'error' });
+                setSnackbar({ open: true, message: err?.response?.data?.error || t('createForm.specialtyCreateError') || 'Error creating specialty', severity: 'error' });
               } finally {
                 setNewEspecialidad("");
                 setOpenEspDialog(false);
@@ -669,7 +670,7 @@ export default function CreateCategoria({
               }
             }}
           >
-            Agregar
+            {t('createForm.addButton')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -683,12 +684,12 @@ export default function CreateCategoria({
       <SuccessOverlay
         open={successOpen}
         mode="create"
-        entity="Categoría"
+        entity={t('createForm.categoryCreatedSuccess')}
         gender="feminine"
         onClose={() => setSuccessOpen(false)}
         actions={[
-          { label: 'Crear otra', onClick: () => setSuccessOpen(false), variant: 'contained', color: 'success' },
-          { label: 'Ir al listado', onClick: () => { setSuccessOpen(false); navigate('/categorias'); }, variant: 'outlined', color: 'success' }
+          { label: t('createForm.createButtonText'), onClick: () => setSuccessOpen(false), variant: 'contained', color: 'success' },
+          { label: t('createForm.goToListButton'), onClick: () => { setSuccessOpen(false); navigate('/categorias'); }, variant: 'outlined', color: 'success' }
         ]}
       />
       <Snackbar

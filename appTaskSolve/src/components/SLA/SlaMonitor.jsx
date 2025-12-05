@@ -24,6 +24,7 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import ErrorIcon from "@mui/icons-material/Error";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { getApiOrigin } from "../../utils/apiBase";
+import { useTranslation } from 'react-i18next';
 
 const getApiBase = () => `${getApiOrigin()}/apiticket`;
 
@@ -88,7 +89,18 @@ const getSlaUrgency = (slaText) => {
   };
 };
 
+const statusKey = (estado) => {
+  const map = {
+    'Asignado': 'status.assigned',
+    'En Proceso': 'status.inProgress',
+    'Resuelto': 'status.resolved',
+    'Cerrado': 'status.closed'
+  };
+  return map[estado] || 'status.notFound';
+};
+
 export default function SlaMonitor() {
+  const { t } = useTranslation();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -144,28 +156,28 @@ export default function SlaMonitor() {
         >
           <Box>
             <Typography variant="h4" sx={{ fontWeight: 800 }}>
-              Monitor de SLA
+              {t('home.title')}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Prioriza y actúa sobre los tiquetes con SLA más críticos
+              {t('home.description')}
             </Typography>
           </Box>
           <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
             <TextField
               select
               size="small"
-              label="Filtro"
+              label={t('home.status')}
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
             >
-              <MenuItem value="todos">Todos</MenuItem>
-              <MenuItem value="vencido">Vencido</MenuItem>
-              <MenuItem value="critico">Crítico</MenuItem>
-              <MenuItem value="urgente">Urgente</MenuItem>
-              <MenuItem value="proximo">Próximo</MenuItem>
-              <MenuItem value="normal">Normal</MenuItem>
+              <MenuItem value="todos">{t('home.all')}</MenuItem>
+              <MenuItem value="vencido">{t('sla.vencido')}</MenuItem>
+              <MenuItem value="critico">{t('sla.critico')}</MenuItem>
+              <MenuItem value="urgente">{t('sla.urgente')}</MenuItem>
+              <MenuItem value="proximo">{t('sla.proximo')}</MenuItem>
+              <MenuItem value="normal">{t('sla.normal')}</MenuItem>
             </TextField>
-            <Tooltip title="Actualizar">
+            <Tooltip title={t('home.reload') || 'Actualizar'}>
               <IconButton onClick={fetchTickets}>
                 <RefreshIcon />
               </IconButton>
@@ -185,11 +197,11 @@ export default function SlaMonitor() {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell>Tiquete</TableCell>
-                  <TableCell>Categoría</TableCell>
-                  <TableCell>Estado</TableCell>
-                  <TableCell>Tiempo restante SLA</TableCell>
-                  <TableCell>Prioridad</TableCell>
+                  <TableCell>{t('home.table.ticket') || 'Ticket'}</TableCell>
+                  <TableCell>{t('home.table.title') || 'Category'}</TableCell>
+                  <TableCell>{t('home.table.status') || 'Status'}</TableCell>
+                  <TableCell>{t('home.table.sla') || 'SLA'}</TableCell>
+                  <TableCell>{t('home.table.actions') || 'Priority'}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -200,11 +212,7 @@ export default function SlaMonitor() {
                     </TableCell>
                     <TableCell>{r["Categoría"]}</TableCell>
                     <TableCell>
-                      <Chip
-                        size="small"
-                        label={r["Estado actual"]}
-                        color={statusColor(r["Estado actual"])}
-                      />
+                      <Chip size="small" label={t(statusKey(r["Estado actual"])) || r["Estado actual"]} color={statusColor(r["Estado actual"])} />
                     </TableCell>
                     <TableCell>
                       {r._urg ? (
@@ -224,11 +232,8 @@ export default function SlaMonitor() {
                               sx={{ fontSize: 18, color: r._urg.color }}
                             />
                           )}
-                          <Typography
-                            variant="caption"
-                            sx={{ fontWeight: 700, color: r._urg.color }}
-                          >
-                            {r._urg.label}
+                          <Typography variant="caption" sx={{ fontWeight: 600, color: r._urg.color, display: 'block', lineHeight: 1.2 }}>
+                            {t(`sla.${r._urg.level}`)}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {r._slaText}
@@ -259,7 +264,7 @@ export default function SlaMonitor() {
                   <TableRow>
                     <TableCell colSpan={5}>
                       <Alert severity="info">
-                        No hay tiquetes para el filtro seleccionado.
+                        {t('home.noResults') || 'No hay tickets para el filtro seleccionado.'}
                       </Alert>
                     </TableCell>
                   </TableRow>

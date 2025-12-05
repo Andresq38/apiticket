@@ -1,0 +1,2 @@
+[29-11-2025 00:42:03] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 161 - Message: Cannot add or update a child row: a foreign key constraint fails (`ticket_system`.`notificacion`, CONSTRAINT `notificacion_ibfk_2` FOREIGN KEY (`id_usuario_remitente`) REFERENCES `usuario` (`id_usuario`) ON DELETE SET NULL ON UPDATE CASCADE)
+ 
