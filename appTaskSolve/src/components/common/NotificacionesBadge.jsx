@@ -113,69 +113,91 @@ export default function NotificacionesBadge({ userId }) {
         eventSourceRef.current.close();
       }
 
-      try {
+        try {
         setConnectionStatus('connecting');
-        const eventSource = new EventSource(`${apiBase}/apiticket/notificacion/stream/${effectiveUserId}`);
-        eventSourceRef.current = eventSource;
+        const streamUrl = `${apiBase}/apiticket/notificacion/stream/${effectiveUserId}`;
 
-        // Evento: conexión establecida
-        eventSource.onopen = () => {
-          setConnectionStatus('connected');
-          reconnectAttempts = 0; // Reset contador de reintentos
-        };
-
-        // Evento: nueva notificación recibida
-        eventSource.addEventListener('notification', (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            
-            setCountNoLeidas(data.count || 0);
-            
-            // Si hay última notificación, actualizar lista completa
-            if (data.latest) {
-              fetchNotificaciones(); // Refrescar lista completa
+        // Before creating EventSource, probe the endpoint to avoid 404 spam in console
+        fetch(streamUrl, { method: 'GET', headers: { Accept: 'text/event-stream' } })
+          .then(res => {
+            if (!res.ok) {
+              // Endpoint not available (404 or other) -> fallback to polling
+              console.warn('SSE stream not available, falling back to polling. Status:', res.status);
+              setConnectionStatus('disconnected');
+              // start polling every 30s
+              reconnectTimeout = setInterval(fetchNotificaciones, 30000);
+              return;
             }
-          } catch (error) {
-            console.error('Error al procesar evento notification:', error);
-          }
-        });
+            // Endpoint exists -> open EventSource
+            const eventSource = new EventSource(streamUrl);
+            eventSourceRef.current = eventSource;
 
-        // Evento: heartbeat (servidor sigue activo)
-        eventSource.addEventListener('heartbeat', (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            // Heartbeat recibido correctamente
-          } catch (error) {
-            console.error('Error al procesar heartbeat:', error);
-          }
-        });
+            // Evento: conexión establecida
+            eventSource.onopen = () => {
+              setConnectionStatus('connected');
+              reconnectAttempts = 0; // Reset contador de reintentos
+            };
 
-        // Evento: error en servidor
-        eventSource.addEventListener('error', (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            // Error SSE del servidor registrado
-          } catch (error) {
-            // Silenciar errores de parsing
-          }
-        });
+            // Evento: nueva notificación recibida
+            eventSource.addEventListener('notification', (event) => {
+              try {
+                const data = JSON.parse(event.data);
+                
+                setCountNoLeidas(data.count || 0);
+                
+                // Si hay última notificación, actualizar lista completa
+                if (data.latest) {
+                  fetchNotificaciones(); // Refrescar lista completa
+                }
+              } catch (error) {
+                console.error('Error al procesar evento notification:', error);
+              }
+            });
 
-        // Error de conexión
-        eventSource.onerror = (error) => {
-          console.error('❌ Error en conexión SSE:', error);
-          setConnectionStatus('error');
-          eventSource.close();
+            // Evento: heartbeat (servidor sigue activo)
+            eventSource.addEventListener('heartbeat', (event) => {
+              try {
+                const data = JSON.parse(event.data);
+                // Heartbeat recibido correctamente
+              } catch (error) {
+                console.error('Error al procesar heartbeat:', error);
+              }
+            });
 
-          // Intentar reconexión automática
-          if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-            reconnectAttempts++;
-            reconnectTimeout = setTimeout(connectSSE, RECONNECT_INTERVAL);
-          } else {
+            // Evento: error en servidor
+            eventSource.addEventListener('error', (event) => {
+              try {
+                const data = JSON.parse(event.data);
+                // Error SSE del servidor registrado
+              } catch (error) {
+                // Silenciar errores de parsing
+              }
+            });
+
+            // Error de conexión
+            eventSource.onerror = (error) => {
+              console.error('❌ Error en conexión SSE:', error);
+              setConnectionStatus('error');
+              eventSource.close();
+
+              // Intentar reconexión automática
+              if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                reconnectAttempts++;
+                reconnectTimeout = setTimeout(connectSSE, RECONNECT_INTERVAL);
+              } else {
+                setConnectionStatus('disconnected');
+                // Fallback: polling cada 30 segundos
+                reconnectTimeout = setInterval(fetchNotificaciones, 30000);
+              }
+            };
+          })
+          .catch(err => {
+            console.warn('Error probing SSE endpoint, falling back to polling:', err);
             setConnectionStatus('disconnected');
-            // Fallback: polling cada 30 segundos
             reconnectTimeout = setInterval(fetchNotificaciones, 30000);
-          }
-        };
+            return;
+          });
+
 
       } catch (error) {
         console.error('Error al crear EventSource:', error);
@@ -453,21 +475,19 @@ export default function NotificacionesBadge({ userId }) {
         </Box>
 
         {/* Footer */}
-        {notificaciones.length > 0 && (
-          <>
-            <Divider />
-            <Box sx={{ p: 1 }}>
-              <Button
-                fullWidth
-                startIcon={<VisibilityIcon />}
-                onClick={handleVerTodas}
-                size="small"
-              >
-                Ver todas las notificaciones
-              </Button>
-            </Box>
-          </>
-        )}
+        {notificaciones.length > 0 && [
+          <Divider key="footer-divider" />,
+          <Box key="footer-box" sx={{ p: 1 }}>
+            <Button
+              fullWidth
+              startIcon={<VisibilityIcon />}
+              onClick={handleVerTodas}
+              size="small"
+            >
+              Ver todas las notificaciones
+            </Button>
+          </Box>
+        ]}
       </Menu>
     </>
   );

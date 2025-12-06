@@ -224,6 +224,16 @@ const CategoriasList = () => {
                       boxShadow: `0 12px 36px 0 ${catColor.text}33`,
                       borderColor: catColor.text,
                       transform: 'translateY(-2px) scale(1.02)'
+                    },
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => navigate(`/categorias/${cat.id_categoria}`)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      navigate(`/categorias/${cat.id_categoria}`);
                     }
                   }}
                 >

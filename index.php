@@ -2,14 +2,33 @@
 // Iniciar buffer de salida para poder limpiarlo si hay errores de autenticación
 ob_start();
 
+/* Encabezadas CORS (desarrollo) - permitir el frontend dev en localhost:5173 */
+// En desarrollo permitimos el origen del Vite dev server. En producción restringirlo.
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowed_origins = [
+	'http://localhost:5173',
+	'http://127.0.0.1:5173'
+];
+if (in_array($origin, $allowed_origins)) {
+	header("Access-Control-Allow-Origin: $origin");
+} else {
+	// fallback (solo en desarrollo) - comentar en producción
+	header('Access-Control-Allow-Origin: *');
+}
+header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization');
+header('Access-Control-Allow-Credentials: true');
+header('Content-Type: application/json');
+
+// Responder inmediatamente a preflight OPTIONS para evitar bloqueo CORS
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+	http_response_code(200);
+	// terminar aquí para responder al preflight
+	exit;
+}
+
 // Composer autoloader
 require_once 'vendor/autoload.php';
-/*Encabezada de las solicitudes*/
-/*CORS - Permitir todos los orígenes en desarrollo*/
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: *");
-header("Access-Control-Allow-Methods: *");
-header('Content-Type: application/json');
 
 // Configurar parámetros de cookie y arrancar sesión
 // Evitar incluir el puerto en el dominio de la cookie (los navegadores lo rechazan)
