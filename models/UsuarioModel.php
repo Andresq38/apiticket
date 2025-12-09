@@ -67,40 +67,51 @@ public function get($id)
     
     public function login($objeto){
         try{
-            $sql = "SELECT * from usuario where id_usuario = '$objeto->id_usuario'";
-            $vResultado = $this->enlace->ExecuteSQL ($sql);
-            if(is_object($vResultado[0])){
+            // Validar campos requeridos
+            if (empty($objeto->email) || !isset($objeto->email)) {
+                throw new Exception("El correo electrónico es requerido");
+            }
+            
+            if (empty($objeto->password) || !isset($objeto->password)) {
+                throw new Exception("La contraseña es requerida");
+            }
+
+            // Buscar usuario por correo
+            $sql = "SELECT * FROM usuario WHERE correo = ?";
+            $vResultado = $this->enlace->executePrepared($sql, 's', [(string)$objeto->email]);
+            
+            if(!empty($vResultado) && is_object($vResultado[0])){
                 $usuario = $vResultado[0];
-                if(password_verify($objeto->password, $usuario->password)){
-                    $usuario = $this->get($objeto->id_usuario);
-                    if(!empty($usuario)){
-                        // Datos para el token JWT
-                        $data = [
-                            'id_usuario' => $usuario->id_usuario,
-                            'nombre' => $usuario->nombre,
-                            'correo' => $usuario->correo,
-                            'id_rol' => $usuario->id_rol,
-                            'iat' => time(),  // Hora de emisión
-							'exp' => time() + 3600 // Expiración en 1 hora
-                        ];
+                
+                // Verificar contraseña con SHA-256 (formato actual en BD)
+                $passwordHash = hash('sha256', $objeto->password);
+                
+                if($passwordHash === $usuario->password){
+                    // Datos para el token JWT
+                    $data = [
+                        'id_usuario' => $usuario->id_usuario,
+                        'nombre' => $usuario->nombre,
+                        'correo' => $usuario->correo,
+                        'id_rol' => $usuario->id_rol,
+                        'iat' => time(),  // Hora de emisión
+                        'exp' => time() + 3600 // Expiración en 1 hora
+                    ];
 
-                        	// Generar el token JWT
-                        $jwt_token = JWT::encode($data, Config::get('SECRET_KEY'), 'HS256');
+                    // Generar el token JWT
+                    $jwt_token = JWT::encode($data, Config::get('SECRET_KEY'), 'HS256');
 
-						// Enviar el token como respuesta
-						return $jwt_token;
-                    } else {
-                        throw new Exception("Usuario no encontrado");
-                    }
-
+                    // Enviar el token como respuesta
+                    return $jwt_token;
                 } else {
                     throw new Exception("Contraseña incorrecta");
                 }
+            } else {
+                throw new Exception("Usuario no encontrado");
             }
 
-        }   
-        catch(Exception $e){
+        } catch(Exception $e){
             handleException($e);
+            return false;
         }
     }
 

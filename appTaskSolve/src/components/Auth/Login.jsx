@@ -41,6 +41,25 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Validaciones
+    if (!email || !email.trim()) {
+      setError('El correo electrónico es requerido');
+      return;
+    }
+
+    if (!password || !password.trim()) {
+      setError('La contraseña es requerida');
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Por favor ingresa un correo electrónico válido');
+      return;
+    }
+
     setLoading(true);
     try {
       const user = await login(email, password);
@@ -126,18 +145,23 @@ export default function Login() {
             </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit}>
+          <Box component="form" onSubmit={handleSubmit} noValidate>
             <TextField
               margin="normal"
-              required
               fullWidth
               id="email"
               label="Correo electrónico"
               name="email"
+              type="email"
               autoComplete="email"
               autoFocus
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (error && error.includes('correo')) setError('');
+              }}
+              error={error && error.toLowerCase().includes('correo')}
+              helperText={error && error.toLowerCase().includes('correo') ? error : ' '}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -150,7 +174,6 @@ export default function Login() {
 
             <TextField
               margin="normal"
-              required
               fullWidth
               name="password"
               label="Contraseña"
@@ -158,7 +181,12 @@ export default function Login() {
               id="password"
               autoComplete="current-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (error && error.includes('contraseña')) setError('');
+              }}
+              error={error && error.toLowerCase().includes('contraseña')}
+              helperText={error && error.toLowerCase().includes('contraseña') ? error : ' '}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">

@@ -22,18 +22,25 @@ const Header = () => {
   const [lang, setLang] = useState(i18n.language || 'en');
   const { user, logout } = useAuth();
 
-  // Obtener userId del localStorage
+  // Obtener userId del contexto de autenticación o localStorage
   useEffect(() => {
-    const userStr = localStorage.getItem("user");
+    // Primero intentar del contexto de auth
+    if (user?.id) {
+      setUserId(user.id);
+      return;
+    }
+    
+    // Fallback a localStorage (authUser es el que guarda AuthContext)
+    const userStr = localStorage.getItem("authUser");
     if (userStr) {
       try {
-        const user = JSON.parse(userStr);
-        setUserId(user.id);
+        const userData = JSON.parse(userStr);
+        setUserId(userData.id);
       } catch (e) {
         console.error("Error al parsear usuario:", e);
       }
     }
-  }, []);
+  }, [user]);
 
   const getUserId = () => userId;
 

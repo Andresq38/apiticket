@@ -153,7 +153,12 @@ class NotificacionModel
                 }
             }
 
+            // Si no viene remitente, usar administrador por defecto también
             $idRemitente = $objeto->id_usuario_remitente ?? null;
+            if (empty($idRemitente)) {
+                $idRemitente = $this->getDefaultAdminId();
+            }
+
             $mensaje = $objeto->mensaje ?? null;
             $estado = $objeto->estado ?? 'No Leida';
 
@@ -163,7 +168,7 @@ class NotificacionModel
             
             $idNotificacion = $this->enlace->executePrepared_DML_last($vSql, 'sssss', [
                 (string)$idDest,
-                $idRemitente,
+                (string)$idRemitente,
                 (string)$objeto->tipo_evento,
                 $mensaje,
                 $estado
@@ -276,17 +281,70 @@ class NotificacionModel
             $ticketModel = new TicketModel();
             $ticket = $ticketModel->get($idTicket);
             if (!$ticket) { return ['success' => false, 'error' => 'Ticket no encontrado']; }
-            $mensaje = "Se ha cambiado el estado del ticket #{$idTicket}";
-            $n = $this->create((object)[
-                'id_usuario_destinatario' => null, // fallback a admin
-                'id_usuario_remitente' => $idUsuarioRemitente,
-                'tipo_evento' => 'Cambio de estado',
-                'mensaje' => $mensaje
-            ]);
-            return ['success' => true, 'notificaciones' => $n ? [$n] : []];
+            
+            // Notificar al usuario creador del ticket sobre el cambio de estado
+            if (!empty($ticket->id_usuario)) {
+                $mensajePorEstado = [
+                    'Pendiente' => "Tu ticket #{$idTicket} está pendiente de asignación",
+                    'Asignado' => "Tu ticket #{$idTicket} ha sido asignado a un técnico",
+                    'En Proceso' => "El técnico ha comenzado a trabajar en tu ticket #{$idTicket}",
+                    'Resuelto' => "Tu ticket #{$idTicket} ha sido marcado como resuelto",
+                    'Cerrado' => "Tu ticket #{$idTicket} ha sido cerrado"
+                ];
+                
+                $mensaje = $mensajePorEstado[$nuevoEstado] ?? "Tu ticket #{$idTicket} cambió a estado: {$nuevoEstado}";
+                
+                $this->create((object)[
+                    'id_usuario_destinatario' => $ticket->id_usuario,
+                    'id_usuario_remitente' => $idUsuarioRemitente,
+                    'tipo_evento' => 'Cambio de estado',
+                    'mensaje' => $mensaje
+                ]);
+            }
+            
+            return ['success' => true];
         } catch (Exception $e) {
             // No fallar la operación principal si falla la notificación
             error_log("Error al crear notificaciones: " . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Notificar al técnico cuando se le asigna un ticket
+     */
+    public function notificarAsignacionTecnico($idTicket, $idTecnico, $metodo = 'Manual')
+    {
+        try {
+            $ticketModel = new TicketModel();
+            $ticket = $ticketModel->get($idTicket);
+            if (!$ticket) { 
+                return ['success' => false, 'error' => 'Ticket no encontrado']; 
+            }
+            
+            // Obtener id_usuario del técnico
+            $sqlTecnico = "SELECT id_usuario FROM tecnico WHERE id_tecnico = ?";
+            $tecnicoResult = $this->enlace->executePrepared($sqlTecnico, 'i', [(int)$idTecnico]);
+            
+            if (empty($tecnicoResult)) {
+                return ['success' => false, 'error' => 'Técnico no encontrado'];
+            }
+            
+            $idUsuarioTecnico = $tecnicoResult[0]->id_usuario;
+            
+            $tipoAsignacion = $metodo === 'Automatica' ? 'automáticamente' : 'manualmente';
+            $mensaje = "Se te ha asignado {$tipoAsignacion} el ticket #{$idTicket} - '{$ticket->titulo}' con prioridad {$ticket->prioridad}";
+            
+            $this->create((object)[
+                'id_usuario_destinatario' => $idUsuarioTecnico,
+                'id_usuario_remitente' => null,
+                'tipo_evento' => 'Ticket asignado',
+                'mensaje' => $mensaje
+            ]);
+            
+            return ['success' => true];
+        } catch (Exception $e) {
+            error_log("Error al crear notificación de asignación: " . $e->getMessage());
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }

@@ -18,8 +18,17 @@ class Auth
             $body = json_decode($content);
             $response = new Response();
 
-            if (!$body || empty($body->email) || empty($body->password)) {
-                return $response->status(400)->toJSON(['error' => 'Email y contraseña son requeridos']);
+            // Validar campos requeridos
+            if (!$body) {
+                return $response->status(400)->toJSON(['error' => 'Datos de autenticación requeridos']);
+            }
+            
+            if (empty($body->email) || !isset($body->email)) {
+                return $response->status(400)->toJSON(['error' => 'El correo electrónico es requerido']);
+            }
+            
+            if (empty($body->password) || !isset($body->password)) {
+                return $response->status(400)->toJSON(['error' => 'La contraseña es requerida']);
             }
 
             $usuarioModel = new UsuarioModel();

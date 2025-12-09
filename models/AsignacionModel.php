@@ -382,20 +382,33 @@ class AsignacionModel
                              VALUES (?, ?, ?, ?, ?, ?)";
             // Para asignación automática, el usuario asigna es el sistema (ID '1-ADMIN' si existe) o null
             $idUsuarioAsigna = ($metodo === 'Automatica') ? null : (isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : null);
-            $this->enlace->executePrepared_DML($sqlAuditoria, 'iissis', [
+            
+            // Preparar tipos: i=int, i=int, s=string, s=string, i=int/null, s=string/null
+            $tiposAuditoria = 'iissis';
+            $paramsAuditoria = [
                 (int)$idTicket,
                 (int)$idTecnico,
                 $metodo,
                 $justificacion,
                 $puntajeCalculado !== null ? (int)$puntajeCalculado : null,
                 $idUsuarioAsigna
-            ]);
-            // CRÍTICO: Generar notificaciones al técnico Y al cliente
-            // Sistema automático como remitente (usuario ID 1 - Administrador por defecto)
-            require_once 'NotificacionModel.php';
-            $notifModel = new NotificacionModel();
-            $notifModel->notificarCambioEstado($idTicket, 1, 'Asignado', $justificacion);
-
+            ];
+            
+            $this->enlace->executePrepared_DML($sqlAuditoria, $tiposAuditoria, $paramsAuditoria);
+            
+            // Generar notificaciones al técnico Y al cliente
+            try {
+                require_once 'NotificacionModel.php';
+                $notifModel = new NotificacionModel();
+                
+                // Notificar al técnico que se le asignó un ticket
+                $notifModel->notificarAsignacionTecnico($idTicket, $idTecnico, $metodo);
+                
+                // Notificar al usuario creador del ticket que fue asignado
+                $notifModel->notificarCambioEstado($idTicket, null, 'Asignado', $justificacion);
+            } catch (Exception $e) {
+                error_log("Error al generar notificaciones: " . $e->getMessage());
+            }
 
             return [
                 'success' => true,

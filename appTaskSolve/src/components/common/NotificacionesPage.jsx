@@ -35,11 +35,12 @@ export default function NotificacionesPage() {
 
   // Obtener userId del contexto/localStorage
   useEffect(() => {
-    const userStr = localStorage.getItem("user");
+    // Usar authUser que es donde AuthContext guarda el usuario
+    const userStr = localStorage.getItem("authUser");
     if (userStr) {
       try {
-        const user = JSON.parse(userStr);
-        setUserId(user.id);
+        const userData = JSON.parse(userStr);
+        setUserId(userData.id);
       } catch (e) {
         console.error("Error al parsear usuario:", e);
       }

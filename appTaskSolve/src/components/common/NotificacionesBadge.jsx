@@ -35,8 +35,13 @@ export default function NotificacionesBadge({ userId }) {
   const open = Boolean(anchorEl);
   const apiBase = getApiOrigin();
 
-  // Resolver id efectivo (prop o fallback admin)
-  const effectiveUserId = userId || adminFallbackId;
+  // Usar solo el userId que se pasa como prop (no usar fallback a admin)
+  const effectiveUserId = userId;
+
+  // Debug: log del userId efectivo
+  useEffect(() => {
+    console.log('🔔 NotificacionesBadge - userId:', userId);
+  }, [userId]);
 
   // Sincronizar con localStorage cuando cambie el Set
   useEffect(() => {
@@ -47,30 +52,17 @@ export default function NotificacionesBadge({ userId }) {
     }
   }, [notificacionesMarcadasLeidas]);
 
-  // Obtener id de administrador por defecto si no se pasa userId
-  const fetchAdminFallback = async () => {
-    if (userId || adminFallbackId) return;
-    try {
-      const res = await axios.get(`${apiBase}/apiticket/notificacion/adminDefault`);
-      const idAdmin = res.data?.id_admin;
-      if (idAdmin) {
-        setAdminFallbackId(idAdmin);
-        // Luego de resolver, cargar notificaciones iniciales
-        setTimeout(() => fetchNotificaciones(), 50);
-      } else {
-        console.warn('adminDefault endpoint no devolvió id_admin');
-      }
-    } catch (e) {
-      console.error('Error obteniendo adminDefault:', e);
-    }
-  };
-
   // Cargar notificaciones no leídas y el contador
   const fetchNotificaciones = async () => {
-    if (!effectiveUserId) return;
+    if (!effectiveUserId) {
+      console.log('⚠️ fetchNotificaciones: No hay userId efectivo');
+      return;
+    }
     
     try {
       setLoading(true);
+      console.log('📥 Cargando notificaciones para usuario:', effectiveUserId);
+      
       // Usar NotificacionService en lugar de axios directo
       const [notifs, count] = await Promise.all([
         NotificacionService.getNoLeidas(effectiveUserId),
@@ -78,6 +70,7 @@ export default function NotificacionesBadge({ userId }) {
       ]);
 
       const notificacionesList = Array.isArray(notifs) ? notifs : (notifs?.data || []);
+      console.log('📬 Notificaciones recibidas:', notificacionesList.length);
       
       // Filtrar notificaciones que ya fueron marcadas como leídas localmente
       const notificacionesFiltradas = notificacionesList.filter(n => 
@@ -87,7 +80,7 @@ export default function NotificacionesBadge({ userId }) {
       setNotificaciones(notificacionesFiltradas);
       setCountNoLeidas(notificacionesFiltradas.length);
     } catch (error) {
-      console.error('Error al cargar notificaciones:', error);
+      console.error('❌ Error al cargar notificaciones:', error);
     } finally {
       setLoading(false);
     }
@@ -95,12 +88,11 @@ export default function NotificacionesBadge({ userId }) {
 
   // Conectar a SSE para notificaciones en tiempo real
   useEffect(() => {
-    // Intentar resolver admin primero si falta userId
-    if (!userId && !adminFallbackId) {
-      fetchAdminFallback();
-      return; // esperar a que se resuelva adminFallbackId
+    // No conectar si no hay userId válido
+    if (!effectiveUserId) {
+      console.log('⚠️ NotificacionesBadge: No hay userId, no se conecta SSE');
+      return;
     }
-    if (!effectiveUserId) return;
 
     let reconnectTimeout;
     let reconnectAttempts = 0;
@@ -322,8 +314,7 @@ export default function NotificacionesBadge({ userId }) {
         PaperProps={{
           sx: {
             width: 420,
-            maxHeight: 500,
-            overflow: 'hidden',
+            maxHeight: 600,
             display: 'flex',
             flexDirection: 'column'
           }
@@ -359,7 +350,25 @@ export default function NotificacionesBadge({ userId }) {
         <Divider />
 
         {/* Lista de notificaciones */}
-        <Box sx={{ overflowY: 'auto', flex: 1 }}>
+        <Box sx={{ 
+          overflowY: 'auto', 
+          flex: 1,
+          maxHeight: 400,
+          '&::-webkit-scrollbar': {
+            width: '8px'
+          },
+          '&::-webkit-scrollbar-track': {
+            background: 'rgba(0, 0, 0, 0.05)',
+            borderRadius: '4px'
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: 'rgba(0, 0, 0, 0.2)',
+            borderRadius: '4px',
+            '&:hover': {
+              background: 'rgba(0, 0, 0, 0.35)'
+            }
+          }
+        }}>
           {loading ? (
             <MenuItem disabled>
               <Typography variant="body2" color="text.secondary">
@@ -376,7 +385,7 @@ export default function NotificacionesBadge({ userId }) {
               </Box>
             </MenuItem>
           ) : (
-            notificaciones.slice(0, 5).map((notif) => (
+            notificaciones.map((notif) => (
               <MenuItem
                 key={notif.id_notificacion}
                 sx={{
@@ -474,20 +483,7 @@ export default function NotificacionesBadge({ userId }) {
           )}
         </Box>
 
-        {/* Footer */}
-        {notificaciones.length > 0 && [
-          <Divider key="footer-divider" />,
-          <Box key="footer-box" sx={{ p: 1 }}>
-            <Button
-              fullWidth
-              startIcon={<VisibilityIcon />}
-              onClick={handleVerTodas}
-              size="small"
-            >
-              Ver todas las notificaciones
-            </Button>
-          </Box>
-        ]}
+
       </Menu>
     </>
   );

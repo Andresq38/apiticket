@@ -580,13 +580,8 @@ export default function EditTicket() {
               <Tooltip title={t('ticketForm.categoryTooltip')} placement="top">
                 <TextField
                   fullWidth
-<<<<<<< HEAD
                   label={t('ticketForm.categoryDerived')}
                   value={categoriaPreview ? `${categoriaPreview.id_categoria} - ${categoriaPreview.nombre}` : ''}
-=======
-                  label={t('ticketForm.categoryDerived')}
-                  value={categoriaPreview ? `${categoriaPreview.id_categoria} - ${categoriaPreview.nombre}` : ''}
->>>>>>> cbf7f9799934842cdd2ec89408208a78f608c08f
                   InputProps={{
                     readOnly: true,
                     startAdornment: <CategoryOutlinedIcon sx={{ mr: 1, color: categoriaPreview ? 'success.main' : 'text.disabled' }} />
