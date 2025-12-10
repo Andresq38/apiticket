@@ -2,6 +2,21 @@
 class historial_estado
 {
     /**
+     * Obtener estadísticas mensuales de tickets resueltos y no resueltos
+     * GET /apiticket/historial_estado/estadisticas_mensuales
+     */
+    public function estadisticasMensuales()
+    {
+        try {
+            $response = new Response();
+            $hestado = new Historial_EstadoModel();
+            $result = $hestado->getEstadisticasMensuales();
+            $response->toJSON($result);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+    /**
      * Listar todo el historial
      * GET /apiticket/historial_estado
      */

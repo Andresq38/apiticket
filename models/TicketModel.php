@@ -13,6 +13,7 @@ class TicketModel
             //Consulta sql
             $vSql = "SELECT 
                         t.id_ticket AS 'Identificador del Ticket',
+                        t.id_usuario,
                         t.titulo AS 'Título',
                         c.nombre AS 'Categoría',
                         e.nombre AS 'Estado actual',

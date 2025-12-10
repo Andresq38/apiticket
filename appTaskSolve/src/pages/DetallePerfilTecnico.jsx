@@ -24,6 +24,9 @@ export default function DetallePerfilTecnico() {
   const { t } = useTranslation();
   const [especialidades, setEspecialidades] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [ticketsAbiertos, setTicketsAbiertos] = useState(0);
+  const [telefono, setTelefono] = useState('');
+  const [fechaIngreso, setFechaIngreso] = useState('');
 
   // Si no hay usuario o no es técnico, redirigir
   useEffect(() => {
@@ -44,24 +47,31 @@ export default function DetallePerfilTecnico() {
 
   // Cargar especialidades del técnico
   useEffect(() => {
-    const loadEspecialidades = async () => {
+    const loadInfo = async () => {
       try {
         setLoading(true);
         const apiBase = getApiBaseWithPrefix();
-        console.log('📡 Cargando especialidades para user.id:', user?.id);
-        const res = await axios.get(`${apiBase}/tecnico/obtenerEspecialidades/${user?.id}`);
-        console.log('📡 Respuesta del servidor:', res.data);
-        setEspecialidades(res.data?.especialidades || []);
+        // Especialidades
+        const espRes = await axios.get(`${apiBase}/tecnico/obtenerEspecialidades/${user?.id}`);
+        setEspecialidades(espRes.data?.especialidades || []);
+        // Tickets abiertos
+        const ticketRes = await axios.get(`${apiBase}/tecnico/ticketsAbiertos/${user?.id}`);
+        setTicketsAbiertos(ticketRes.data?.count || 0);
+        // Info adicional (teléfono, fecha ingreso)
+        const infoRes = await axios.get(`${apiBase}/tecnico/${user?.id}`);
+        setTelefono(infoRes.data?.telefono || '');
+        setFechaIngreso(infoRes.data?.fecha_ingreso || '');
       } catch (error) {
-        console.warn('❌ Error cargando especialidades:', error?.message);
         setEspecialidades([]);
+        setTicketsAbiertos(0);
+        setTelefono('');
+        setFechaIngreso('');
       } finally {
         setLoading(false);
       }
     };
-
     if (user?.id) {
-      loadEspecialidades();
+      loadInfo();
     }
   }, [user?.id]);
 
@@ -77,97 +87,77 @@ export default function DetallePerfilTecnico() {
     <Container maxWidth="md" sx={{ py: 4 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" sx={{ flexGrow: 1 }}>
-          {t('header.myProfile') || 'Mi Perfil'}
+        <Typography variant="h4" sx={{ flexGrow: 1, fontWeight: 700 }}>
+          {t('profile.panelTitle', 'Información profesional del técnico')}
         </Typography>
       </Box>
 
-      {/* Información Personal */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          {t('profile.personalInfo')}
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-        
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6}>
-            <Box>
-              <Typography color="textSecondary" variant="body2">
-                {t('profile.name')}
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.name || 'N/A'}
-              </Typography>
+      {/* Card principal */}
+      <Paper elevation={4} sx={{ p: 4, mb: 4, borderRadius: 4 }}>
+        <Grid container spacing={3} alignItems="center">
+          <Grid item xs={12} md={3}>
+            {/* Avatar genérico */}
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Box sx={{ width: 90, height: 90, borderRadius: '50%', bgcolor: 'primary.light', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, color: 'white', fontWeight: 700 }}>
+                {user?.name?.charAt(0) || 'T'}
+              </Box>
             </Box>
           </Grid>
-          
-          <Grid item xs={12} sm={6}>
-            <Box>
-              <Typography color="textSecondary" variant="body2">
-                {t('profile.email')}
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.email || 'N/A'}
-              </Typography>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <Box>
-              <Typography color="textSecondary" variant="body2">
-                {t('profile.userId')}
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.id || 'N/A'}
-              </Typography>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} sm={6}>
-            <Box>
-              <Typography color="textSecondary" variant="body2">
-                {t('profile.role')}
-              </Typography>
-              <Typography variant="body1" sx={{ fontWeight: 500 }}>
-                {user?.rol || 'N/A'}
-              </Typography>
+          <Grid item xs={12} md={9}>
+            <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
+              {user?.name || 'N/A'}
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+              {user?.email || 'N/A'}
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mb: 2 }}>
+              <Chip label={t('profile.role') + ': ' + (user?.rol || 'N/A')} color="primary" />
+              <Chip label={t('profile.userId') + ': ' + (user?.id || 'N/A')} color="default" />
+              {telefono && <Chip label={t('profile.phone') + ': ' + telefono} color="info" />}
+              {fechaIngreso && <Chip label={t('profile.entryDate') + ': ' + fechaIngreso} color="success" />}
+              <Chip
+                label={ticketsAbiertos === 0
+                  ? t('profile.noOpenTickets')
+                  : t('profile.openTickets', { count: ticketsAbiertos })}
+                color={ticketsAbiertos === 0 ? 'success' : 'warning'}
+                sx={{ fontWeight: 700, fontSize: 16, px: 2, py: 1 }}
+              />
             </Box>
           </Grid>
         </Grid>
-
-        {/* Botones */}
-        <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<EditIcon />}
-            onClick={() => navigate(`/editar-tecnico/${user?.id}`)}
-          >
-            {t('profile.update')}
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            startIcon={<ArrowBackIcon />}
-            onClick={() => navigate('/')}
-          >
-            {t('profile.goBack')}
-          </Button>
-        </Box>
       </Paper>
 
+      {/* Botones fuera del cuadro principal */}
+      <Box sx={{ display: 'flex', gap: 2, mb: 3, justifyContent: 'flex-end' }}>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<EditIcon />}
+          onClick={() => navigate(`/editar-tecnico/${user?.id}`)}
+        >
+          {t('profile.update')}
+        </Button>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => navigate('/')}
+        >
+          {t('profile.goBack')}
+        </Button>
+      </Box>
+
       {/* Especialidades */}
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
+      <Paper elevation={2} sx={{ p: 3, mb: 3, borderRadius: 3 }}>
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 700 }}>
           {t('profile.specialties')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
-        
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
             <CircularProgress size={30} />
           </Box>
-        ) : especialidades.length > 0 ? (
+        ) : Array.isArray(especialidades) && especialidades.length > 0 ? (
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {especialidades.map((esp, idx) => (
               <Chip
@@ -175,6 +165,7 @@ export default function DetallePerfilTecnico() {
                 label={esp.nombre || esp}
                 color="primary"
                 variant="outlined"
+                sx={{ fontWeight: 700, fontSize: 16, px: 2, py: 1 }}
               />
             ))}
           </Box>

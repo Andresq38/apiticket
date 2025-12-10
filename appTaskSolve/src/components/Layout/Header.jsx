@@ -241,7 +241,7 @@ const Header = () => {
           </Button>
 
           {/* TICKETS - dropdown - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
+          {normalizedRole === 'administrador' && (
             <Box>
               <Button
                 variant="text"
@@ -263,7 +263,7 @@ const Header = () => {
           )}
 
           {/* DASHBOARD - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
+          {normalizedRole === 'administrador' && (
             <Button
               variant="text"
               color="inherit"
@@ -275,7 +275,7 @@ const Header = () => {
           )}
 
           {/* TÉCNICOS - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
+          {normalizedRole === 'administrador' && (
             <Button
               variant="text"
               color="inherit"
@@ -287,7 +287,7 @@ const Header = () => {
           )}
 
           {/* CATEGORÍAS - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
+          {normalizedRole === 'administrador' && (
             <Button
               variant="text"
               color="inherit"
@@ -299,7 +299,7 @@ const Header = () => {
           )}
 
           {/* MANTENIMIENTOS - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
+          {normalizedRole === 'administrador' && (
             <Button
               variant="text"
               color="inherit"
@@ -331,6 +331,18 @@ const Header = () => {
               sx={getButtonStyles(`/incidentes-pendientes`)}
             >
               {t('header.pendingTab')}
+            </Button>
+          )}
+
+          {/* MIS TICKETS - solo visible para cliente */}
+          {normalizedRole === 'cliente' && (
+            <Button
+              variant="text"
+              color="inherit"
+              onClick={() => navigate('/cliente')}
+              sx={getButtonStyles('/cliente')}
+            >
+              {t('cliente.myTickets') || 'Mis Tickets'}
             </Button>
           )}
         </Box>

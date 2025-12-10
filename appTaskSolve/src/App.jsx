@@ -36,6 +36,7 @@ const MantenimientosHome = lazy(() => import('./components/Mantenimientos/Manten
 const MantenimientosCategorias = lazy(() => import('./components/Mantenimientos/MantenimientosCategorias'));
 const NotificacionesPage = lazy(() => import('./components/common/NotificacionesPage'));
 const SlaMonitor = lazy(() => import('./components/SLA/SlaMonitor'));
+const ClienteHub = lazy(() => import('./components/Cliente/ClienteHub'));
 
 export default function App() {
     // Limpiar sesión y localStorage al iniciar la app para mostrar siempre el login
@@ -75,6 +76,13 @@ export default function App() {
               <Route path="/tickets/tecnico" element={<ProtectedRoute><TicketsPorTecnico /></ProtectedRoute>} />
               <Route path="/tickets/:id" element={<ProtectedRoute><DetalleTicket /></ProtectedRoute>} />
               <Route path="/tickets/editar/:id" element={<ProtectedRoute><EditTicket /></ProtectedRoute>} />
+              <Route path="/cliente/*" element={
+                <ProtectedRoute>
+                  <RoleProtectedRoute allowedRoles={['Cliente']}>
+                    <ClienteHub />
+                  </RoleProtectedRoute>
+                </ProtectedRoute>
+              } />
               <Route path="/tecnicos/*" element={
                 <ProtectedRoute>
                   <RoleProtectedRoute allowedRoles={['Administrador']}>

@@ -216,7 +216,33 @@ class Historial_EstadoModel
                      JOIN estado e ON he.id_estado = e.id_estado
                      GROUP BY e.id_estado, e.nombre
                      ORDER BY total_cambios DESC";
-            
+            return $this->enlace->ExecuteSQL($vSql);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    /**
+     * Obtener estadísticas mensuales de tickets resueltos y no resueltos
+     */
+    public function getEstadisticasMensuales()
+    {
+        try {
+            $vSql = "SELECT 
+                        MONTH(fecha_creacion) AS mes,
+                        YEAR(fecha_creacion) AS anio,
+                        SUM(CASE WHEN estado_final = 'Resuelto' OR estado_final = 'Cerrado' THEN 1 ELSE 0 END) AS resueltos,
+                        SUM(CASE WHEN estado_final != 'Resuelto' AND estado_final != 'Cerrado' THEN 1 ELSE 0 END) AS sin_resolver
+                    FROM (
+                        SELECT t.id_ticket, t.fecha_creacion,
+                            (SELECT e.nombre FROM historial_estados he
+                                JOIN estado e ON he.id_estado = e.id_estado
+                                WHERE he.id_ticket = t.id_ticket
+                                ORDER BY he.fecha_cambio DESC LIMIT 1) AS estado_final
+                        FROM ticket t
+                    ) sub
+                    GROUP BY anio, mes
+                    ORDER BY anio, mes";
             return $this->enlace->ExecuteSQL($vSql);
         } catch (Exception $e) {
             handleException($e);

@@ -571,6 +571,35 @@
         "update": "Update",
         "goBack": "Go Back",
         "specialties": "Specialties",
-        "noSpecialties": "No specialties assigned"
+        "noSpecialties": "No specialties assigned",
+        "noOpenTickets": "No open tickets",
+        "openTickets": "{{count}} open ticket{{count > 1 ? 's' : ''}}",
+        "panelTitle": "Professional information of the technician"
+    }
+    ,
+    "pendingIncidents": {
+        "title": "Pending Incidents",
+        "searchPlaceholder": "Search by ID, title or status...",
+        "noPending": "No pending incidents"
+    },
+    "cliente": {
+        "myTickets": "My Tickets",
+        "newTicket": "New Ticket",
+        "accessDenied": "Access denied. Only clients can access this module."
+    },
+    "misTickets": {
+        "title": "My Tickets",
+        "subtitle": "Here you can view and manage all your tickets",
+        "noTickets": "You have no tickets created yet",
+        "userNotFound": "User not found",
+        "loadError": "Error loading tickets",
+        "noDescription": "No description",
+        "viewButton": "View",
+        "viewDetailButton": "View details",
+        "deleteButton": "Delete",
+        "confirmDelete": "Delete ticket?",
+        "confirmDeleteMessage": "This action cannot be undone.",
+        "deleteError": "Could not delete the ticket",
+        "refresh": "Refresh"
     }
 }

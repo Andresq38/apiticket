@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 import {
   Box,
   Button,
@@ -36,9 +37,10 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { getApiOrigin } from '../../utils/apiBase';
 import { formatDate } from '../../utils/format';
 
-export default function CreateTicket() {
+export default function CreateTicket({ isFromHub = false }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const apiBase = useMemo(() => `${getApiOrigin()}/apiticket`, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -86,9 +88,9 @@ export default function CreateTicket() {
       ? t('createTicketForm.longDescription') 
       : '',
     id_etiqueta: !form.id_etiqueta ? t('createTicketForm.selectTag') : '',
-    id_usuario: !form.id_usuario ? t('createTicketForm.selectUser') : '',
+    id_usuario: !isFromHub && !form.id_usuario ? t('createTicketForm.selectUser') : '',
   };
-  const isValid = !errors.titulo && !errors.descripcion && !errors.id_etiqueta && !errors.id_usuario;
+  const isValid = !errors.titulo && !errors.descripcion && !errors.id_etiqueta && !errors.id_usuario && (isFromHub ? !!usuarioSeleccionado : !!form.id_usuario);
 
   const prioridadColor = (p) => {
     switch (p) {
@@ -121,6 +123,16 @@ export default function CreateTicket() {
         setClienteRolId(assumedClienteId);
         const filtrados = rawUsuarios.filter(u => String(u.id_rol) === String(assumedClienteId));
         setUsuarios(filtrados);
+        
+        // Si viene desde el hub de cliente, pre-seleccionar al usuario actual
+        if (isFromHub && user?.id) {
+          const currentUser = filtrados.find(u => String(u.id_usuario) === String(user.id));
+          if (currentUser) {
+            setUsuarioSeleccionado(currentUser);
+            // Asignar directamente el id_usuario al form
+            setForm(f => ({ ...f, id_usuario: currentUser.id_usuario }));
+          }
+        }
       } catch (e) {
         if (e.name !== 'AbortError' && e.code !== 'ERR_CANCELED') {
           setError(e.response?.data?.error || e.message || 'Error al cargar datos iniciales');
@@ -129,7 +141,7 @@ export default function CreateTicket() {
     }
     load();
     return () => controller.abort();
-  }, [apiBase]);
+  }, [apiBase, isFromHub, user]);
 
   // Cargar información del usuario cuando se selecciona
   useEffect(() => {
@@ -140,11 +152,12 @@ export default function CreateTicket() {
         correo: usuarioSeleccionado.correo
       });
       setForm(f => ({ ...f, id_usuario: usuarioSeleccionado.id_usuario }));
-    } else {
+    } else if (!isFromHub) {
+      // Solo limpiar si no viene del hub
       setUsuarioInfo(null);
       setForm(f => ({ ...f, id_usuario: '' }));
     }
-  }, [usuarioSeleccionado]);
+  }, [usuarioSeleccionado, isFromHub]);
 
   // Al elegir etiqueta, obtenemos la categoría asociada para mostrarla (optimizado vía endpoint directo)
   useEffect(() => {
@@ -243,6 +256,11 @@ export default function CreateTicket() {
       setSuccess(successMessage);
       setSnackbar({ open: true, message: successMessage, severity: 'success' });
       setShowSuccessOverlay(true);
+      
+      // Disparar evento para notificar a otros componentes que se creó un ticket
+      if (isFromHub) {
+        window.dispatchEvent(new CustomEvent('ticketCreated', { detail: { ticketId: idTicket } }));
+      }
     } catch (e) {
       const msg = e.response?.data?.message || e.response?.data?.error || e.message || 'Error al crear el ticket';
       setError(msg);
@@ -263,7 +281,7 @@ export default function CreateTicket() {
             {t('ticketForm.createSubtitle')}
           </Typography>
         </Box>
-  <Button variant="text" onClick={() => navigate('/mantenimientos')} startIcon={<ArrowBackIcon />}>{t('ticketForm.goBack')}</Button>
+  <Button variant="text" onClick={() => navigate(isFromHub ? '/cliente' : '/mantenimientos')} startIcon={<ArrowBackIcon />}>{t('ticketForm.goBack')}</Button>
       </Box>
 
       {/* Formulario principal */}
@@ -457,6 +475,7 @@ export default function CreateTicket() {
               />
             </Grid>
 
+            {!isFromHub && (
             <Grid item xs={12}>
               <Autocomplete
                 options={usuarios}
@@ -495,6 +514,7 @@ export default function CreateTicket() {
                 noOptionsText={clienteRolId ? t('ticketForm.noUsersAvailable') : t('ticketForm.loadingRoles')}
               />
             </Grid>
+            )}
 
             {usuarioInfo && (
               <>
@@ -619,7 +639,11 @@ export default function CreateTicket() {
         }}
         onClose={() => setShowSuccessOverlay(false)}
         subtitle={success || undefined}
-        actions={[
+        actions={isFromHub ? [
+          { label: 'Crear otro', onClick: () => { setShowSuccessOverlay(false); setForm({ titulo:'', descripcion:'', prioridad:'Media', id_usuario:'', id_etiqueta:'' }); }, variant: 'contained', color: 'success' },
+          { label: 'Ver detalle', onClick: () => { if (createdId) navigate(`/tickets/${createdId}`); }, variant: 'outlined', color: 'success' },
+          { label: 'Ir a mis tickets', onClick: () => { navigate('/cliente'); }, variant: 'outlined', color: 'success' }
+        ] : [
           { label: 'Crear otro', onClick: () => { setShowSuccessOverlay(false); setForm({ titulo:'', descripcion:'', prioridad:'Media', id_usuario:'', id_etiqueta:'' }); setUsuarioSeleccionado(null); }, variant: 'contained', color: 'success' },
           { label: 'Ver detalle', onClick: () => { if (createdId) navigate(`/tickets/${createdId}`); }, variant: 'outlined', color: 'success' },
           { label: 'Ir al listado', onClick: () => { navigate('/'); }, variant: 'outlined', color: 'success' }

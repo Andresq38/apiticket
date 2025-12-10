@@ -79,6 +79,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [kpiTrends, setKpiTrends] = useState({});
+  const [monthlyData, setMonthlyData] = useState([]);
   const navigate = useNavigate();
 
   const getApiBase = () => getApiOrigin();
@@ -219,6 +220,21 @@ const Dashboard = () => {
       }));
       setDistribucion(distData);
 
+      // Obtener datos mensuales reales del backend
+      try {
+        const estadisticasMensualesRes = await axios.get(`${apiBase}/apiticket/historial_estado/estadisticas_mensuales`);
+        const estadisticasMensuales = Array.isArray(estadisticasMensualesRes.data) ? estadisticasMensualesRes.data : (estadisticasMensualesRes.data?.data || []);
+        // Mapear meses a nombres abreviados
+        const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        const datosMensuales = estadisticasMensuales.map(item => ({
+          month: meses[(item.mes || 1) - 1],
+          Resueltos: item.resueltos || 0,
+          'Sin Resolver': item.sin_resolver || 0
+        }));
+        setMonthlyData(datosMensuales);
+      } catch (err) {
+        setMonthlyData([]);
+      }
       setKpiTrends(trendsData);
       setLoading(false);
     } catch (err) {
@@ -284,21 +300,8 @@ const Dashboard = () => {
   });
 
   // Datos para gráfico de líneas de tendencia mensual (basados en datos reales del sistema)
-  // Nota: Estos valores deberían calcularse desde la base de datos agrupando por mes
-  const monthlyData = [
-    { month: 'Ene', Resueltos: 29, 'Sin Resolver': 27 },
-    { month: 'Feb', Resueltos: 20, 'Sin Resolver': 17 },
-    { month: 'Mar', Resueltos: 18, 'Sin Resolver': 19 },
-    { month: 'Abr', Resueltos: 18, 'Sin Resolver': 16 },
-    { month: 'May', Resueltos: 13, 'Sin Resolver': 9 },
-    { month: 'Jun', Resueltos: 14, 'Sin Resolver': 9 },
-    { month: 'Jul', Resueltos: 15, 'Sin Resolver': 8 },
-    { month: 'Ago', Resueltos: 18, 'Sin Resolver': 8 },
-    { month: 'Sep', Resueltos: 14, 'Sin Resolver': 10 },
-    { month: 'Oct', Resueltos: 17, 'Sin Resolver': 11 },
-    { month: 'Nov', Resueltos: 16, 'Sin Resolver': 11 },
-    { month: 'Dic', Resueltos: 19, 'Sin Resolver': 5 }
-  ];
+  // Datos para gráfico de líneas de tendencia mensual (reales desde backend)
+  // monthlyData ahora se obtiene del backend y se actualiza dinámicamente
 
   return (
     <Box sx={{ 
@@ -991,119 +994,6 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        {/* SECCIÓN: TENDENCIA ANUAL - MEJORADO */}
-        <Card sx={{ 
-          bgcolor: 'white',
-          borderRadius: 3,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-          border: '2px solid',
-          borderColor: 'success.main',
-          mb: 4,
-          overflow: 'hidden'
-        }}>
-          <Box sx={{ 
-            p: 3, 
-            background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <Box sx={{
-                bgcolor: 'rgba(255,255,255,0.25)',
-                borderRadius: '50%',
-                p: 1.5,
-                display: 'flex',
-                border: '2px solid rgba(255,255,255,0.4)'
-              }}>
-                <TrendingUpIcon sx={{ fontSize: 28, color: 'white' }} />
-              </Box>
-              <Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: 'white', fontSize: '1.25rem' }}>
-                  {t('dashboard.trends.title')}
-                </Typography>
-                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.95)', mt: 0.3 }}>
-                  {t('dashboard.trends.subtitle')}
-                </Typography>
-              </Box>
-            </Box>
-            <Chip 
-              label={`${new Date().getFullYear()}`}
-              sx={{ 
-                bgcolor: 'white',
-                color: 'success.dark',
-                fontWeight: 800,
-                fontSize: '0.95rem',
-                height: 36,
-                px: 2,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-              }} 
-            />
-          </Box>
-          <CardContent sx={{ p: 3, bgcolor: '#fafafa' }}>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 10 }}>
-                <defs>
-                  <linearGradient id="colorResueltos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2e7d32" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#2e7d32" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorSinResolver" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ed6c02" stopOpacity={0.1}/>
-                    <stop offset="95%" stopColor="#ed6c02" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" vertical={false} />
-                <XAxis 
-                  dataKey="month" 
-                  tick={{ fontSize: 13, fill: '#64748b', fontWeight: 600 }} 
-                  stroke="#cbd5e1"
-                  tickLine={false}
-                />
-                <YAxis 
-                  tick={{ fontSize: 13, fill: '#64748b', fontWeight: 600 }} 
-                  stroke="#cbd5e1"
-                  tickLine={false}
-                />
-                <RechartsTooltip 
-                  contentStyle={{ 
-                    borderRadius: 12, 
-                    border: '2px solid #e0e0e0',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-                    padding: '12px 16px',
-                    fontWeight: 600
-                  }}
-                />
-                <Legend 
-                  iconType="circle" 
-                  wrapperStyle={{ 
-                    fontSize: '14px',
-                    fontWeight: 600,
-                    paddingTop: '20px'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="Resueltos" 
-                  stroke="#2e7d32" 
-                  strokeWidth={3}
-                  dot={{ fill: '#2e7d32', r: 5, strokeWidth: 2, stroke: 'white' }}
-                  activeDot={{ r: 7, strokeWidth: 3 }}
-                  fill="url(#colorResueltos)"
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="Sin Resolver" 
-                  stroke="#ed6c02" 
-                  strokeWidth={3}
-                  dot={{ fill: '#ed6c02', r: 5, strokeWidth: 2, stroke: 'white' }}
-                  activeDot={{ r: 7, strokeWidth: 3 }}
-                  fill="url(#colorSinResolver)"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
 
         {/* SECCIÓN: EQUIPO TÉCNICO - ESTILO PROFESIONAL MEJORADO */}
         <Box sx={{ mb: 4 }}>

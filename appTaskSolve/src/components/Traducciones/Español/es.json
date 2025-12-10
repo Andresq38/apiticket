@@ -573,6 +573,35 @@
         "update": "Actualizar",
         "goBack": "Volver",
         "specialties": "Especialidades",
-        "noSpecialties": "No hay especialidades asignadas"
+        "noSpecialties": "No hay especialidades asignadas",
+        "noOpenTickets": "Sin tiquetes abiertos",
+        "openTickets": "{{count}} tiquete{{count > 1 ? 's' : ''}} abierto{{count > 1 ? 's' : ''}}",
+        "panelTitle": "Información profesional del técnico"
+    }
+    ,
+    "pendingIncidents": {
+        "title": "Incidentes Pendientes",
+        "searchPlaceholder": "Buscar por ID, título o estado...",
+        "noPending": "No hay incidentes pendientes"
+    },
+    "cliente": {
+        "myTickets": "Mis Tickets",
+        "newTicket": "Nuevo Ticket",
+        "accessDenied": "Acceso denegado. Solo clientes pueden acceder a este módulo."
+    },
+    "misTickets": {
+        "title": "Mis Tickets",
+        "subtitle": "Aquí puedes ver y gestionar todos tus tickets",
+        "noTickets": "No tienes tickets creados aún",
+        "userNotFound": "Usuario no encontrado",
+        "loadError": "Error al cargar tickets",
+        "noDescription": "Sin descripción",
+        "viewButton": "Ver",
+        "viewDetailButton": "Ver detalle",
+        "deleteButton": "Eliminar",
+        "confirmDelete": "¿Eliminar ticket?",
+        "confirmDeleteMessage": "Esta acción no se puede deshacer.",
+        "deleteError": "No se pudo eliminar el ticket",
+        "refresh": "Refrescar"
     }
 }
