@@ -330,7 +330,7 @@ const Header = () => {
               onClick={() => navigate(`/incidentes-pendientes`)}
               sx={getButtonStyles(`/incidentes-pendientes`)}
             >
-              Pendientes
+              {t('header.pendingTab')}
             </Button>
           )}
         </Box>
@@ -365,7 +365,7 @@ const Header = () => {
               py: 1,
             }}
           >
-            Cerrar sesión
+            {t('header.logout')}
           </Button>
         )}
         <Menu

@@ -158,7 +158,7 @@ export default function CreateTecnico() {
         } else {
           setSnackbar({
             open: true,
-            message: 'Respuesta inválida del servidor',
+            message: t('technicianForm.invalidServerResponse'),
             severity: 'warning',
           });
         }
@@ -187,16 +187,16 @@ export default function CreateTecnico() {
             reset({ id_rol: 0, id_usuario: '', nombre: '', correo: '', password: '', confirm_password: '', disponibilidad: true, especialidades: [], carga_trabajo: 0 });
             window.scrollTo(0, 0);
           } else {
-            setSnackbar({ open: true, message: 'Respuesta inválida del servidor (técnico)', severity: 'warning' });
+            setSnackbar({ open: true, message: t('technicianForm.invalidServerResponseTech'), severity: 'warning' });
           }
         } catch (errTec) {
-          setSnackbar({ open: true, message: errTec?.response?.data?.message || errTec?.message || 'Error al crear técnico', severity: 'error' });
+          setSnackbar({ open: true, message: errTec?.response?.data?.message || errTec?.message || t('technicianForm.errorCreateTech'), severity: 'error' });
         }
       }
     } catch (err) {
       setSnackbar({
         open: true,
-        message: err?.response?.data?.message || err?.message || 'Error al guardar',
+        message: err?.response?.data?.message || err?.message || t('technicianForm.errorSave'),
         severity: 'error',
       });
     } finally {
@@ -571,7 +571,7 @@ export default function CreateTecnico() {
               {t('technicianForm.save')}
             </Button>
             <Button variant="outlined" onClick={() => navigate(-1)} sx={{ m: 0 }}>
-              {t('technicianForm.reviewRequired')}
+              {t('technicianForm.goBackButton')}
             </Button>
           </Box>
         </form>
@@ -600,10 +600,10 @@ export default function CreateTecnico() {
         gender="masculine"
         onClose={() => setSuccessOpen(false)}
           actions={savedRol === 2 ? [
-            { label: 'Crear otro', onClick: () => setSuccessOpen(false), variant: 'contained', color: 'success' },
-            { label: 'Ir al listado de técnicos', onClick: () => { setSuccessOpen(false); navigate('/tecnicos'); }, variant: 'outlined', color: 'success' }
+            { label: t('technicianForm.createAnother'), onClick: () => setSuccessOpen(false), variant: 'contained', color: 'success' },
+            { label: t('technicianForm.goToList'), onClick: () => { setSuccessOpen(false); navigate('/tecnicos'); }, variant: 'outlined', color: 'success' }
           ] : [
-            { label: 'Cerrar', onClick: () => setSuccessOpen(false), variant: 'contained', color: 'success' }
+            { label: t('technicianForm.close'), onClick: () => setSuccessOpen(false), variant: 'contained', color: 'success' }
           ]}
       />
     </>

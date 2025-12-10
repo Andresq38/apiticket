@@ -1,12 +1,14 @@
 {
     "header": {
         "home": "Inicio",
+        "logout": "Cerrar sesión",
         "tickets": "Tiquetes",
         "dashboard": "Panel Ejecutivo",
         "technicians": "Equipo Técnico",
         "categories": "Catálogo",
         "maintenance": "Mantenimientos",
         "myProfile": "Mi Perfil",
+        "pendingTab": "Pendientes",
         "ticketMenu": {
             "administrator": "Administrador",
             "client": "Cliente",
@@ -462,6 +464,15 @@
         "formIncomplete": "Formulario incompleto. Por favor revise los campos requeridos marcados con * y corrija los errores."
     },
     "technicianForm": {
+            "invalidServerResponse": "Respuesta inválida del servidor",
+            "invalidServerResponseTech": "Respuesta inválida del servidor (técnico)",
+            "errorCreateTech": "Error al crear técnico",
+            "errorSave": "Error al guardar",
+            "goBackButton": "Volver",
+            "createAnother": "Crear otro",
+            "goToList": "Ir al listado de técnicos",
+            "close": "Cerrar"
+        ,
         "createTitle": "Crear Nuevo Usuario",
         "createSubtitle": "Complete el formulario para registrar un nuevo usuario o técnico",
         "editTitle": "Editar Técnico",
@@ -550,5 +561,18 @@
         "technician": "Técnico: {{name}}",
         "notFound": "Técnico no encontrado",
         "errorLoading": "No se pudo cargar la información del técnico"
+    }
+    ,
+    "profile": {
+        "userNotFound": "Usuario no encontrado",
+        "personalInfo": "Información Personal",
+        "name": "Nombre",
+        "email": "Correo",
+        "userId": "ID de Usuario",
+        "role": "Rol",
+        "update": "Actualizar",
+        "goBack": "Volver",
+        "specialties": "Especialidades",
+        "noSpecialties": "No hay especialidades asignadas"
     }
 }

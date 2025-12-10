@@ -68,7 +68,7 @@ export default function DetallePerfilTecnico() {
   if (!user) {
     return (
       <Container maxWidth="md" sx={{ py: 4 }}>
-        <Alert severity="error">Usuario no encontrado</Alert>
+        <Alert severity="error">{t('profile.userNotFound')}</Alert>
       </Container>
     );
   }
@@ -85,7 +85,7 @@ export default function DetallePerfilTecnico() {
       {/* Información Personal */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
-          Información Personal
+          {t('profile.personalInfo')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
         
@@ -93,7 +93,7 @@ export default function DetallePerfilTecnico() {
           <Grid item xs={12} sm={6}>
             <Box>
               <Typography color="textSecondary" variant="body2">
-                Nombre
+                {t('profile.name')}
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {user?.name || 'N/A'}
@@ -104,7 +104,7 @@ export default function DetallePerfilTecnico() {
           <Grid item xs={12} sm={6}>
             <Box>
               <Typography color="textSecondary" variant="body2">
-                Correo
+                {t('profile.email')}
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {user?.email || 'N/A'}
@@ -115,7 +115,7 @@ export default function DetallePerfilTecnico() {
           <Grid item xs={12} sm={6}>
             <Box>
               <Typography color="textSecondary" variant="body2">
-                ID de Usuario
+                {t('profile.userId')}
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {user?.id || 'N/A'}
@@ -126,7 +126,7 @@ export default function DetallePerfilTecnico() {
           <Grid item xs={12} sm={6}>
             <Box>
               <Typography color="textSecondary" variant="body2">
-                Rol
+                {t('profile.role')}
               </Typography>
               <Typography variant="body1" sx={{ fontWeight: 500 }}>
                 {user?.rol || 'N/A'}
@@ -143,7 +143,7 @@ export default function DetallePerfilTecnico() {
             startIcon={<EditIcon />}
             onClick={() => navigate(`/editar-tecnico/${user?.id}`)}
           >
-            Actualizar
+            {t('profile.update')}
           </Button>
           <Button
             variant="outlined"
@@ -151,7 +151,7 @@ export default function DetallePerfilTecnico() {
             startIcon={<ArrowBackIcon />}
             onClick={() => navigate('/')}
           >
-            Volver
+            {t('profile.goBack')}
           </Button>
         </Box>
       </Paper>
@@ -159,7 +159,7 @@ export default function DetallePerfilTecnico() {
       {/* Especialidades */}
       <Paper sx={{ p: 3 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
-          Especialidades
+          {t('profile.specialties')}
         </Typography>
         <Divider sx={{ mb: 2 }} />
         
@@ -180,7 +180,7 @@ export default function DetallePerfilTecnico() {
           </Box>
         ) : (
           <Typography color="textSecondary" variant="body2">
-            No hay especialidades asignadas
+            {t('profile.noSpecialties')}
           </Typography>
         )}
       </Paper>

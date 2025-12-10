@@ -38,6 +38,11 @@ const NotificacionesPage = lazy(() => import('./components/common/Notificaciones
 const SlaMonitor = lazy(() => import('./components/SLA/SlaMonitor'));
 
 export default function App() {
+    // Limpiar sesión y localStorage al iniciar la app para mostrar siempre el login
+    React.useEffect(() => {
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('authUser');
+    }, []);
   return (
     <AuthProvider>
       <Router>

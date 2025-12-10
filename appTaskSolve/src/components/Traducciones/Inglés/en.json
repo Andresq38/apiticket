@@ -1,12 +1,14 @@
 {
     "header": {
         "home": "Home",
+        "logout": "Logout",
         "tickets": "Tickets",
         "dashboard": "Executive Dashboard",
         "technicians": "Technical Team",
         "categories": "Catalog",
         "maintenance": "Maintenance",
         "myProfile": "My Profile",
+        "pendingTab": "Pending",
         "ticketMenu": {
             "administrator": "Administrator",
             "client": "Client",
@@ -460,6 +462,15 @@
         "formIncomplete": "Incomplete form. Please review required fields marked with * and fix errors."
     },
     "technicianForm": {
+            "invalidServerResponse": "Invalid server response",
+            "invalidServerResponseTech": "Invalid server response (technician)",
+            "errorCreateTech": "Error creating technician",
+            "errorSave": "Error saving",
+            "goBackButton": "Back",
+            "createAnother": "Create another",
+            "goToList": "Go to technicians list",
+            "close": "Close"
+        ,
         "createTitle": "Create New User",
         "createSubtitle": "Complete the form to register a new user or technician",
         "editTitle": "Edit Technician",
@@ -548,5 +559,18 @@
         "technician": "Technician: {{name}}",
         "notFound": "Technician not found",
         "errorLoading": "Could not load technician information"
+    }
+    ,
+    "profile": {
+        "userNotFound": "User not found",
+        "personalInfo": "Personal Information",
+        "name": "Name",
+        "email": "Email",
+        "userId": "User ID",
+        "role": "Role",
+        "update": "Update",
+        "goBack": "Go Back",
+        "specialties": "Specialties",
+        "noSpecialties": "No specialties assigned"
     }
 }
