@@ -103,4 +103,22 @@ class tecnico
             handleException($e);
         }
     }
+
+    /* Obtener especialidades de un técnico por id_usuario */
+    public function obtenerEspecialidades($idUsuario)
+    {
+        try {
+            $tecnico = new TecnicoModel();
+            $especialidades = $tecnico->getEspecialidades($idUsuario);
+            
+            $response = new Response();
+            $response->toJSON([
+                'success' => true,
+                'especialidades' => $especialidades
+            ]);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 }
+

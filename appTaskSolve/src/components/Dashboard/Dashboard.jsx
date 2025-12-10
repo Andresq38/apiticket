@@ -67,9 +67,11 @@ import {
   Line
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 
 const Dashboard = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const [tecnicos, setTecnicos] = useState([]);
@@ -89,8 +91,18 @@ const Dashboard = () => {
     try {
       const apiBase = getApiBase();
       
-      // Obtener todos los tickets para hacer estadísticas
-      const ticketsRes = await axios.get(`${apiBase}/apiticket/ticket`);
+      // Determinar si el usuario es técnico y tiene id_tecnico
+      const isTecnico = user?.rol?.toLowerCase() === 'tecnico' && user?.id_tecnico;
+      
+      // Obtener tickets según el rol
+      let ticketsRes;
+      if (isTecnico) {
+        // Técnico: solo tickets de su especialidad
+        ticketsRes = await axios.get(`${apiBase}/apiticket/ticket/getTicketByEspecialidadTecnico/${user.id_tecnico}`);
+      } else {
+        // Admin u otro rol: todos los tickets
+        ticketsRes = await axios.get(`${apiBase}/apiticket/ticket`);
+      }
       const ticketsData = Array.isArray(ticketsRes.data) ? ticketsRes.data : (ticketsRes.data?.data || []);
 
       // Obtener todas las categorías

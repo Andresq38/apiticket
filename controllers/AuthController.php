@@ -32,7 +32,12 @@ class Auth
             }
 
             $usuarioModel = new UsuarioModel();
-            $user = $usuarioModel->findByEmail($body->email);
+
+            // Normalizar email: sin espacios y en minúsculas
+            $email = strtolower(trim((string)$body->email));
+            $password = (string)($body->password ?? '');
+
+            $user = $usuarioModel->findByEmail($email);
             if (!$user) {
                 return $response->status(401)->toJSON(['error' => 'Credenciales inválidas']);
             }
@@ -44,12 +49,17 @@ class Auth
             $legacy = $user->legacy_password ?? '';
             $ok = false;
             if ($hash) {
-                $ok = password_verify($body->password, $hash);
+                $ok = password_verify($password, $hash);
             }
             if (!$ok && $legacy) {
                 // Compatibilidad con SHA2(…,256) de MySQL almacenado como hex
-                $sha = hash('sha256', (string)$body->password);
+                $sha = hash('sha256', $password);
                 $ok = (strcasecmp($sha, $legacy) === 0);
+
+                // Fallback extra: permitir contraseña en texto plano (por si algún usuario se creó sin hash)
+                if (!$ok) {
+                    $ok = hash_equals((string)$legacy, $password);
+                }
             }
             if (!$ok) {
                 return $response->status(401)->toJSON(['error' => 'Credenciales inválidas']);
@@ -57,6 +67,22 @@ class Auth
 
             // Actualizar último login (ignorar errores)
             try { $usuarioModel->actualizarUltimoLogin($user->id_usuario); } catch (\Throwable $e) {}
+
+            // Si es técnico, obtener id_tecnico
+            $idTecnico = null;
+            if (strtolower($user->rol ?? '') === 'tecnico') {
+                try {
+                    $tecnicoModel = new TecnicoModel();
+                    $sqlTecnico = "SELECT id_tecnico FROM tecnico WHERE id_usuario = ?";
+                    $enlace = new MySqlConnect();
+                    $resTecnico = $enlace->executePrepared($sqlTecnico, 's', [(string)$user->id_usuario]);
+                    if (!empty($resTecnico)) {
+                        $idTecnico = $resTecnico[0]->id_tecnico ?? null;
+                    }
+                } catch (\Throwable $e) {
+                    error_log("Error al obtener id_tecnico: " . $e->getMessage());
+                }
+            }
 
             // Iniciar sesión server-side
             if (session_status() !== PHP_SESSION_ACTIVE) session_start();
@@ -66,6 +92,7 @@ class Auth
                 'email' => $user->correo ?? null,
                 'rol' => $user->rol ?? null,
                 'name' => $user->nombre ?? null,
+                'id_tecnico' => $idTecnico,
             ];
 
             // Generar notificación de inicio de sesión
@@ -79,7 +106,8 @@ class Auth
 
             return $response->toJSON([
                 'success' => true,
-                'user' => $_SESSION['auth_user']
+                'user' => $_SESSION['auth_user'],
+                'token' => '' // Mantener compatibilidad con frontend
             ]);
         } catch (Exception $e) {
             handleException($e);

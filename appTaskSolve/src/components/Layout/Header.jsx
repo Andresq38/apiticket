@@ -22,6 +22,13 @@ const Header = () => {
   const [lang, setLang] = useState(i18n.language || 'en');
   const { user, logout } = useAuth();
 
+  // Normalizar rol (sin acentos) para comparaciones
+  const normalizedRole = (user?.rol || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '');
+
   // Obtener userId del contexto de autenticación o localStorage
   useEffect(() => {
     // Primero intentar del contexto de auth
@@ -233,65 +240,99 @@ const Header = () => {
             {t("header.home")}
           </Button>
 
-          {/* TICKETS - dropdown*/}
-          <Box>
+          {/* TICKETS - dropdown - solo visible para admin */}
+          {normalizedRole !== 'tecnico' && (
+            <Box>
+              <Button
+                variant="text"
+                color="inherit"
+                onClick={handleMenuClick}
+                endIcon={<ArrowDropDownIcon />}
+                sx={{
+                  textTransform: "uppercase",
+                  fontWeight: 700,
+                  fontSize: "1.25rem",
+                  letterSpacing: 0.3,
+                  px: 1,
+                  minWidth: "auto",
+                }}
+              >
+                {t("header.tickets")}
+              </Button>
+            </Box>
+          )}
+
+          {/* DASHBOARD - solo visible para admin */}
+          {normalizedRole !== 'tecnico' && (
             <Button
               variant="text"
               color="inherit"
-              onClick={handleMenuClick}
-              endIcon={<ArrowDropDownIcon />}
-              sx={{
-                textTransform: "uppercase",
-                fontWeight: 700,
-                fontSize: "1.25rem",
-                letterSpacing: 0.3,
-                px: 1,
-                minWidth: "auto",
-              }}
+              onClick={() => navigate("/dashboard")}
+              sx={getButtonStyles("/dashboard")}
             >
-              {t("header.tickets")}
+              {t("header.dashboard")}
             </Button>
-          </Box>
+          )}
 
-          {/* DASHBOARD */}
-          <Button
-            variant="text"
-            color="inherit"
-            onClick={() => navigate("/dashboard")}
-            sx={getButtonStyles("/dashboard")}
-          >
-            {t("header.dashboard")}
-          </Button>
+          {/* TÉCNICOS - solo visible para admin */}
+          {normalizedRole !== 'tecnico' && (
+            <Button
+              variant="text"
+              color="inherit"
+              onClick={() => navigate("/tecnicos")}
+              sx={getButtonStyles("/tecnicos")}
+            >
+              {t("header.technicians")}
+            </Button>
+          )}
 
-          {/* TÉCNICOS */}
-          <Button
-            variant="text"
-            color="inherit"
-            onClick={() => navigate("/tecnicos")}
-            sx={getButtonStyles("/tecnicos")}
-          >
-            {t("header.technicians")}
-          </Button>
+          {/* CATEGORÍAS - solo visible para admin */}
+          {normalizedRole !== 'tecnico' && (
+            <Button
+              variant="text"
+              color="inherit"
+              onClick={() => navigate("/categorias")}
+              sx={getButtonStyles("/categorias")}
+            >
+              {t("header.categories")}
+            </Button>
+          )}
 
-          {/* CATEGORÍAS */}
-          <Button
-            variant="text"
-            color="inherit"
-            onClick={() => navigate("/categorias")}
-            sx={getButtonStyles("/categorias")}
-          >
-            {t("header.categories")}
-          </Button>
+          {/* MANTENIMIENTOS - solo visible para admin */}
+          {normalizedRole !== 'tecnico' && (
+            <Button
+              variant="text"
+              color="inherit"
+              onClick={() => navigate("/mantenimientos")}
+              sx={getButtonStyles("/mantenimientos")}
+            >
+              {t("header.maintenance")}
+            </Button>
+          )}
 
-          {/* MANTENIMIENTOS */}
-          <Button
-            variant="text"
-            color="inherit"
-            onClick={() => navigate("/mantenimientos")}
-            sx={getButtonStyles("/mantenimientos")}
-          >
-            {t("header.maintenance")}
-          </Button>
+          {/* MI PERFIL - solo visible para técnico */}
+          {normalizedRole === 'tecnico' && (
+            <Button
+              variant="text"
+              color="inherit"
+              onClick={() => navigate(`/mi-perfil-tecnico`)}
+              sx={getButtonStyles(`/mi-perfil-tecnico`)}
+            >
+              {t("header.myProfile") || "Mi Perfil"}
+            </Button>
+          )}
+
+          {/* INCIDENTES PENDIENTES - solo visible para técnico */}
+          {normalizedRole === 'tecnico' && (
+            <Button
+              variant="text"
+              color="inherit"
+              onClick={() => navigate(`/incidentes-pendientes`)}
+              sx={getButtonStyles(`/incidentes-pendientes`)}
+            >
+              Pendientes
+            </Button>
+          )}
         </Box>
 
         {/* Spacer to push any future items to the right */}

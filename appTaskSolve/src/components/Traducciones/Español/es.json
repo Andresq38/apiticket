@@ -6,6 +6,7 @@
         "technicians": "Equipo Técnico",
         "categories": "Catálogo",
         "maintenance": "Mantenimientos",
+        "myProfile": "Mi Perfil",
         "ticketMenu": {
             "administrator": "Administrador",
             "client": "Cliente",

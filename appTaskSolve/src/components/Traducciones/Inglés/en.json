@@ -2,10 +2,11 @@
     "header": {
         "home": "Home",
         "tickets": "Tickets",
-        "dashboard": "Executive Panel",
+        "dashboard": "Executive Dashboard",
         "technicians": "Technical Team",
         "categories": "Catalog",
         "maintenance": "Maintenance",
+        "myProfile": "My Profile",
         "ticketMenu": {
             "administrator": "Administrator",
             "client": "Client",

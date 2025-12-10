@@ -751,5 +751,92 @@ class TicketModel
         }
     }
 
+    /* Obtener tickets ASIGNADOS a un técnico específico (todos los estados) */
+    public function getTicketsByTecnico($idUsuario)
+    {
+        try {
+            // Obtener id_tecnico del usuario
+            $sqlTecnico = "SELECT id_tecnico FROM tecnico WHERE id_usuario = ?";
+            $resultTecnico = $this->enlace->executePrepared($sqlTecnico, 's', [(string)$idUsuario]);
+            
+            if (empty($resultTecnico)) {
+                return [];
+            }
+            
+            $idTecnico = $resultTecnico[0]->id_tecnico;
+            
+            // Obtener todos los tickets asignados al técnico
+            $vSql = "SELECT 
+                        t.id_ticket,
+                        t.titulo,
+                        c.nombre AS categoria,
+                        e.nombre AS estado,
+                        COALESCE(et.nombre, '') AS etiqueta,
+                        COALESCE(es.nombre, '') AS especialidad,
+                        t.fecha_creacion,
+                        t.descripcion,
+                        t.prioridad,
+                        t.id_tecnico
+                    FROM 
+                        ticket t
+                    JOIN 
+                        categoria_ticket c ON t.id_categoria = c.id_categoria
+                    JOIN 
+                        estado e ON t.id_estado = e.id_estado
+                    LEFT JOIN
+                        etiqueta et ON et.id_etiqueta = t.id_etiqueta
+                    LEFT JOIN
+                        especialidad es ON es.id_especialidad = t.id_especialidad
+                    WHERE 
+                        t.id_tecnico = ?
+                    ORDER BY 
+                        t.id_ticket DESC";
+            
+            $vResultado = $this->enlace->executePrepared($vSql, 'i', [(int)$idTecnico]);
+            return $vResultado ?: [];
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    /* Obtener todos los tickets con estado Pendiente (sin técnico asignado aún) */
+    public function getTicketsPendientes()
+    {
+        try {
+            // Obtener todos los tickets con estado Pendiente
+            // Estos tickets aún no tienen técnico asignado (id_tecnico es NULL)
+            $vSql = "SELECT 
+                        t.id_ticket,
+                        t.titulo,
+                        c.nombre AS categoria,
+                        e.nombre AS estado,
+                        COALESCE(et.nombre, '') AS etiqueta,
+                        COALESCE(es.nombre, '') AS especialidad,
+                        t.fecha_creacion,
+                        t.descripcion,
+                        t.prioridad,
+                        t.id_tecnico
+                    FROM 
+                        ticket t
+                    JOIN 
+                        categoria_ticket c ON t.id_categoria = c.id_categoria
+                    JOIN 
+                        estado e ON t.id_estado = e.id_estado
+                    LEFT JOIN
+                        etiqueta et ON et.id_etiqueta = t.id_etiqueta
+                    LEFT JOIN
+                        especialidad es ON es.id_especialidad = t.id_especialidad
+                    WHERE 
+                        LOWER(e.nombre) = 'pendiente'
+                    ORDER BY 
+                        t.id_ticket DESC";
+            
+            $vResultado = $this->enlace->ExecuteSQL($vSql);
+            return $vResultado ?: [];
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 
 }
+

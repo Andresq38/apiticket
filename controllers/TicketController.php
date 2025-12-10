@@ -53,6 +53,56 @@ class ticket
         }
     }
 
+    /**
+     * Obtiene todos los tickets que coinciden con las especialidades del técnico
+     */
+    public function getTicketByEspecialidadTecnico($idTecnico)
+    {
+        try {
+            $response = new Response();
+            $ticket = new TicketModel();
+            
+            // Obtener especialidades del técnico
+            $enlace = new MySqlConnect();
+            $sqlEsp = "SELECT e.id_especialidad, e.nombre 
+                       FROM tecnico_especialidad te
+                       JOIN especialidad e ON e.id_especialidad = te.id_especialidad
+                       WHERE te.id_tecnico = ?";
+            $especialidades = $enlace->executePrepared($sqlEsp, 'i', [(int)$idTecnico]);
+            
+            if (empty($especialidades)) {
+                // Si no tiene especialidades, retornar vacío
+                return $response->toJSON([]);
+            }
+            
+            // Obtener IDs de especialidades
+            $idsEspecialidades = array_map(function($esp) {
+                return $esp->id_especialidad;
+            }, $especialidades);
+            
+            // Obtener todos los tickets
+            $todosLosTickets = $ticket->getTicketsCompletos();
+            
+            // Filtrar tickets que pertenecen a categorías relacionadas con las especialidades del técnico
+            // (asumimos que la categoría del ticket corresponde a la especialidad)
+            $ticketsFiltrados = array_filter($todosLosTickets, function($t) use ($especialidades) {
+                // Comparar nombre de categoría con nombres de especialidades
+                $categoriaTicket = strtolower(trim($t['Categoría'] ?? ''));
+                foreach ($especialidades as $esp) {
+                    $nombreEsp = strtolower(trim($esp->nombre ?? ''));
+                    if ($categoriaTicket === $nombreEsp) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            
+            $response->toJSON(array_values($ticketsFiltrados));
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
     public function getTicketCompletoById($idTicket)
     {
         try {
@@ -238,5 +288,40 @@ class ticket
             handleException($e);
         }
     }
+
+    /* Obtener tickets asignados a un técnico por id_usuario */
+    public function obtenerTicketsTecnico($idUsuario)
+    {
+        try {
+            $ticket = new TicketModel();
+            $tickets = $ticket->getTicketsByTecnico($idUsuario);
+            
+            $response = new Response();
+            $response->toJSON([
+                'success' => true,
+                'tickets' => $tickets
+            ]);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
+
+    /* Obtener todos los tickets con estado Pendiente */
+    public function obtenerTicketsPendientes()
+    {
+        try {
+            $ticket = new TicketModel();
+            $tickets = $ticket->getTicketsPendientes();
+            
+            $response = new Response();
+            $response->toJSON([
+                'success' => true,
+                'tickets' => $tickets
+            ]);
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
     
 }
+

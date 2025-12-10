@@ -33,12 +33,13 @@ import {
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import ErrorIcon from '@mui/icons-material/Error';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import SuccessOverlay from '../common/SuccessOverlay';
-import { getApiOrigin } from '../../utils/apiBase';
+import { getApiOrigin, getApiBaseWithPrefix } from '../../utils/apiBase';
 import FraseCarrusel from '../Dashboard/FraseCarrusel';
 
 // Datos simulados como fallback
@@ -46,6 +47,7 @@ const TICKET_DATA_HOME = [];
 
 const Home = () => {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [tickets, setTickets] = useState(TICKET_DATA_HOME);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -63,6 +65,7 @@ const Home = () => {
   const [deletedTicketInfo, setDeletedTicketInfo] = useState(null);
   // Detectar automáticamente la base del API o tomarla de variables de entorno
   const apiBase = getApiOrigin();
+  const apiBaseWithPrefix = getApiBaseWithPrefix();
   const theme = useTheme();
   const navigate = useNavigate(); // Hook para navegación
 
@@ -114,25 +117,38 @@ const Home = () => {
     setLoading(true);
     setError(null);
     try {
-      // 1) Intentar obtener tickets completos (incluye fecha_creacion y SLA detallado)
-      let res = await axios.get(`${apiBase}/apiticket/ticket/getTicketsCompletos`);
-      let data = res.data ?? [];
+      // Normalizar rol para determinar si es técnico
+      const normalizedRole = (user?.rol || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '');
 
-      if (!Array.isArray(data) || data.length === 0) {
-        // 2) Fallback al listado simple
-        res = await axios.get(`${apiBase}/apiticket/ticket`);
+      let res;
+      let data = [];
+
+      // Si es técnico, obtener solo sus tickets asignados
+      if (normalizedRole === 'tecnico' && user?.id) {
+        res = await axios.get(`${apiBaseWithPrefix}/ticket/obtenerTicketsTecnico/${user.id}`);
+        data = res.data?.tickets ?? [];
+      } else {
+        // Si no es técnico, obtener todos los tickets
+        res = await axios.get(`${apiBase}/apiticket/ticket/getTicketsCompletos`);
         data = res.data ?? [];
+
+        if (!Array.isArray(data) || data.length === 0) {
+          res = await axios.get(`${apiBase}/apiticket/ticket`);
+          data = res.data ?? [];
+        }
       }
 
       if (Array.isArray(data) && data.length > 0) {
         const mapped = data.map((t) => {
-          // Soportar ambos formatos: "completos" (propiedades directas y objetos anidados)
-          // y "simple" (alias de columnas)
           const id = t.id_ticket ?? t['Identificador del Ticket'];
           const titulo = t.titulo || t['Título'] || t['Categoría'] || '';
           const fecha = t.fecha_creacion || t['Fecha de creación'] || '';
           const estado = (t.estado && (t.estado.nombre || t.estado)) || t['Estado actual'] || '';
-          const sla = (t.sla && t.sla.tiempo_restante) || t['Tiempo restante SLA'] || t['Tiempo restante SLA (máx)'] || '';
+          const sla = (t.sla && t.sla.tiempo_restante) || t['Tiempo restante SLA'] || t['Tiempo restante SLA (máx)'] || t.sla || '';
 
           return {
             id_ticket: parseInt(id, 10),
@@ -181,7 +197,7 @@ const Home = () => {
 
   useEffect(() => {
     fetchTickets();
-  }, []);
+  }, [user]);
 
   // Filtros + ordenamiento + búsqueda
   const filtered = useMemo(() => {

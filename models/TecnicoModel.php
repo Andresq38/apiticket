@@ -306,4 +306,22 @@ class TecnicoModel
             handleException($e);
         }
     }
+
+    /* Obtener especialidades de un técnico por id_usuario */
+    public function getEspecialidades($idUsuario)
+    {
+        try {
+            $sqlEsp = "SELECT e.id_especialidad, e.nombre, e.descripcion
+                       FROM tecnico t
+                       JOIN tecnico_especialidad te ON t.id_tecnico = te.id_tecnico
+                       JOIN especialidad e ON e.id_especialidad = te.id_especialidad
+                       WHERE t.id_usuario = ?";
+            $especialidades = $this->enlace->executePrepared($sqlEsp, 's', [(string)$idUsuario]);
+            
+            return $especialidades ?: [];
+        } catch (Exception $e) {
+            handleException($e);
+        }
+    }
 }
+

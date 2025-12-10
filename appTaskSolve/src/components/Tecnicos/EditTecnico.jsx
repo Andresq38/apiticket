@@ -7,6 +7,7 @@ import {
   Box, Grid, Paper, Divider, Typography, FormControl, TextField, MenuItem, InputAdornment, Button, Snackbar, Alert, Autocomplete, CircularProgress, Breadcrumbs, Link, Checkbox, Chip,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 import SuccessOverlay from '../common/SuccessOverlay';
 import SaveIcon from '@mui/icons-material/Save';
 import PersonIcon from '@mui/icons-material/Person';
@@ -61,8 +62,20 @@ export default function EditTecnico() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
+  
+  // Verificar si el técnico está editando su propio perfil
+  const isTecnico = user?.rol?.toLowerCase() === 'tecnico';
+  const isOwnProfile = isTecnico && user?.id_tecnico && String(user.id_tecnico) === String(id);
+  
+  // Si es técnico y NO es su perfil, redirigir
+  useEffect(() => {
+    if (isTecnico && !isOwnProfile) {
+      navigate('/', { replace: true });
+    }
+  }, [isTecnico, isOwnProfile, navigate]);
   const { control, handleSubmit, reset, formState: { errors }, watch } = useForm({
     defaultValues: {
       id_rol: 0, id_usuario: '', nombre: '', correo: '', password: '', confirm_password: '', disponibilidad: true, especialidades: [], carga_trabajo: 0,

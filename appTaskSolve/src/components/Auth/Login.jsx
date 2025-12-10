@@ -63,7 +63,25 @@ export default function Login() {
     setLoading(true);
     try {
       const user = await login(email, password);
-      navigate(getFrom(location.state), { replace: true });
+      
+      // Normalizar rol para determinar redirección
+      const normalizedRole = (user?.rol || '')
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/\p{Diacritic}/gu, '');
+      
+      // Redirigir según el rol del usuario
+      let redirectPath = '/';
+      if (normalizedRole === 'tecnico') {
+        redirectPath = '/';
+      } else if (normalizedRole === 'administrador') {
+        redirectPath = '/dashboard';
+      } else if (normalizedRole === 'cliente') {
+        redirectPath = '/';
+      }
+      
+      navigate(redirectPath, { replace: true });
     } catch (err) {
       console.error('❌ Error en login:', err);
       console.error('❌ Response:', err?.response?.data);
