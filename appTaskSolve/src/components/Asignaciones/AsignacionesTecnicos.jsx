@@ -17,6 +17,7 @@ import {
   Tooltip
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import PersonIcon from '@mui/icons-material/Person';
 import ConfirmationNumberIcon from '@mui/icons-material/ConfirmationNumber';
 import CategoryIcon from '@mui/icons-material/Category';
@@ -27,6 +28,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { getApiOrigin } from '../../utils/apiBase';
 
 const AsignacionesTecnicos = () => {
+  const { t } = useTranslation();
   const [tecnicos, setTecnicos] = useState([]);
   const [ticketsPorTecnico, setTicketsPorTecnico] = useState({});
   const [loading, setLoading] = useState(true);
@@ -428,7 +430,7 @@ const AsignacionesTecnicos = () => {
                               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                 <CategoryIcon sx={{ fontSize: 16, mr: 0.5, color: 'text.secondary' }} />
                                 <Typography variant="caption" color="text.secondary">
-                                  {ticket['Categoría']}
+                                  {ticket['Categoría'] || t('tickets.fields.category', 'Categoría')}
                                 </Typography>
                               </Box>
 
@@ -445,7 +447,7 @@ const AsignacionesTecnicos = () => {
                               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                                 <AccessTimeIcon sx={{ fontSize: 16, mr: 0.5, color: borderColor }} />
                                 <Typography variant="caption" sx={{ color: borderColor, fontWeight: 600 }}>
-                                  SLA: {ticket['Tiempo restante SLA'] || 'No disponible'}
+                                  {t('assignments.slaLabel', 'SLA')}: {ticket['Tiempo restante SLA'] || t('assignments.noSla', 'No disponible')}
                                 </Typography>
                               </Box>
 
@@ -458,7 +460,7 @@ const AsignacionesTecnicos = () => {
                                 onClick={() => handleVerDetalle(ticket['Identificador del Ticket'])}
                                 sx={{ mt: 1 }}
                               >
-                                Ver Detalle
+                                {t('actions.viewDetail')}
                               </Button>
                             </CardContent>
                           </Card>
@@ -476,7 +478,7 @@ const AsignacionesTecnicos = () => {
       {/* Mensaje si no hay técnicos */}
       {tecnicos.length === 0 && (
         <Alert severity="info">
-          No hay técnicos registrados en el sistema.
+          {t('assignments.noTechnicians', 'No hay técnicos registrados en el sistema.')}
         </Alert>
       )}
     </Container>

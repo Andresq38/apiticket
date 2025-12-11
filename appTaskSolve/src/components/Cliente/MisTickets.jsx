@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Container,
   Typography,
@@ -13,7 +13,16 @@ import {
   DialogContent,
   DialogActions,
   useTheme,
-  Snackbar
+  Snackbar,
+  Chip,
+  IconButton,
+  Divider,
+  TextField,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
+  Checkbox
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -23,13 +32,17 @@ import { getApiOrigin } from '../../utils/apiBase';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CloseIcon from '@mui/icons-material/Close';
 import SuccessOverlay from '../common/SuccessOverlay';
+import CreateTicket from '../Tickets/CreateTicket';
 import { alpha } from '@mui/material/styles';
 
 /**
  * MisTickets Component
  * 
- * Muestra los tickets creados por el cliente actual.
+ * Muestra los tickets creados por el cliente actual en formato de tarjetas.
+ * Incluye opción de crear nuevo ticket en un modal.
  * Solo muestra tickets pertenecientes al usuario logueado.
  */
 export default function MisTickets() {
@@ -47,6 +60,12 @@ export default function MisTickets() {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'info' });
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const [deletedTicketInfo, setDeletedTicketInfo] = useState(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [showCreateSuccess, setShowCreateSuccess] = useState(false);
+  const [createdTicketInfo, setCreatedTicketInfo] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [deleteMode, setDeleteMode] = useState(false);
+  const [selectedTickets, setSelectedTickets] = useState(new Set());
 
   /**
    * Cargar tickets del cliente actual
@@ -156,6 +175,32 @@ export default function MisTickets() {
   }, [user?.id, apiBase]);
 
   /**
+   * Toggle para seleccionar/deseleccionar un ticket
+   */
+  const toggleSelectTicket = (ticketId) => {
+    setSelectedTickets(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(ticketId)) {
+        newSet.delete(ticketId);
+      } else {
+        newSet.add(ticketId);
+      }
+      return newSet;
+    });
+  };
+
+  /**
+   * Seleccionar todos los tickets
+   */
+  const selectAllTickets = () => {
+    if (selectedTickets.size === tickets.length) {
+      setSelectedTickets(new Set());
+    } else {
+      setSelectedTickets(new Set(tickets.map(t => t.id_ticket)));
+    }
+  };
+
+  /**
    * Solicitar confirmación para eliminar ticket
    */
   const requestDelete = (ticket) => {
@@ -164,22 +209,70 @@ export default function MisTickets() {
   };
 
   /**
+   * Eliminar tickets seleccionados
+   */
+  const deleteSelectedTickets = () => {
+    if (selectedTickets.size === 0) return;
+    setTargetTicket(null);
+    setConfirmOpen(true);
+  };
+
+  /**
    * Confirmar eliminación del ticket
    */
   const confirmDelete = async () => {
-    if (!targetTicket) return;
-    const t = targetTicket;
     setConfirmOpen(false);
-    setTargetTicket(null);
+
     try {
-      await axios.delete(`${apiBase}/apiticket/ticket/delete/${t.id_ticket}`);
-      setTickets(prev => prev.filter(x => x.id_ticket !== t.id_ticket));
-      setDeletedTicketInfo(t);
-      setShowDeleteSuccess(true);
+      // Si tenemos un ticket específico (eliminación individual)
+      if (targetTicket) {
+        const t = targetTicket;
+        setTargetTicket(null);
+        await axios.delete(`${apiBase}/apiticket/ticket/delete/${t.id_ticket}`);
+        setTickets(prev => prev.filter(x => x.id_ticket !== t.id_ticket));
+        setDeletedTicketInfo(t);
+        setShowDeleteSuccess(true);
+      }
+      // Si tenemos múltiples seleccionados (eliminación masiva)
+      else if (selectedTickets.size > 0) {
+        const ticketsToDelete = Array.from(selectedTickets);
+        let deletedCount = 0;
+        let failedCount = 0;
+
+        for (const ticketId of ticketsToDelete) {
+          try {
+            await axios.delete(`${apiBase}/apiticket/ticket/delete/${ticketId}`);
+            deletedCount++;
+          } catch (err) {
+            console.error(`Error eliminando ticket ${ticketId}:`, err);
+            failedCount++;
+          }
+        }
+
+        // Actualizar lista después de eliminar
+        setTickets(prev => prev.filter(x => !selectedTickets.has(x.id_ticket)));
+        setSelectedTickets(new Set());
+        setDeleteMode(false);
+
+        // Mostrar mensaje de resultado
+        if (deletedCount > 0) {
+          setSnackbar({
+            open: true,
+            message: `${deletedCount} ticket(s) eliminado(s) exitosamente${failedCount > 0 ? ` (${failedCount} falló)` : ''}`,
+            severity: failedCount > 0 ? 'warning' : 'success'
+          });
+        } else if (failedCount > 0) {
+          setSnackbar({
+            open: true,
+            message: `No se pudieron eliminar los tickets`,
+            severity: 'error'
+          });
+        }
+      }
     } catch (err) {
-      console.error('Error eliminando ticket:', err);
+      console.error('Error eliminando tickets:', err);
       const msg = err?.response?.data?.error || 
-                  (t('misTickets.deleteError') || 'No se pudo eliminar el ticket');
+                  'No se pudieron eliminar los tickets';
       setSnackbar({ open: true, message: msg, severity: 'error' });
     }
   };
@@ -256,14 +349,95 @@ export default function MisTickets() {
             {t('misTickets.subtitle') || 'Aquí puedes ver y gestionar todos tus tickets'}
           </Typography>
         </Box>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={() => fetchMyTickets()}
-          disabled={loading}
-        >
-          {t('misTickets.refresh') || t('common.refresh') || 'Refrescar'}
-        </Button>
+        <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' }, flexWrap: 'wrap' }}>
+          {deleteMode ? (
+            <>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setDeleteMode(false);
+                  setSelectedTickets(new Set());
+                }}
+                sx={{ fontWeight: 700 }}
+              >
+                {t('misTickets.cancel') || 'Cancelar'}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={selectAllTickets}
+                sx={{
+                  background: selectedTickets.size === tickets.length 
+                    ? `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%)`
+                    : `linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)`,
+                  fontWeight: 700,
+                  textTransform: 'none'
+                }}
+              >
+                {selectedTickets.size === tickets.length 
+                  ? (t('misTickets.deselectAll') || 'Deseleccionar todo')
+                  : (t('misTickets.selectAll') || 'Seleccionar todo')}
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                startIcon={<DeleteIcon />}
+                onClick={deleteSelectedTickets}
+                disabled={selectedTickets.size === 0}
+                sx={{
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  px: 3
+                }}
+              >
+                {t('misTickets.deleteSelected') || 'Eliminar'} {selectedTickets.size > 0 && `(${selectedTickets.size})`}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                startIcon={<AddCircleIcon />}
+                onClick={() => setCreateModalOpen(true)}
+                sx={{
+                  background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark || '#1b5e20'} 100%)`,
+                  fontWeight: 700,
+                  textTransform: 'none',
+                  px: 3,
+                  boxShadow: `0 4px 12px ${alpha(theme.palette.success.main, 0.25)}`,
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    boxShadow: `0 8px 20px ${alpha(theme.palette.success.main, 0.38)}`,
+                    transform: 'translateY(-2px)'
+                  }
+                }}
+              >
+                {t('misTickets.createButton') || 'Crear Nuevo Ticket'}
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<DeleteIcon />}
+                onClick={() => setDeleteMode(true)}
+                disabled={tickets.length === 0}
+                sx={{
+                  color: theme.palette.error.main,
+                  borderColor: theme.palette.error.main,
+                  fontWeight: 700,
+                  textTransform: 'none'
+                }}
+              >
+                {t('misTickets.deleteMultiple') || 'Eliminar Múltiples'}
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={() => fetchMyTickets()}
+                disabled={loading}
+              >
+                {t('misTickets.refresh') || t('common.refresh') || 'Refrescar'}
+              </Button>
+            </>
+          )}
+        </Box>
       </Box>
 
       {error && (
@@ -379,24 +553,26 @@ export default function MisTickets() {
                   </Typography>
 
                   {/* Descripción y Fecha */}
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: '#64748b',
-                        display: '-webkit-box',
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                        flex: 1
-                      }}
-                    >
-                      {ticket.descripcion || (
-                        <em>{t('misTickets.noDescription') || 'Sin descripción'}</em>
-                      )}
-                    </Typography>
+                  {ticket.descripcion && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: '#64748b',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 1,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          flex: 1
+                        }}
+                      >
+                        {ticket.descripcion}
+                      </Typography>
+                    </Box>
+                  )}
 
-                    {/* Fecha */}
+                  {/* Fecha */}
+                  {ticket.fecha_creacion && !isNaN(new Date(ticket.fecha_creacion).getTime()) && (
                     <Typography
                       variant="caption"
                       sx={{
@@ -405,7 +581,7 @@ export default function MisTickets() {
                         alignItems: 'center',
                         gap: 0.5,
                         whiteSpace: 'nowrap',
-                        ml: 2
+                        mt: ticket.descripcion ? 0 : 0
                       }}
                     >
                       📅{' '}
@@ -415,7 +591,7 @@ export default function MisTickets() {
                         day: 'numeric'
                       })}
                     </Typography>
-                  </Box>
+                  )}
                 </Grid>
 
                 {/* Derecha: Acciones */}
@@ -432,6 +608,18 @@ export default function MisTickets() {
                     backgroundColor: alpha(theme.palette.primary.main, 0.02)
                   }}
                 >
+                  {deleteMode && (
+                    <Checkbox
+                      checked={selectedTickets.has(ticket.id_ticket)}
+                      onChange={() => toggleSelectTicket(ticket.id_ticket)}
+                      sx={{
+                        color: theme.palette.error.main,
+                        '&.Mui-checked': {
+                          color: theme.palette.error.main
+                        }
+                      }}
+                    />
+                  )}
                   <Button
                     size="medium"
                     variant="contained"
@@ -457,28 +645,6 @@ export default function MisTickets() {
                   >
                     {t('misTickets.viewDetailButton') || 'Ver Detalle'}
                   </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<DeleteIcon />}
-                    color="error"
-                    onClick={() => requestDelete(ticket)}
-                    sx={{
-                      fontWeight: 600,
-                      textTransform: 'none',
-                      borderColor: alpha(theme.palette.error.main, 0.3),
-                      borderWidth: '1.5px',
-                      px: 2,
-                      transition: 'all 0.3s ease',
-                      '&:hover': {
-                        backgroundColor: alpha(theme.palette.error.main, 0.08),
-                        borderColor: theme.palette.error.main,
-                        borderWidth: '1.5px'
-                      }
-                    }}
-                  >
-                    {t('misTickets.deleteButton') || 'Eliminar'}
-                  </Button>
                 </Grid>
               </Grid>
             </Card>
@@ -489,10 +655,16 @@ export default function MisTickets() {
 
       {/* Dialog de confirmación para eliminar */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-        <DialogTitle>{t('misTickets.confirmDelete') || '¿Eliminar ticket?'}</DialogTitle>
+        <DialogTitle>
+          {selectedTickets.size > 0 
+            ? `¿Eliminar ${selectedTickets.size} ticket(s)?` 
+            : (t('misTickets.confirmDelete') || '¿Eliminar ticket?')}
+        </DialogTitle>
         <DialogContent>
           <Typography>
-            {t('misTickets.confirmDeleteMessage') || 'Esta acción no se puede deshacer.'}
+            {selectedTickets.size > 0 
+              ? `Se eliminarán ${selectedTickets.size} ticket(s). Esta acción no se puede deshacer.`
+              : (t('misTickets.confirmDeleteMessage') || 'Esta acción no se puede deshacer.')}
           </Typography>
         </DialogContent>
         <DialogActions>
@@ -534,6 +706,96 @@ export default function MisTickets() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Modal para crear nuevo ticket */}
+      <Dialog
+        open={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '12px',
+            maxHeight: '90vh'
+          }
+        }}
+      >
+        <DialogTitle
+          sx={{
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark || '#115293'} 100%)`,
+            color: 'white',
+            fontWeight: 700,
+            fontSize: '1.3rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            pb: 2
+          }}
+        >
+          {t('misTickets.createNewTicketTitle') || 'Crear Nuevo Ticket'}
+          <IconButton
+            size="small"
+            onClick={() => setCreateModalOpen(false)}
+            sx={{ color: 'white' }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ py: 3, maxHeight: 'calc(90vh - 200px)', overflow: 'auto' }}>
+          <CreateTicket
+            isFromHub={true}
+            onSuccess={(ticketId) => {
+              // Cerrar modal inmediatamente
+              setCreateModalOpen(false);
+              // Mostrar overlay de éxito después de cerrar el modal
+              setCreatedTicketInfo({ id_ticket: ticketId });
+              setSuccessMessage(`✓ Ticket #${ticketId} creado exitosamente`);
+              setShowCreateSuccess(true);
+              // NO se recarga automáticamente - el usuario decide qué hacer con los botones
+            }}
+            isModal={true}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Success Overlay para creación */}
+      <SuccessOverlay
+        open={showCreateSuccess}
+        mode="create"
+        entity="Ticket"
+        variant="extended"
+        details={{
+          id: createdTicketInfo?.id_ticket
+        }}
+        onClose={() => {
+          setShowCreateSuccess(false);
+          setCreatedTicketInfo(null);
+          // Refrescar lista cuando se cierre
+          fetchMyTickets();
+        }}
+        actions={[
+          { 
+            label: 'Crear otro', 
+            onClick: () => {
+              setShowCreateSuccess(false);
+              setCreatedTicketInfo(null);
+              setCreateModalOpen(true);
+            }, 
+            variant: 'contained', 
+            color: 'success' 
+          },
+          { 
+            label: 'Ir a mis tickets', 
+            onClick: () => {
+              setShowCreateSuccess(false);
+              setCreatedTicketInfo(null);
+              fetchMyTickets();
+            }, 
+            variant: 'outlined', 
+            color: 'success' 
+          }
+        ]}
+      />
     </Container>
   );
 }

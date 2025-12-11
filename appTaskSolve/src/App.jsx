@@ -38,12 +38,9 @@ const NotificacionesPage = lazy(() => import('./components/common/Notificaciones
 const SlaMonitor = lazy(() => import('./components/SLA/SlaMonitor'));
 const ClienteHub = lazy(() => import('./components/Cliente/ClienteHub'));
 
+const HomeSelector = () => <Home />;
+
 export default function App() {
-    // Limpiar sesión y localStorage al iniciar la app para mostrar siempre el login
-    React.useEffect(() => {
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('authUser');
-    }, []);
   return (
     <AuthProvider>
       <Router>
@@ -51,7 +48,7 @@ export default function App() {
           <Suspense fallback={<div style={{ padding: 24 }}>Cargando…</div>}>
             <Routes>
               <Route path="/login" element={<Login />} />
-              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+              <Route path="/" element={<ProtectedRoute><HomeSelector /></ProtectedRoute>} />
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <RoleProtectedRoute allowedRoles={['Administrador']}>

@@ -76,7 +76,7 @@ export default function Login() {
       if (normalizedRole === 'tecnico') {
         redirectPath = '/';
       } else if (normalizedRole === 'administrador') {
-        redirectPath = '/dashboard';
+        redirectPath = '/';
       } else if (normalizedRole === 'cliente') {
         redirectPath = '/';
       }

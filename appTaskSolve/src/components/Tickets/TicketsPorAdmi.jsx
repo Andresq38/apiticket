@@ -8,25 +8,19 @@ import {
   Box,
   CircularProgress,
   Alert,
+  Button,
+  useTheme
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 
 const API_BASE = "http://localhost:81/apiticket";
 
-const statusColor = (estado) => {
-  const map = {
-    Asignado: "info",
-    "En Proceso": "warning",
-    Resuelto: "success",
-    Cerrado: "default",
-  };
-  return map[estado] || "primary";
-};
-
 export default function TicketsPorAdmi() {
   const { t } = useTranslation();
+  const theme = useTheme();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -34,13 +28,14 @@ export default function TicketsPorAdmi() {
 
   const navigate = useNavigate();
 
-  const getStatusColor = (estado) => {
+  const getStatusVisual = (estado) => {
     const e = (estado || "").toLowerCase();
-    if (e.includes("asign")) return "#0288d1";
-    if (e.includes("proceso") || e.includes("proce")) return "#ef6c00";
-    if (e.includes("resuelto") || e.includes("resuel")) return "#2e7d32";
-    if (e.includes("cerrado")) return "#9e9e9e";
-    return "#616161";
+    if (e.includes("pend")) return { color: theme.palette.warning.main };
+    if (e.includes("asign")) return { color: theme.palette.info.main };
+    if (e.includes("proceso") || e.includes("proce")) return { color: theme.palette.warning.dark || "#f57c00" };
+    if (e.includes("resuelto") || e.includes("resuel")) return { color: theme.palette.success.main };
+    if (e.includes("cerrado")) return { color: theme.palette.secondary.main };
+    return { color: "#9ca3af" };
   };
 
   const translateEstadoLabel = (estadoNombre) => {
@@ -137,38 +132,61 @@ export default function TicketsPorAdmi() {
                   width: "100%",
                   borderRadius: 2,
                   cursor: "pointer",
-                  "&:hover": { boxShadow: 8 },
+                  borderLeft: "5px solid",
+                  borderLeftColor: getStatusVisual(ticket.estado).color,
+                  transition: "all 0.3s ease",
+                  "&:hover": { boxShadow: 8, transform: "translateX(4px)" },
                 }}
                 onClick={() => navigate(`/tickets/${id}`)}
               >
-                <CardContent>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    {t('tickets.ticketLabel')} #{id}
-                  </Typography>
-                  <Typography variant="h6" sx={{ mb: 1 }}>
-                    {ticket.titulo}
-                  </Typography>
+                <CardContent
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    gap: 2,
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1 }}>
+                      <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 700 }}>
+                        {t('tickets.ticketLabel')} #{id}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={translateEstadoLabel(ticket.estado)}
+                        sx={{
+                          bgcolor: alpha(getStatusVisual(ticket.estado).color, 0.12),
+                          color: getStatusVisual(ticket.estado).color,
+                          fontWeight: 700,
+                          border: `1px solid ${alpha(getStatusVisual(ticket.estado).color, 0.4)}`,
+                        }}
+                      />
+                    </Box>
+                    <Typography variant="h6" sx={{ mb: 0.5, fontWeight: 700 }}>
+                      {ticket.titulo}
+                    </Typography>
+                    {ticket.sla && (
+                      <Typography variant="body2" color="text.secondary">
+                        SLA: {ticket.sla}
+                      </Typography>
+                    )}
+                  </Box>
 
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      mb: 1,
-                    }}
-                  >
-                    <Chip
-                      size="small"
-                      label={translateEstadoLabel(ticket.estado)}
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, flexShrink: 0 }}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={(e) => { e.stopPropagation(); navigate(`/tickets/${id}`); }}
                       sx={{
-                        bgcolor: getStatusColor(ticket.estado),
-                        color: "#fff",
+                        textTransform: "none",
+                        fontWeight: 700,
+                        px: 3,
                       }}
-                    />
-                    {/*ticket.sla && (
-                      <Chip size="small" variant="outlined" label={`SLA: ${ticket.sla}`} />
-                    )*/}
+                    >
+                      {t('misTickets.viewDetailButton') || t('actions.viewDetail') || 'Ver detalle'}
+                    </Button>
                   </Box>
                 </CardContent>
               </Card>

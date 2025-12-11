@@ -522,15 +522,21 @@ export default function EditTicket() {
                   if (!opt) return '';
                   const obj = typeof opt === 'object' ? opt : etiquetas.find((e) => String(e.id_etiqueta) === String(opt)) || {};
                   const name = obj.nombre ?? obj.label ?? obj.etiqueta ?? '';
-                  return String(name || '');
+                  const id = obj.id_etiqueta ?? obj.id ?? '';
+                  return id ? `${name} (ID: ${id})` : String(name || '');
                 }}
                 renderOption={(props, option) => (
                   <li {...props} key={option.id_etiqueta ?? option.id} style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, py: 1 }}>
                       <LabelOutlinedIcon sx={{ color: 'primary.main', flexShrink: 0, mt: 0.5 }} />
-                      <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                        {option.nombre ?? option.label ?? ''}
-                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ lineHeight: 1.6, fontWeight: 500 }}>
+                          {option.nombre ?? option.label ?? ''}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          ID: {option.id_etiqueta ?? option.id ?? '-'}
+                        </Typography>
+                      </Box>
                     </Box>
                   </li>
                 )}
@@ -598,9 +604,28 @@ export default function EditTicket() {
                   if (!opt) return '';
                   const obj = typeof opt === 'object' ? opt : especialidades.find((e) => String(e.id_especialidad) === String(opt)) || {};
                   const name = obj.nombre ?? obj.especialidad ?? '';
-                  return String(name || '');
+                  const id = obj.id_especialidad ?? obj.id ?? '';
+                  return id ? `${name} (ID: ${id})` : String(name || '');
                 }}
                 onChange={(_, val) => setForm((f) => ({ ...f, id_especialidad: val?.id_especialidad || '' }))}
+                renderOption={(props, option) => {
+                  const nombre = option.nombre ?? option.especialidad ?? '';
+                  const id = option.id_especialidad ?? option.id ?? '';
+                  return (
+                    <li {...props} key={id || nombre}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {nombre}
+                        </Typography>
+                        {id && (
+                          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
+                            ID: {id}
+                          </Typography>
+                        )}
+                      </Box>
+                    </li>
+                  );
+                }}
                 renderInput={(params) => (
                     <TextField
                     {...params}

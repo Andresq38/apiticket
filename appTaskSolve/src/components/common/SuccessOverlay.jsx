@@ -1,5 +1,5 @@
-import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography, Button, Stack, Chip, Divider } from '@mui/material';
+import React, { useEffect } from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Typography, Button, Stack, Chip, Divider, LinearProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
@@ -112,39 +112,90 @@ export default function SuccessOverlay({
       {renderHero()}
       <DialogTitle sx={{ mt: 6, fontWeight: 800, textAlign: 'center' }}>{title}</DialogTitle>
       <DialogContent>
-        <Typography variant="body1" sx={{ mb: 2 }}>
+        <Typography variant="body1" sx={{ mb: 2, fontSize: '1.1rem', fontWeight: 500 }}>
           {subtitle || defaultSubtitle}
         </Typography>
         {isCreate && (
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
             (Los campos se han reiniciado)
           </Typography>
         )}
         {variant === 'extended' && details && (
           <Box sx={{ mt: 3 }}>
-            <Divider sx={{ mb: 2 }} />
-            <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" sx={{ mb: 2 }}>
-              {details.id && (
-                <Chip color={isCreate ? 'success' : isUpdate ? 'info' : isAssign ? 'success' : 'error'} variant="outlined" label={`ID: #${details.id}`} />
-              )}
-              {details.prioridad && (
-                <Chip color={details.prioridad === 'Alta' ? 'error' : details.prioridad === 'Media' ? 'warning' : 'info'} label={`Prioridad: ${details.prioridad}`} />
-              )}
-              {details.categoria && (
-                <Chip variant="outlined" label={`Categoría: ${details.categoria}`} />
-              )}
-              {details.etiqueta && (
-                <Chip variant="outlined" label={`Etiqueta: ${details.etiqueta}`} />
-              )}
-            </Stack>
-            {Array.isArray(details.extra) && details.extra.length > 0 && (
-              <Stack spacing={0.5} sx={{ maxWidth: 420, mx: 'auto' }}>
-                {details.extra.map((e, idx) => (
-                  <Typography key={idx} variant="caption" color="text.secondary">
-                    {e.label}: {e.value}
-                  </Typography>
-                ))}
+            <Divider sx={{ mb: 3 }} />
+            
+            {/* Información principal en chips */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="overline" sx={{ color: 'text.secondary', display: 'block', mb: 1, fontWeight: 600 }}>
+                Detalles del Ticket
+              </Typography>
+              <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" sx={{ mb: 2 }}>
+                {details.id && (
+                  <Chip 
+                    color={isCreate ? 'success' : isUpdate ? 'info' : isAssign ? 'success' : 'error'} 
+                    variant="outlined" 
+                    label={`ID: #${details.id}`}
+                    sx={{ fontWeight: 600, fontSize: '0.9rem' }}
+                  />
+                )}
+                {details.prioridad && (
+                  <Chip 
+                    color={details.prioridad === 'Alta' ? 'error' : details.prioridad === 'Media' ? 'warning' : 'info'} 
+                    label={`Prioridad: ${details.prioridad}`}
+                    sx={{ fontWeight: 600, fontSize: '0.9rem' }}
+                  />
+                )}
               </Stack>
+
+              {/* Categoría y Etiqueta */}
+              <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap">
+                {details.categoria && (
+                  <Chip 
+                    variant="outlined" 
+                    label={`Categoría: ${details.categoria}`}
+                    sx={{ fontSize: '0.85rem' }}
+                  />
+                )}
+                {details.etiqueta && (
+                  <Chip 
+                    variant="outlined" 
+                    label={`Etiqueta: ${details.etiqueta}`}
+                    sx={{ fontSize: '0.85rem' }}
+                  />
+                )}
+              </Stack>
+            </Box>
+
+            {/* Información adicional */}
+            {Array.isArray(details.extra) && details.extra.length > 0 && (
+              <Box sx={{ 
+                backgroundColor: '#f8f9fa', 
+                borderRadius: 2, 
+                p: 2, 
+                border: '1px solid #e9ecef'
+              }}>
+                <Stack spacing={1}>
+                  {details.extra.map((e, idx) => (
+                    <Box key={idx} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                      <Typography variant="caption" sx={{ fontWeight: 600, color: '#495057', minWidth: 100 }}>
+                        {e.label}:
+                      </Typography>
+                      <Typography 
+                        variant="caption" 
+                        sx={{ 
+                          color: '#212529', 
+                          fontWeight: 500,
+                          maxWidth: '60%',
+                          wordBreak: 'break-word',
+                          textAlign: 'right'
+                        }}
+                      >
+                        {e.value}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
             )}
           </Box>
         )}

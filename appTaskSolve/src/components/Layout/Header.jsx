@@ -60,10 +60,34 @@ const Header = () => {
 
   // Función para verificar si una ruta está activa
   const isActive = (path) => {
-    if (path === "/") return location.pathname === "/";
+    // Normalizar pathnames removiendo trailing slash (pero manteniendo / si es la raíz)
+    const normalizedPathname = location.pathname === '/' ? '/' : location.pathname.replace(/\/$/, '');
+    const normalizedPath = path === '/' ? '/' : path.replace(/\/$/, '');
+
+    // Casos especiales para TABs del técnico - PRIMERO
+    if (normalizedPath === "/mi-perfil-tecnico") {
+      // Solo activo en /mi-perfil-tecnico exacto o subrutas
+      return normalizedPathname.startsWith("/mi-perfil-tecnico");
+    }
+
+    if (normalizedPath === "/incidentes-pendientes") {
+      // Solo activo en /incidentes-pendientes exacto o subrutas
+      return normalizedPathname.startsWith("/incidentes-pendientes");
+    }
+
+    // Casos especiales para TABs del cliente
+    if (normalizedPath === "/cliente") {
+      // Activo en /cliente o cualquier ruta /cliente que NO sea /cliente/mistickets
+      return normalizedPathname.startsWith("/cliente") && !normalizedPathname.includes("/cliente/mistickets");
+    }
+
+    if (path === "/cliente/mistickets") {
+      // Solo activo en /cliente/mistickets exacto
+      return normalizedPathname.includes("/cliente/mistickets");
+    }
 
     // Para MANTENIMIENTOS, solo activar en rutas específicas de mantenimiento
-    if (path === "/mantenimientos") {
+    if (normalizedPath === "/mantenimientos") {
       const mantenimientosPaths = [
         "/mantenimientos",
         "/mantenimientos/categorias",
@@ -74,28 +98,33 @@ const Header = () => {
         "/tickets/crear",
         "/tickets/editar",
       ];
-      return mantenimientosPaths.some((p) => location.pathname.startsWith(p));
+      return mantenimientosPaths.some((p) => normalizedPathname.startsWith(p.replace(/\/$/, '')));
     }
 
     // Para TÉCNICOS, excluir rutas de mantenimiento (crear/editar)
-    if (path === "/tecnicos") {
+    if (normalizedPath === "/tecnicos") {
       return (
-        location.pathname.startsWith("/tecnicos") &&
-        !location.pathname.includes("/crear") &&
-        !location.pathname.includes("/editar")
+        normalizedPathname.startsWith("/tecnicos") &&
+        !normalizedPathname.includes("/crear") &&
+        !normalizedPathname.includes("/editar")
       );
     }
 
     // Para CATEGORÍAS: excluir rutas de mantenimiento (crear/editar) para que solo se subraye MANTENIMIENTOS en esas vistas
-    if (path === "/categorias") {
+    if (normalizedPath === "/categorias") {
       return (
-        location.pathname.startsWith("/categorias") &&
-        !location.pathname.includes("/crear") &&
-        !location.pathname.includes("/editar")
+        normalizedPathname.startsWith("/categorias") &&
+        !normalizedPathname.includes("/crear") &&
+        !normalizedPathname.includes("/editar")
       );
     }
 
-    return location.pathname.startsWith(path);
+    // INICIO - Solo activa cuando estamos exactamente en /
+    if (normalizedPath === "/") {
+      return normalizedPathname === "/";
+    }
+
+    return normalizedPathname.startsWith(normalizedPath);
   };
 
   // Estilos para botones activos e inactivos
@@ -228,110 +257,140 @@ const Header = () => {
             }}
           ></Typography>
         </Box>
-        {/* Left-aligned nav group: Home + Dashboard + Técnicos + Categorías */}
+        {/* Left-aligned nav group: Home + Dashboard + Técnicos + Categorías + Cliente Tabs */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {/* HOME - visible para todos */}
-          <Button
-            variant="text"
-            color="inherit"
-            onClick={() => navigate("/")}
-            sx={getButtonStyles("/")}
-          >
-            {t("header.home")}
-          </Button>
-
-          {/* TICKETS - dropdown - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
-            <Box>
+          {/* CLIENTE TABS - solo visible para cliente */}
+          {normalizedRole === 'cliente' && (
+            <>
+              {/* INICIO - cliente */}
               <Button
                 variant="text"
                 color="inherit"
-                onClick={handleMenuClick}
-                endIcon={<ArrowDropDownIcon />}
-                sx={{
-                  textTransform: "uppercase",
-                  fontWeight: 700,
-                  fontSize: "1.25rem",
-                  letterSpacing: 0.3,
-                  px: 1,
-                  minWidth: "auto",
-                }}
+                onClick={() => navigate('/cliente')}
+                sx={getButtonStyles('/cliente')}
               >
-                {t("header.tickets")}
+                {t('header.home')}
               </Button>
-            </Box>
+
+              {/* MIS TICKETS - cliente */}
+              <Button
+                variant="text"
+                color="inherit"
+                onClick={() => navigate('/cliente/mistickets')}
+                sx={getButtonStyles('/cliente/mistickets')}
+              >
+                {t('cliente.myTickets')}
+              </Button>
+            </>
           )}
 
-          {/* DASHBOARD - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
-            <Button
-              variant="text"
-              color="inherit"
-              onClick={() => navigate("/dashboard")}
-              sx={getButtonStyles("/dashboard")}
-            >
-              {t("header.dashboard")}
-            </Button>
-          )}
+          {/* ADMIN/TECNICO TABS - no visible para cliente */}
+          {normalizedRole !== 'cliente' && (
+            <>
+              {/* HOME - visible para admin/tecnico */}
+              <Button
+                variant="text"
+                color="inherit"
+                onClick={() => navigate('/')}
+                sx={getButtonStyles("/")}
+              >
+                {t("header.home")}
+              </Button>
 
-          {/* TÉCNICOS - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
-            <Button
-              variant="text"
-              color="inherit"
-              onClick={() => navigate("/tecnicos")}
-              sx={getButtonStyles("/tecnicos")}
-            >
-              {t("header.technicians")}
-            </Button>
-          )}
+              {/* TICKETS - dropdown - solo visible para admin */}
+              {normalizedRole === 'administrador' && (
+                <Box>
+                  <Button
+                    variant="text"
+                    color="inherit"
+                    onClick={handleMenuClick}
+                    endIcon={<ArrowDropDownIcon />}
+                    sx={{
+                      textTransform: "uppercase",
+                      fontWeight: 700,
+                      fontSize: "1.25rem",
+                      letterSpacing: 0.3,
+                      px: 1,
+                      minWidth: "auto",
+                    }}
+                  >
+                    {t("header.tickets")}
+                  </Button>
+                </Box>
+              )}
 
-          {/* CATEGORÍAS - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
-            <Button
-              variant="text"
-              color="inherit"
-              onClick={() => navigate("/categorias")}
-              sx={getButtonStyles("/categorias")}
-            >
-              {t("header.categories")}
-            </Button>
-          )}
+              {/* DASHBOARD - solo visible para admin */}
+              {normalizedRole === 'administrador' && (
+                <Button
+                  variant="text"
+                  color="inherit"
+                  onClick={() => navigate("/dashboard")}
+                  sx={getButtonStyles("/dashboard")}
+                >
+                  {t("header.dashboard")}
+                </Button>
+              )}
 
-          {/* MANTENIMIENTOS - solo visible para admin */}
-          {normalizedRole !== 'tecnico' && (
-            <Button
-              variant="text"
-              color="inherit"
-              onClick={() => navigate("/mantenimientos")}
-              sx={getButtonStyles("/mantenimientos")}
-            >
-              {t("header.maintenance")}
-            </Button>
-          )}
+              {/* TÉCNICOS - solo visible para admin */}
+              {normalizedRole === 'administrador' && (
+                <Button
+                  variant="text"
+                  color="inherit"
+                  onClick={() => navigate("/tecnicos")}
+                  sx={getButtonStyles("/tecnicos")}
+                >
+                  {t("header.technicians")}
+                </Button>
+              )}
 
-          {/* MI PERFIL - solo visible para técnico */}
-          {normalizedRole === 'tecnico' && (
-            <Button
-              variant="text"
-              color="inherit"
-              onClick={() => navigate(`/mi-perfil-tecnico`)}
-              sx={getButtonStyles(`/mi-perfil-tecnico`)}
-            >
-              {t("header.myProfile") || "Mi Perfil"}
-            </Button>
-          )}
+              {/* CATEGORÍAS - solo visible para admin */}
+              {normalizedRole === 'administrador' && (
+                <Button
+                  variant="text"
+                  color="inherit"
+                  onClick={() => navigate("/categorias")}
+                  sx={getButtonStyles("/categorias")}
+                >
+                  {t("header.categories")}
+                </Button>
+              )}
 
-          {/* INCIDENTES PENDIENTES - solo visible para técnico */}
-          {normalizedRole === 'tecnico' && (
-            <Button
-              variant="text"
-              color="inherit"
-              onClick={() => navigate(`/incidentes-pendientes`)}
-              sx={getButtonStyles(`/incidentes-pendientes`)}
-            >
-              Pendientes
-            </Button>
+              {/* MANTENIMIENTOS - solo visible para admin */}
+              {normalizedRole === 'administrador' && (
+                <Button
+                  variant="text"
+                  color="inherit"
+                  onClick={() => navigate("/mantenimientos")}
+                  sx={getButtonStyles("/mantenimientos")}
+                >
+                  {t("header.maintenance")}
+                </Button>
+              )}
+
+              {/* MI PERFIL - solo visible para técnico */}
+              {normalizedRole === 'tecnico' && (
+                <Button
+                  variant="text"
+                  color="inherit"
+                  onClick={() => navigate(`/mi-perfil-tecnico`)}
+                  sx={getButtonStyles(`/mi-perfil-tecnico`)}
+                >
+                  {t("header.myProfile") || "Mi Perfil"}
+                </Button>
+              )}
+
+              {/* INCIDENTES PENDIENTES - solo visible para técnico */}
+              {normalizedRole === 'tecnico' && (
+                <Button
+                  variant="text"
+                  color="inherit"
+                  onClick={() => navigate(`/incidentes-pendientes`)}
+                  sx={getButtonStyles(`/incidentes-pendientes`)}
+                >
+                  Pendientes
+                </Button>
+              )}
+            </>
           )}
         </Box>
 

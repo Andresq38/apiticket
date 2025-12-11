@@ -20,6 +20,7 @@ import {
   Chip,
   Fade,
   FormControl,
+  useTheme,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-hot-toast';
@@ -37,10 +38,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { getApiOrigin } from '../../utils/apiBase';
 import { formatDate } from '../../utils/format';
 
-export default function CreateTicket({ isFromHub = false }) {
+export default function CreateTicket({ isFromHub = false, onSuccess = null, isModal = false }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const theme = useTheme();
   const apiBase = useMemo(() => `${getApiOrigin()}/apiticket`, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -254,12 +256,19 @@ export default function CreateTicket({ isFromHub = false }) {
       const successMessage = `✓ Ticket #${idTicket} creado exitosamente`;
       setCreatedId(idTicket);
       setSuccess(successMessage);
-      setSnackbar({ open: true, message: successMessage, severity: 'success' });
-      setShowSuccessOverlay(true);
       
-      // Disparar evento para notificar a otros componentes que se creó un ticket
-      if (isFromHub) {
-        window.dispatchEvent(new CustomEvent('ticketCreated', { detail: { ticketId: idTicket } }));
+      // Si viene del modal, llamar callback inmediatamente (el modal cierre lo maneja MisTickets)
+      if (isModal && onSuccess) {
+        onSuccess(idTicket);
+      } else {
+        // Si no es modal, mostrar overlay y notificar a otros componentes
+        setSnackbar({ open: true, message: successMessage, severity: 'success' });
+        setShowSuccessOverlay(true);
+        
+        // Disparar evento para notificar a otros componentes que se creó un ticket
+        if (isFromHub) {
+          window.dispatchEvent(new CustomEvent('ticketCreated', { detail: { ticketId: idTicket } }));
+        }
       }
     } catch (e) {
       const msg = e.response?.data?.message || e.response?.data?.error || e.message || 'Error al crear el ticket';
@@ -272,17 +281,38 @@ export default function CreateTicket({ isFromHub = false }) {
 
   return (
     <>
-    <Container maxWidth="lg" sx={{ py: 5, position: 'relative' }}>
-      {/* Encabezado estilizado */}
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Box>
-          <Typography variant="h4" sx={{ fontWeight: 700 }}>{t('ticketForm.createTitle')}</Typography>
+    <Container maxWidth={isModal ? "sm" : "lg"} sx={{ py: isModal ? 0 : 5, position: 'relative' }}>
+      {/* Encabezado estilizado - oculto en modal */}
+      {!isModal && (
+        <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>{t('ticketForm.createTitle')}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+              {t('ticketForm.createSubtitle')}
+            </Typography>
+          </Box>
+          <Button
+            variant="text"
+            onClick={() => navigate(isFromHub ? '/cliente' : '/mantenimientos')}
+            startIcon={<ArrowBackIcon />}
+            sx={{ color: 'primary.main', fontWeight: 700 }}
+          >
+            {t('ticketForm.goBack')}
+          </Button>
+        </Box>
+      )}
+
+      {/* Encabezado simplificado para modal */}
+      {isModal && (
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, color: '#1a202c' }}>
+            {t('ticketForm.completeForm')}
+          </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {t('ticketForm.createSubtitle')}
           </Typography>
         </Box>
-  <Button variant="text" onClick={() => navigate(isFromHub ? '/cliente' : '/mantenimientos')} startIcon={<ArrowBackIcon />}>{t('ticketForm.goBack')}</Button>
-      </Box>
+      )}
 
       {/* Formulario principal */}
       <Paper
@@ -375,20 +405,26 @@ export default function CreateTicket({ isFromHub = false }) {
               <Autocomplete
                 options={etiquetas}
                 loading={etiquetas.length === 0}
-                // Mostrar solo nombre de la etiqueta (sin ID)
+                // Mostrar nombre de la etiqueta con su ID
                 getOptionLabel={(opt) => {
                   if (!opt) return '';
                   const obj = typeof opt === 'object' ? opt : etiquetas.find((e) => String(e.id_etiqueta) === String(opt)) || {};
                   const name = obj.nombre ?? obj.label ?? obj.etiqueta ?? '';
-                  return String(name || '');
+                  const id = obj.id_etiqueta ?? obj.id ?? '';
+                  return id ? `${name} (ID: ${id})` : String(name || '');
                 }}
                 renderOption={(props, option) => (
                   <li {...props} key={option.id_etiqueta ?? option.id} style={{ whiteSpace: 'normal', wordWrap: 'break-word' }}>
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, py: 1 }}>
                       <LabelOutlinedIcon sx={{ color: 'primary.main', flexShrink: 0, mt: 0.5 }} />
-                      <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                        {option.nombre ?? option.label ?? ''}
-                      </Typography>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <Typography variant="body2" sx={{ lineHeight: 1.6, fontWeight: 500 }}>
+                          {option.nombre ?? option.label ?? ''}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+                          ID: {option.id_etiqueta ?? option.id ?? '-'}
+                        </Typography>
+                      </Box>
                     </Box>
                   </li>
                 )}
@@ -456,9 +492,28 @@ export default function CreateTicket({ isFromHub = false }) {
                   if (!opt) return '';
                   const obj = typeof opt === 'object' ? opt : especialidades.find((e) => String(e.id_especialidad) === String(opt)) || {};
                   const name = obj.nombre ?? obj.especialidad ?? '';
-                  return String(name || '');
+                  const id = obj.id_especialidad ?? obj.id ?? '';
+                  return id ? `${name} (ID: ${id})` : String(name || '');
                 }}
                 onChange={(_, val) => setForm((f) => ({ ...f, id_especialidad: val?.id_especialidad || '' }))}
+                renderOption={(props, option) => {
+                  const nombre = option.nombre ?? option.especialidad ?? '';
+                  const id = option.id_especialidad ?? option.id ?? '';
+                  return (
+                    <li {...props} key={id || nombre}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {nombre}
+                        </Typography>
+                        {id && (
+                          <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.7rem' }}>
+                            ID: {id}
+                          </Typography>
+                        )}
+                      </Box>
+                    </li>
+                  );
+                }}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -594,22 +649,41 @@ export default function CreateTicket({ isFromHub = false }) {
               <Divider sx={{ my: 1 }} />
               <Fade in timeout={500}>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-end', mt: 2 }}>
-                    <Button
+                  <Button
                     type="submit"
                     variant="contained"
                     disabled={loading || !isValid}
                     startIcon={!loading ? <SaveRoundedIcon /> : null}
-                    sx={{ minWidth: 180, fontWeight: 600 }}
+                    sx={{
+                      minWidth: 180,
+                      fontWeight: 700,
+                      textTransform: 'none',
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                      boxShadow: `0 6px 18px ${theme.palette.primary.main}33`,
+                      '&:hover': {
+                        boxShadow: `0 10px 26px ${theme.palette.primary.main}44`,
+                        background: `linear-gradient(135deg, ${theme.palette.primary.dark} 0%, ${theme.palette.primary.main} 100%)`
+                      }
+                    }}
                   >
                     {loading ? <CircularProgress size={20} /> : t('ticketForm.saveTicket')}
                   </Button>
                   <Button
                     variant="outlined"
-                    color="inherit"
-                    // Redirigir a Inicio en lugar del listado de tickets
+                    color="secondary"
                     onClick={() => navigate('/', { replace: true })}
                     startIcon={<CancelRoundedIcon />}
-                    sx={{ minWidth: 140 }}
+                    sx={{
+                      minWidth: 140,
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      borderWidth: '1.5px',
+                      borderColor: `${theme.palette.secondary.main}55`,
+                      '&:hover': {
+                        borderColor: theme.palette.secondary.main,
+                        backgroundColor: `${theme.palette.secondary.main}0f`
+                      }
+                    }}
                   >
                     {t('ticketForm.cancel')}
                   </Button>
@@ -640,13 +714,13 @@ export default function CreateTicket({ isFromHub = false }) {
         onClose={() => setShowSuccessOverlay(false)}
         subtitle={success || undefined}
         actions={isFromHub ? [
-          { label: 'Crear otro', onClick: () => { setShowSuccessOverlay(false); setForm({ titulo:'', descripcion:'', prioridad:'Media', id_usuario:'', id_etiqueta:'' }); }, variant: 'contained', color: 'success' },
-          { label: 'Ver detalle', onClick: () => { if (createdId) navigate(`/tickets/${createdId}`); }, variant: 'outlined', color: 'success' },
-          { label: 'Ir a mis tickets', onClick: () => { navigate('/cliente'); }, variant: 'outlined', color: 'success' }
+          { label: t('ticketForm.createAnother') || 'Crear otro', onClick: () => { setShowSuccessOverlay(false); setForm({ titulo:'', descripcion:'', prioridad:'Media', id_usuario:'', id_etiqueta:'' }); }, variant: 'contained', color: 'success' },
+          { label: t('ticketForm.viewDetail') || 'Ver detalle', onClick: () => { if (createdId) navigate(`/tickets/${createdId}`); }, variant: 'outlined', color: 'success' },
+          { label: t('ticketForm.goMyTickets') || 'Ir a mis tickets', onClick: () => { navigate('/cliente'); }, variant: 'outlined', color: 'success' }
         ] : [
-          { label: 'Crear otro', onClick: () => { setShowSuccessOverlay(false); setForm({ titulo:'', descripcion:'', prioridad:'Media', id_usuario:'', id_etiqueta:'' }); setUsuarioSeleccionado(null); }, variant: 'contained', color: 'success' },
-          { label: 'Ver detalle', onClick: () => { if (createdId) navigate(`/tickets/${createdId}`); }, variant: 'outlined', color: 'success' },
-          { label: 'Ir al listado', onClick: () => { navigate('/'); }, variant: 'outlined', color: 'success' }
+          { label: t('ticketForm.createAnother') || 'Crear otro', onClick: () => { setShowSuccessOverlay(false); setForm({ titulo:'', descripcion:'', prioridad:'Media', id_usuario:'', id_etiqueta:'' }); setUsuarioSeleccionado(null); }, variant: 'contained', color: 'success' },
+          { label: t('ticketForm.viewDetail') || 'Ver detalle', onClick: () => { if (createdId) navigate(`/tickets/${createdId}`); }, variant: 'outlined', color: 'success' },
+          { label: t('ticketForm.goToList') || 'Ir al listado', onClick: () => { navigate('/cliente'); }, variant: 'outlined', color: 'success' }
         ]}
       />
     </Container>

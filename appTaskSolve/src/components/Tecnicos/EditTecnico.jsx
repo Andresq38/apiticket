@@ -480,13 +480,31 @@ export default function EditTecnico() {
                     id="especialidades"
                     options={sortedEspecialidades}
                     disableCloseOnSelect
-                    getOptionLabel={(o) => o.nombre || ''}
+                    getOptionLabel={(o) => {
+                      const nombre = o.nombre || '';
+                      const id = o.id_especialidad || '';
+                      return id ? `${nombre} (ID: ${id})` : nombre;
+                    }}
                     value={field.value || []}
                     onChange={(_, newValue) => {
                       field.onChange(newValue || []);
                       setOpenEsp(false);
                     }}
-                    renderTags={() => null}
+                    renderTags={(value, getTagProps) =>
+                      value.map((option, index) => {
+                        const { key, ...tagProps } = getTagProps({ index });
+                        return (
+                          <Chip
+                            key={key}
+                            label={`${option.nombre || ''} (ID: ${option.id_especialidad || '-'})`}
+                            {...tagProps}
+                            size="small"
+                            icon={<WorkIcon fontSize="small" />}
+                            sx={{ m: 0.5 }}
+                          />
+                        );
+                      })
+                    }
                     isOptionEqualToValue={(o, v) => o.id_especialidad === v.id_especialidad}
                     open={openEsp}
                     onOpen={() => setOpenEsp(true)}
@@ -501,8 +519,13 @@ export default function EditTecnico() {
                           checked={selected}
                         />
                         <WorkIcon fontSize="small" sx={{ mr: 1, color: 'info.main' }} />
-                        <Box sx={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                          {`${option.id_especialidad} - ${option.nombre}`}
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, whiteSpace: 'normal', wordBreak: 'break-word', flex: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500, flex: 1 }}>
+                            {option.nombre || ''}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 600, backgroundColor: 'action.hover', px: 1, py: 0.5, borderRadius: 1 }}>
+                            ID: {option.id_especialidad || '-'}
+                          </Typography>
                         </Box>
                       </li>
                     )}
