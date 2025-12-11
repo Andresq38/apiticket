@@ -23,4 +23,8 @@
  [11-12-2025 04:06:25] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
  [11-12-2025 04:15:31] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
  [11-12-2025 04:15:31] [Andrés Castillo] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [11-12-2025 04:31:01] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [11-12-2025 04:31:02] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [11-12-2025 04:40:00] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
+ [11-12-2025 04:40:00] [PC] error: File: C:\xampp\htdocs\apiticket\controllers\core\MySqlConnect.php - line: 89 - Message: Unknown column 'he.id_usuario' in 'on clause'
  

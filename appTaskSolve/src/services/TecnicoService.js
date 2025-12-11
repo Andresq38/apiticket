@@ -6,20 +6,17 @@ const API = getApiOrigin();
 const BASE_URL = `${API}/apiticket/tecnico`;
 
 class TecnicoService {
-  // ✅ Obtener todos los técnicos
-  // GET: http://localhost:81/apiticket/tecnico
+  // Obtener todos los técnicos
   getTecnicos() {
     return axios.get(BASE_URL);
   }
 
-  // ✅ Obtener un técnico por ID
-  // GET: http://localhost:81/apiticket/tecnico/1
+  // Obtener un técnico por ID
   getTecnicoById(tecnicoId) {
     return axios.get(`${BASE_URL}/${tecnicoId}`);
   }
 
-  // ✅ Crear un técnico (junto con su usuario dentro del mismo endpoint transaccional)
-  // POST: http://localhost:81/apiticket/tecnico
+  // Crear un técnico con su usuario en transacción
   createTecnico(tecnicoData) {
     return axios.post(BASE_URL, tecnicoData, {
       headers: {
@@ -28,8 +25,7 @@ class TecnicoService {
     });
   }
 
-  // ✅ Actualizar un técnico
-  // PUT: http://localhost:81/apiticket/tecnico
+  // Actualizar un técnico
   updateTecnico(tecnicoData) {
     return axios.put(BASE_URL, tecnicoData, {
       headers: {
@@ -38,8 +34,7 @@ class TecnicoService {
     });
   }
 
-  // ✅ Toggle disponibilidad de un técnico
-  // POST: http://localhost:81/apiticket/tecnico/toggleDisponibilidad/{id}
+  // Toggle de disponibilidad
   toggleDisponibilidad(tecnicoId) {
     return axios.post(`${BASE_URL}/toggleDisponibilidad/${tecnicoId}`);
   }

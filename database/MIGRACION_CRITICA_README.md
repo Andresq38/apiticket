@@ -1,6 +1,6 @@
-# 🔧 INSTRUCCIONES CRÍTICAS - Migración Base de Datos
+# INSTRUCCIONES CRÍTICAS - Migración Base de Datos
 
-## ⚠️ IMPORTANTE: EJECUTAR ANTES DE LA REVISIÓN
+## IMPORTANTE: EJECUTAR ANTES DE LA REVISIÓN
 
 Para que el **Historial de Estados** funcione correctamente con trazabilidad completa, es **OBLIGATORIO** ejecutar esta migración.
 
@@ -29,7 +29,7 @@ C:\xampp\mysql\bin\mysql.exe -u root -p ticket_system < migration_add_usuario_to
 3. Abre el archivo `migration_add_usuario_to_historial.sql`
 4. Ejecuta el script (botón ⚡ o Ctrl+Shift+Enter)
 
-### ✅ Verificación de que la migración fue exitosa:
+### Verificación de que la migración fue exitosa:
 
 Ejecuta esta consulta en phpMyAdmin o MySQL:
 
@@ -53,7 +53,7 @@ El historial se mostrará, pero **NO** aparecerá el nombre del usuario que hizo
 
 ---
 
-## 📊 Verificación de Datos Precargados
+## Verificación de Datos Precargados
 
 Después de la migración, verifica que tienes suficientes datos de prueba:
 

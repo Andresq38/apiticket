@@ -1,6 +1,6 @@
-# 🧪 Verificación del Backend
+# Verificación del Backend
 
-## ✅ Pruebas para confirmar que el backend funciona
+## Pruebas para confirmar que el backend funciona
 
 ### 1. **Prueba básica (sin autenticación)**
 Abrir en el navegador:
@@ -22,8 +22,8 @@ fetch('http://localhost:81/apiticket/auth/login', {
   })
 })
 .then(r => r.json())
-.then(data => console.log('✅ Respuesta:', data))
-.catch(err => console.error('❌ Error:', err));
+.then(data => console.log('Respuesta:', data))
+.catch(err => console.error('Error:', err));
 ```
 
 **Esperado:** Respuesta con `token` y datos del usuario.
@@ -36,18 +36,18 @@ http://localhost:81/apiticket/ticket
 
 ---
 
-## 🔴 Mensajes normales que NO son errores:
+## Mensajes normales que NO son errores:
 
 | URL | Respuesta | ¿Es normal? |
 |-----|-----------|-------------|
-| `http://localhost:81/apiticket/` | "Controlador no especificado" | ✅ SÍ - falta el controlador |
-| `http://localhost:81/apiticket` | "Controlador no especificado" | ✅ SÍ - falta el controlador |
-| `http://localhost:81/apiticket/ticket` | 401 Unauthorized | ✅ SÍ - ruta protegida sin token |
-| `http://localhost:81/` | Página XAMPP dashboard | ✅ SÍ - raíz de Apache |
+| `http://localhost:81/apiticket/` | "Controlador no especificado" | SÍ - falta el controlador |
+| `http://localhost:81/apiticket` | "Controlador no especificado" | SÍ - falta el controlador |
+| `http://localhost:81/apiticket/ticket` | 401 Unauthorized | SÍ - ruta protegida sin token |
+| `http://localhost:81/` | Página XAMPP dashboard | SÍ - raíz de Apache |
 
 ---
 
-## 🟢 Cómo saber si hay un problema REAL:
+## Cómo saber si hay un problema REAL:
 
 1. **Desde la aplicación React** → hacer login
 2. Si el login funciona → backend OK ✅

@@ -1,4 +1,4 @@
-# 🔧 Solución al error "Class Filename\HTTP\API not found"
+# Solución al error "Class Filename\HTTP\API not found"
 
 Este error indica un problema con el autoloader de Composer o caché de PHP.
 

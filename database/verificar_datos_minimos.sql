@@ -8,18 +8,18 @@
 
 USE ticket_system;
 
-SELECT '═══════════════════════════════════════════════════' AS separador;
+SELECT '===================================================' AS separador;
 SELECT '     VERIFICACIÓN DE DATOS MÍNIMOS (3+ registros)  ' AS titulo;
-SELECT '═══════════════════════════════════════════════════' AS separador;
+SELECT '===================================================' AS separador;
 
--- Verificación con indicadores visuales
+-- Verificación con indicadores de estado
 SELECT 
     'usuarios' AS tabla,
     COUNT(*) AS total_registros,
     CASE 
-        WHEN COUNT(*) >= 3 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 3 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END AS estado,
     CASE 
         WHEN COUNT(*) >= 3 THEN 'Tiene datos suficientes'
@@ -34,9 +34,9 @@ SELECT
     'tecnicos',
     COUNT(*),
     CASE 
-        WHEN COUNT(*) >= 3 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 3 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END,
     CASE 
         WHEN COUNT(*) >= 3 THEN 'Tiene datos suficientes'
@@ -51,9 +51,9 @@ SELECT
     'categorias',
     COUNT(*),
     CASE 
-        WHEN COUNT(*) >= 3 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 3 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END,
     CASE 
         WHEN COUNT(*) >= 3 THEN 'Tiene datos suficientes'
@@ -68,9 +68,9 @@ SELECT
     'etiquetas',
     COUNT(*),
     CASE 
-        WHEN COUNT(*) >= 3 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 3 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END,
     CASE 
         WHEN COUNT(*) >= 3 THEN 'Tiene datos suficientes'
@@ -85,9 +85,9 @@ SELECT
     'especialidades',
     COUNT(*),
     CASE 
-        WHEN COUNT(*) >= 3 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 3 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END,
     CASE 
         WHEN COUNT(*) >= 3 THEN 'Tiene datos suficientes'
@@ -102,9 +102,9 @@ SELECT
     'estados',
     COUNT(*),
     CASE 
-        WHEN COUNT(*) >= 3 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 3 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END,
     CASE 
         WHEN COUNT(*) >= 3 THEN 'Tiene datos suficientes (5 estados estándar)'
@@ -119,9 +119,9 @@ SELECT
     'slas',
     COUNT(*),
     CASE 
-        WHEN COUNT(*) >= 3 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 3 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END,
     CASE 
         WHEN COUNT(*) >= 3 THEN 'Tiene datos suficientes'
@@ -136,9 +136,9 @@ SELECT
     'tickets',
     COUNT(*),
     CASE 
-        WHEN COUNT(*) >= 3 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 3 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END,
     CASE 
         WHEN COUNT(*) >= 3 THEN 'Tiene datos suficientes'
@@ -153,9 +153,9 @@ SELECT
     'roles',
     COUNT(*),
     CASE 
-        WHEN COUNT(*) >= 2 THEN '✅ CUMPLE'
-        WHEN COUNT(*) > 0 THEN '⚠️  INSUFICIENTE'
-        ELSE '❌ VACÍA'
+        WHEN COUNT(*) >= 2 THEN 'CUMPLE'
+        WHEN COUNT(*) > 0 THEN 'INSUFICIENTE'
+        ELSE 'VACÍA'
     END,
     CASE 
         WHEN COUNT(*) >= 2 THEN 'Tiene roles básicos (Admin, Usuario, Técnico)'
@@ -164,11 +164,11 @@ SELECT
     END
 FROM rol;
 
-SELECT '═══════════════════════════════════════════════════' AS separador;
+SELECT '===================================================' AS separador;
 
 -- Resumen ejecutivo
 SELECT 
-    '📊 RESUMEN EJECUTIVO' AS categoria,
+    'RESUMEN EJECUTIVO' AS categoria,
     COUNT(*) AS total_tablas,
     SUM(CASE WHEN total >= 3 THEN 1 ELSE 0 END) AS tablas_ok,
     SUM(CASE WHEN total < 3 THEN 1 ELSE 0 END) AS tablas_pendientes,
@@ -206,20 +206,20 @@ LEFT JOIN ticket t ON e.id_estado = t.id_estado
 GROUP BY e.id_estado, e.nombre
 ORDER BY e.id_estado;
 
-SELECT '═══════════════════════════════════════════════════' AS separador;
+SELECT '===================================================' AS separador;
 
 -- Recomendaciones
-SELECT '🔍 RECOMENDACIONES' AS titulo;
+SELECT 'RECOMENDACIONES' AS titulo;
 
 SELECT 
     CASE
-        WHEN (SELECT COUNT(*) FROM usuario) < 3 THEN '⚠️  ACCIÓN REQUERIDA: Agregar más usuarios (clientes)'
-        WHEN (SELECT COUNT(*) FROM tecnico) < 3 THEN '⚠️  ACCIÓN REQUERIDA: Agregar más técnicos'
-        WHEN (SELECT COUNT(*) FROM ticket) < 3 THEN '⚠️  ACCIÓN REQUERIDA: Ejecutar insert_datos_prueba_completos.sql'
-        WHEN (SELECT COUNT(*) FROM especialidad) < 3 THEN '⚠️  ACCIÓN REQUERIDA: Agregar más especialidades'
-        WHEN (SELECT COUNT(*) FROM categoria_ticket) < 3 THEN '⚠️  ACCIÓN REQUERIDA: Agregar más categorías'
-        WHEN (SELECT COUNT(*) FROM etiqueta) < 3 THEN '⚠️  ACCIÓN REQUERIDA: Agregar más etiquetas'
-        ELSE '✅ TODAS LAS TABLAS CUMPLEN CON EL MÍNIMO REQUERIDO'
+        WHEN (SELECT COUNT(*) FROM usuario) < 3 THEN 'ACCIÓN REQUERIDA: Agregar más usuarios (clientes)'
+        WHEN (SELECT COUNT(*) FROM tecnico) < 3 THEN 'ACCIÓN REQUERIDA: Agregar más técnicos'
+        WHEN (SELECT COUNT(*) FROM ticket) < 3 THEN 'ACCIÓN REQUERIDA: Ejecutar insert_datos_prueba_completos.sql'
+        WHEN (SELECT COUNT(*) FROM especialidad) < 3 THEN 'ACCIÓN REQUERIDA: Agregar más especialidades'
+        WHEN (SELECT COUNT(*) FROM categoria_ticket) < 3 THEN 'ACCIÓN REQUERIDA: Agregar más categorías'
+        WHEN (SELECT COUNT(*) FROM etiqueta) < 3 THEN 'ACCIÓN REQUERIDA: Agregar más etiquetas'
+        ELSE 'TODAS LAS TABLAS CUMPLEN CON EL MÍNIMO REQUERIDO'
     END AS accion_requerida;
 
-SELECT '═══════════════════════════════════════════════════' AS separador;
+SELECT '===================================================' AS separador;

@@ -1,15 +1,7 @@
-# Esto te permite hacer uso del módulo mod_rewrite 
-# para poder reescribir o redireccionar URLs.
+# Enable mod_rewrite for URL rewriting and redirection
 RewriteEngine On 
-# Si las siguientes condiciones son verdaderas, entonces 
 RewriteBase /apiticket
-# se redirecciona a la URL:
-# si el nombre de fichero solicitado no es un archivo que 
-# ya exista (podría existir a nivel de servidor)
+# If request is not an existing file
 RewriteCond %{REQUEST_FILENAME} !-f
-# Entonces sobreescribe la URL de la siguiente forma:
-# Toma el fichero solicitado y se convierte en
-# un parámetro de URL. Esto además añade cualquier texto
-# de la URL original como parámetros adicionales [QSA]
-#QSA : añade la cadena de la consulta a la URL que sustituye.
+# Route all requests to index.php, preserving query string
 RewriteRule ^ index.php [QSA,L]
