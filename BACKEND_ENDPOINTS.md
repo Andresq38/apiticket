@@ -16,7 +16,7 @@ Base URL: `/apiticket/`
 - PUT `ticket/update` → Actualizar campos (Body JSON)
 - PUT `ticket/cambiarEstado` → Cambiar estado (validación flujo + imagen mínima estados ≥3)
 - POST `ticket/cambiarEstadoConImagen` → Multipart: estado + una o varias imágenes obligatorias
-- DELETE `ticket/delete/{id}` → Eliminar (cascade historial/imágenes)
+- DELETE `ticket/delete/{id}` → Eliminar (cascade historial/imágenes) 
 
 ## Asignación
 - GET `asignacion/pendientes` → Tickets sin técnico (estado Pendiente)
