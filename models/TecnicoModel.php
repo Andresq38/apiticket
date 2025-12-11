@@ -85,7 +85,8 @@ class TecnicoModel
             $sqlEsp = "SELECT e.id_especialidad, e.nombre, e.descripcion
                        FROM tecnico_especialidad te
                        JOIN especialidad e ON e.id_especialidad = te.id_especialidad
-                       WHERE te.id_tecnico = ?";
+                       WHERE te.id_tecnico = ?
+                       ORDER BY e.id_especialidad ASC";
             $especialidades = $this->enlace->executePrepared($sqlEsp, 'i', [(int)$id]);
             $tec->especialidades = $especialidades ?: [];
 
@@ -315,7 +316,8 @@ class TecnicoModel
                        FROM tecnico t
                        JOIN tecnico_especialidad te ON t.id_tecnico = te.id_tecnico
                        JOIN especialidad e ON e.id_especialidad = te.id_especialidad
-                       WHERE t.id_usuario = ?";
+                       WHERE t.id_usuario = ?
+                       ORDER BY e.id_especialidad ASC";
             $especialidades = $this->enlace->executePrepared($sqlEsp, 's', [(string)$idUsuario]);
             
             return $especialidades ?: [];

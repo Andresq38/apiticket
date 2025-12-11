@@ -217,7 +217,7 @@ export default function TecnicoDetalle() {
         </Box>
         {Array.isArray(data.especialidades) && data.especialidades.length > 0 ? (
           <Grid container spacing={2}>
-            {data.especialidades.map((e) => (
+            {data.especialidades.sort((a, b) => a.id_especialidad - b.id_especialidad).map((e) => (
               <Grid item key={e.id_especialidad} xs={12} sm={6} md={4}>
                 <Paper 
                   elevation={2}
@@ -232,6 +232,9 @@ export default function TecnicoDetalle() {
                     }
                   }}
                 >
+                  <Typography variant="caption" color="primary" sx={{ fontWeight: 600 }}>
+                    ID: {e.id_especialidad}
+                  </Typography>
                   <Typography variant="subtitle1" fontWeight="bold" color="primary.dark">
                     {e.nombre}
                   </Typography>

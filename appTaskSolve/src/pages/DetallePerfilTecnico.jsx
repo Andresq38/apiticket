@@ -45,31 +45,36 @@ export default function DetallePerfilTecnico() {
     }
   }, [user, navigate]);
 
-  // Cargar especialidades del técnico
+  // Cargar especialidades del técnico (manejar errores parciales: no limpiar especialidades
+  // si otras llamadas fallan)
   useEffect(() => {
     const loadInfo = async () => {
+      setLoading(true);
+      const apiBase = getApiBaseWithPrefix();
       try {
-        setLoading(true);
-        const apiBase = getApiBaseWithPrefix();
-        // Especialidades
-        const espRes = await axios.get(`${apiBase}/tecnico/obtenerEspecialidades/${user?.id}`);
-        setEspecialidades(espRes.data?.especialidades || []);
-        // Tickets abiertos
-        const ticketRes = await axios.get(`${apiBase}/tecnico/ticketsAbiertos/${user?.id}`);
-        setTicketsAbiertos(ticketRes.data?.count || 0);
-        // Info adicional (teléfono, fecha ingreso)
-        const infoRes = await axios.get(`${apiBase}/tecnico/${user?.id}`);
-        setTelefono(infoRes.data?.telefono || '');
-        setFechaIngreso(infoRes.data?.fecha_ingreso || '');
-      } catch (error) {
-        setEspecialidades([]);
-        setTicketsAbiertos(0);
-        setTelefono('');
-        setFechaIngreso('');
+        const [espRes, ticketRes, infoRes] = await Promise.allSettled([
+          axios.get(`${apiBase}/tecnico/obtenerEspecialidades/${user?.id}`),
+          axios.get(`${apiBase}/tecnico/ticketsAbiertos/${user?.id}`),
+          axios.get(`${apiBase}/tecnico/${user?.id}`)
+        ]);
+
+        if (espRes.status === 'fulfilled') {
+          setEspecialidades(espRes.value.data?.especialidades || []);
+        }
+        if (ticketRes.status === 'fulfilled') {
+          setTicketsAbiertos(ticketRes.value.data?.count || 0);
+        }
+        if (infoRes.status === 'fulfilled') {
+          setTelefono(infoRes.value.data?.telefono || '');
+          setFechaIngreso(infoRes.value.data?.fecha_ingreso || '');
+        }
+      } catch (err) {
+        console.error('Error cargando datos del técnico:', err);
       } finally {
         setLoading(false);
       }
     };
+
     if (user?.id) {
       loadInfo();
     }
@@ -162,7 +167,7 @@ export default function DetallePerfilTecnico() {
             {especialidades.map((esp, idx) => (
               <Chip
                 key={idx}
-                label={esp.nombre || esp}
+                label={`#${esp.id_especialidad} - ${esp.nombre || esp}`}
                 color="primary"
                 variant="outlined"
                 sx={{ fontWeight: 700, fontSize: 16, px: 2, py: 1 }}
