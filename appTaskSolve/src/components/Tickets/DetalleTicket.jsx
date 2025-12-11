@@ -272,7 +272,7 @@ export default function DetalleTicket() {
           color="primary"
           startIcon={<ChangeCircleIcon />}
           onClick={handleOpenDialog}
-          disabled={disableActions}
+          disabled={isClosed} /* permitir que cualquier técnico pueda cambiar estado mientras no esté cerrado */
         >
           {t('tickets.changeState')}
         </Button>
