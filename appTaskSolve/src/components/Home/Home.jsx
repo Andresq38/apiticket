@@ -117,7 +117,7 @@ const Home = () => {
     setLoading(true);
     setError(null);
     try {
-      // Normalizar rol para determinar si es técnico
+      // Normalizar rol para determinar si es técnico o cliente
       const normalizedRole = (user?.rol || '')
         .toString()
         .toLowerCase()
@@ -131,8 +131,14 @@ const Home = () => {
       if (normalizedRole === 'tecnico' && user?.id) {
         res = await axios.get(`${apiBaseWithPrefix}/ticket/obtenerTicketsTecnico/${user.id}`);
         data = res.data?.tickets ?? [];
-      } else {
-        // Si no es técnico, obtener todos los tickets
+      } 
+      // Si es cliente, obtener solo sus tickets
+      else if (normalizedRole === 'cliente' && user?.id) {
+        res = await axios.get(`${apiBase}/apiticket/ticket/getTicketByUsuario/${user.id}`);
+        data = res.data ?? [];
+      } 
+      // Si es admin, obtener todos los tickets
+      else {
         res = await axios.get(`${apiBase}/apiticket/ticket/getTicketsCompletos`);
         data = res.data ?? [];
 

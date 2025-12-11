@@ -21,6 +21,7 @@ import { getApiOrigin } from '../../utils/apiBase';
 import { formatDateTime } from '../../utils/format';
 import CambiarEstadoDialog from '../common/CambiarEstadoDialog';
 import HistorialTimeline from '../common/HistorialTimeline';
+import { useAuth } from '../../context/AuthContext';
 
 // Componente para cargar y mostrar el historial
 function HistorialTicketSection({ ticketId }) {
@@ -76,6 +77,7 @@ export default function DetalleTicket() {
   const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -93,6 +95,18 @@ export default function DetalleTicket() {
   const [estadosDisponibles, setEstadosDisponibles] = useState([]);
   const [loadingEstados, setLoadingEstados] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+  // Encuesta de satisfacción
+  const [openSurvey, setOpenSurvey] = useState(false);
+  const [surveyRating, setSurveyRating] = useState(0);
+  const [surveyComment, setSurveyComment] = useState('');
+  const hasSurvey = (surveyRating || 0) > 0 || (surveyComment || '').trim().length > 0;
+
+  const normalizedRole = (user?.rol || '')
+    .toString()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '');
 
 
   const getApiBase = () => getApiOrigin();
@@ -116,6 +130,26 @@ export default function DetalleTicket() {
   useEffect(() => {
     fetchTicket();
   }, [id]);
+
+  // Cargar encuesta almacenada si existe
+  useEffect(() => {
+    if (ticket?.id_ticket) {
+      const stored = localStorage.getItem(`survey_ticket_${ticket.id_ticket}`);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setSurveyRating(parsed.rating || 0);
+          setSurveyComment(parsed.comment || '');
+        } catch (_) {
+          setSurveyRating(0);
+          setSurveyComment('');
+        }
+      } else {
+        setSurveyRating(0);
+        setSurveyComment('');
+      }
+    }
+  }, [ticket?.id_ticket]);
 
   const fetchEstados = async () => {
     setLoadingEstados(true);
@@ -165,7 +199,7 @@ export default function DetalleTicket() {
       // Obtener el ID del usuario desde localStorage
       let idUsuarioRemitente = null;
       try {
-        const userStr = localStorage.getItem('user');
+        const userStr = localStorage.getItem('authUser');
         if (userStr) {
           const user = JSON.parse(userStr);
           idUsuarioRemitente = user.id;
@@ -212,6 +246,11 @@ export default function DetalleTicket() {
   // If API returned no ticket
   if (!ticket) return <Alert severity="info">{t('tickets.notFound') || t('actions.notFound')}</Alert>;
 
+  const isClosed = (ticket?.estado?.nombre || '').toLowerCase() === 'cerrado';
+  const isTech = normalizedRole === 'tecnico';
+  const isAssignedToTech = Boolean(ticket?.id_tecnico) && Boolean(user?.id_tecnico) && ticket.id_tecnico === user.id_tecnico;
+  const disableActions = isClosed || (isTech && !isAssignedToTech);
+
   return (
     <Container sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
@@ -224,7 +263,7 @@ export default function DetalleTicket() {
           color="warning"
           startIcon={<EditIcon />}
           onClick={() => navigate(`/tickets/editar/${id}`)}
-          disabled={ticket?.estado?.nombre === 'Cerrado'}
+          disabled={disableActions}
         >
           {t('tickets.edit')}
         </Button>
@@ -233,7 +272,7 @@ export default function DetalleTicket() {
           color="primary"
           startIcon={<ChangeCircleIcon />}
           onClick={handleOpenDialog}
-          disabled={ticket?.estado?.nombre === 'Cerrado'}
+          disabled={disableActions}
         >
           {t('tickets.changeState')}
         </Button>
@@ -634,30 +673,60 @@ export default function DetalleTicket() {
         )}
       </Paper>
 
-      {/* Comentario existente (solo lectura) */}
+      {/* Comentario y Encuesta de satisfacción */}
         <Box>
           <Paper sx={{ p: 2, bgcolor: 'white', borderLeft: '4px solid #1976d2' }} elevation={0}>
             <Typography variant="h6" color="primary" gutterBottom>
-              {t('tickets.clientComment.title')}
+              Encuesta de satisfacción
             </Typography>
 
-            {ticket.comentario && ticket.comentario.trim().length > 0 ? (
-              <Typography
-                variant="body1"
-                sx={{ fontStyle: 'italic', color: 'text.primary' }}
-              >
-                "{ticket.comentario}"
-              </Typography>
+            {hasSurvey ? (
+              <Box sx={{ p: 2, bgcolor: '#f5f8ff', borderRadius: 1 }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                  Calificación
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Rating name="survey-read" value={surveyRating} readOnly precision={1} />
+                </Box>
+                
+                {surveyComment?.trim() && (
+                  <>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                      Comentario
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ fontStyle: 'italic', color: 'text.primary' }}
+                    >
+                      "{surveyComment}"
+                    </Typography>
+                  </>
+                )}
+              </Box>
             ) : (
-                <Typography
+              <Typography
                 variant="body2"
                 sx={{ color: 'text.secondary', fontStyle: 'italic' }}
               >
-                {t('tickets.clientComment.none')}
+                Sin encuesta
               </Typography>
             )}
           </Paper>
         </Box>
+
+      {/* Encuesta de satisfacción cuando el ticket está cerrado */}
+      {isClosed && (
+        <Box sx={{ mt: 3 }}>
+          <Paper sx={{ p: 3, bgcolor: 'white' }} elevation={1}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Llenar encuesta de satisfacción
+            </Typography>
+            <Button variant="contained" color="secondary" onClick={() => setOpenSurvey(true)}>
+              Llenar encuesta de satisfacción
+            </Button>
+          </Paper>
+        </Box>
+      )}
 
         
       {/* Diálogo para cambiar estado */}
@@ -688,9 +757,49 @@ export default function DetalleTicket() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
         <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
+          <Typography variant="h6" sx={{ fontWeight: 700 }}>
+            {snackbar.message}
+          </Typography>
         </Alert>
       </Snackbar>
+
+      {/* Modal de encuesta */}
+      <Dialog open={openSurvey} onClose={() => setOpenSurvey(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Encuesta de satisfacción</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+            <Typography component="legend">Calificación</Typography>
+            <Rating
+              name="survey-rating"
+              value={surveyRating}
+              onChange={(_, newValue) => setSurveyRating(newValue || 0)}
+              precision={1}
+            />
+          </Box>
+          <TextField
+            fullWidth
+            multiline
+            minRows={3}
+            label="Comentario"
+            value={surveyComment}
+            onChange={(e) => setSurveyComment(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenSurvey(false)}>Cerrar</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              const payload = { rating: surveyRating, comment: surveyComment, date: new Date().toISOString() };
+              localStorage.setItem(`survey_ticket_${ticket.id_ticket}`, JSON.stringify(payload));
+              setSnackbar({ open: true, message: 'Gracias por llenar la encuesta', severity: 'success' });
+              setOpenSurvey(false);
+            }}
+          >
+            Guardar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 }

@@ -241,7 +241,7 @@ const Header = () => {
           </Button>
 
           {/* TICKETS - dropdown - solo visible para admin */}
-          {normalizedRole === 'administrador' && (
+          {normalizedRole !== 'tecnico' && (
             <Box>
               <Button
                 variant="text"
@@ -263,7 +263,7 @@ const Header = () => {
           )}
 
           {/* DASHBOARD - solo visible para admin */}
-          {normalizedRole === 'administrador' && (
+          {normalizedRole !== 'tecnico' && (
             <Button
               variant="text"
               color="inherit"
@@ -275,7 +275,7 @@ const Header = () => {
           )}
 
           {/* TÉCNICOS - solo visible para admin */}
-          {normalizedRole === 'administrador' && (
+          {normalizedRole !== 'tecnico' && (
             <Button
               variant="text"
               color="inherit"
@@ -287,7 +287,7 @@ const Header = () => {
           )}
 
           {/* CATEGORÍAS - solo visible para admin */}
-          {normalizedRole === 'administrador' && (
+          {normalizedRole !== 'tecnico' && (
             <Button
               variant="text"
               color="inherit"
@@ -299,7 +299,7 @@ const Header = () => {
           )}
 
           {/* MANTENIMIENTOS - solo visible para admin */}
-          {normalizedRole === 'administrador' && (
+          {normalizedRole !== 'tecnico' && (
             <Button
               variant="text"
               color="inherit"
@@ -330,19 +330,7 @@ const Header = () => {
               onClick={() => navigate(`/incidentes-pendientes`)}
               sx={getButtonStyles(`/incidentes-pendientes`)}
             >
-              {t('header.pendingTab')}
-            </Button>
-          )}
-
-          {/* MIS TICKETS - solo visible para cliente */}
-          {normalizedRole === 'cliente' && (
-            <Button
-              variant="text"
-              color="inherit"
-              onClick={() => navigate('/cliente')}
-              sx={getButtonStyles('/cliente')}
-            >
-              {t('cliente.myTickets') || 'Mis Tickets'}
+              Pendientes
             </Button>
           )}
         </Box>
@@ -377,7 +365,7 @@ const Header = () => {
               py: 1,
             }}
           >
-            {t('header.logout')}
+            Cerrar sesión
           </Button>
         )}
         <Menu

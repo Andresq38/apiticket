@@ -190,37 +190,24 @@ export default function TicketsList() {
                 onClick={() => navigate(`/tickets/${t['Identificador del Ticket']}`)}
               >
                 <CardContent>
-<<<<<<< HEAD
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
                     <Typography variant="subtitle2" color="text.secondary">
                       Ticket #{t['Identificador del Ticket']}
                     </Typography>
                     {urgency?.pulse && (
                       <Chip size="small" label={t(`sla.${urgency.level}`)} sx={{ bgcolor: urgency.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
-=======
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Ticket #{t['Identificador del Ticket']}
-                    </Typography>
-                    {urgency?.pulse && (
-                      <Chip size="small" label={t(`sla.${urgency.level}`)} sx={{ bgcolor: urgency.color, color: 'white', fontWeight: 700, fontSize: '0.65rem' }} />
->>>>>>> cbf7f9799934842cdd2ec89408208a78f608c08f
                     )}
                   </Box>
 
                   <Typography variant="h6" sx={{ mb: 1.5, fontWeight: 700 }}>{t['Categoría']}</Typography>
 
                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap', mb: 1 }}>
-<<<<<<< HEAD
                     <Chip 
                       size="small" 
                       label={t['Estado actual']} 
                       color={statusColor(t['Estado actual'])}
                       sx={{ fontWeight: 700, fontSize: '0.85rem', height: 26 }}
                     />
-=======
-                    <Chip size="small" label={translateStatusLabel(t, t['Estado actual'] || t.estado?.nombre || t.estado)} color={statusColor(t['Estado actual'] || t.estado?.nombre || t.estado)} />
->>>>>>> cbf7f9799934842cdd2ec89408208a78f608c08f
                   </Box>
 
                   {urgency && (

@@ -126,7 +126,7 @@ export default function IncidentesPendientes() {
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
         <Typography variant="h4">
-          {t('pendingIncidents.title')}
+          Incidentes Pendientes
         </Typography>
         <Button
           variant="outlined"
@@ -134,7 +134,7 @@ export default function IncidentesPendientes() {
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/')}
         >
-          {t('profile.goBack')}
+          Volver
         </Button>
       </Box>
 
@@ -142,7 +142,7 @@ export default function IncidentesPendientes() {
       <Paper sx={{ p: 2, mb: 3 }}>
         <TextField
           fullWidth
-          placeholder={t('pendingIncidents.searchPlaceholder')}
+          placeholder="Buscar por ID, título o estado..."
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -167,7 +167,7 @@ export default function IncidentesPendientes() {
         <Paper sx={{ p: 4, textAlign: 'center' }}>
           <ErrorIcon sx={{ fontSize: 48, color: '#999', mb: 2 }} />
           <Typography variant="h6" color="textSecondary">
-            {t('pendingIncidents.noPending')}
+            No hay incidentes pendientes
           </Typography>
         </Paper>
       ) : (
